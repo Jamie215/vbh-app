@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Exercise Platform</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div id="app">
+        <!-- Auth Section (shown when logged out) -->
+        <div id="auth-section" class="hidden">
+            <h1>Welcome to Exercise Platform</h1>
+            <div id="auth-forms">
+                <h2>Sign In</h2>
+                <input type="email" id="login-email" placeholder="Email">
+                <input type="password" id="login-password" placeholder="Password">
+                <button onclick="signIn()">Sign In</button>
+                
+                <h2>Sign Up</h2>
+                <input type="text" id="signup-name" placeholder="Full Name">
+                <input type="email" id="signup-email" placeholder="Email">
+                <input type="password" id="signup-password" placeholder="Password">
+                <button onclick="signUp()">Sign Up</button>
+            </div>
+        </div>
+
+        <!-- Main App (shown when logged in) -->
+        <div id="main-section" class="hidden">
+            <nav>
+                <h1>Exercise Platform</h1>
+                <div id="user-info"></div>
+                <button onclick="signOut()">Sign Out</button>
+            </nav>
+            
+            <div id="video-library">
+                <h2>Exercise Modules</h2>
+                <div id="video-grid"></div>
+            </div>
+            
+            <div id="video-player" class="hidden">
+                <button onclick="closeVideo()">← Back to Library</button>
+                <div id="player"></div>
+                <div id="video-info"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Load Supabase -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <!-- Load YouTube IFrame API -->
+    <script src="https://www.youtube.com/iframe_api"></script>
+    <!-- Your app logic -->
+    <script src="js/config.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/videos.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>
