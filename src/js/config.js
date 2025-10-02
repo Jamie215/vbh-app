@@ -15,6 +15,7 @@ const VIDEO_MODULES = [
     {
         id: 'zijGs3hmXnE',
         title: 'Squat',
+        description: 'Squat Exercise Video',
         thumbnail: 'https://img.youtube.com/vi/zijGs3hmXnE/maxresdefault.jpg'
     }
 ];
