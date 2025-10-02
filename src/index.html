@@ -3,15 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VBH Program</title>
+    <title>Exercise Platform</title>
     <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
     <div id="app">
-        <!-- Navigation Bar (always visible) -->
+        <!-- Navigation Bar -->
         <nav class="navbar">
             <div class="nav-container">
-                <h1 class="logo">VBH Program</h1>
+                <h1 class="logo" onclick="showHome()" style="cursor: pointer;">Exercise Platform</h1>
                 <div class="nav-right">
                     <div id="user-info" class="hidden"></div>
                     <button id="auth-button" onclick="showAuthModal()">Sign In</button>
@@ -20,29 +20,70 @@
             </div>
         </nav>
 
-        <!-- Main Content (Video Library - always visible) -->
-        <main id="main-content">
+        <!-- Home View - Playlists Grid -->
+        <main id="home-view">
             <section class="hero">
-                <h2>Welcome to Your Exercise Journey</h2>
-                <p>Browse our collection of exercise modules and start your fitness transformation today</p>
+                <h2>Your Complete Exercise Library</h2>
+                <p>Browse curated playlists designed for every fitness level</p>
             </section>
 
-            <section id="video-library">
-                <h2>Exercise Modules</h2>
-                <div id="video-grid"></div>
+            <section id="playlists-section">
+                <h2>Exercise Playlists</h2>
+                <div id="playlists-grid"></div>
             </section>
+        </main>
+
+        <!-- Playlist View - Video List -->
+        <main id="playlist-view" class="hidden">
+            <div class="playlist-header">
+                <button class="back-button" onclick="showHome()">← Back to Playlists</button>
+                <div class="playlist-info">
+                    <h1 id="playlist-title"></h1>
+                    <p id="playlist-description"></p>
+                    <div class="playlist-stats">
+                        <span id="video-count"></span>
+                        <span id="playlist-progress" class="hidden"></span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="video-table-container">
+                <table class="video-table">
+                    <thead>
+                        <tr>
+                            <th class="col-order">#</th>
+                            <th class="col-title">Exercise</th>
+                            <th class="col-description">Description</th>
+                            <th class="col-duration">Duration</th>
+                            <th class="col-status">Status</th>
+                            <th class="col-action">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="video-table-body">
+                    </tbody>
+                </table>
+            </div>
         </main>
 
         <!-- Video Player Modal -->
         <div id="video-player-modal" class="modal hidden">
-            <div class="modal-content">
+            <div class="modal-content video-modal">
                 <button class="close-button" onclick="closeVideo()">✕</button>
                 <div id="player"></div>
-                <div id="video-info"></div>
+                <div class="video-details">
+                    <h2 id="current-video-title"></h2>
+                    <p id="current-video-description"></p>
+                    <div id="progress-tracker" class="hidden">
+                        <button id="mark-complete-btn" onclick="markVideoComplete()">
+                            ✓ Mark as Complete
+                        </button>
+                        <span id="completion-status"></span>
+                    </div>
+                </div>
             </div>
         </div>
 
-        <!-- Auth Modal (shown when clicking Sign In or trying to watch) -->
+        <!-- Auth Modal -->
         <div id="auth-modal" class="modal hidden">
             <div class="modal-content auth-modal-content">
                 <button class="close-button" onclick="closeAuthModal()">✕</button>
@@ -51,18 +92,18 @@
                     <button class="tab-button" onclick="switchAuthTab('signup')">Sign Up</button>
                 </div>
                 
-                <!-- Sign In Form -->
                 <div id="signin-form" class="auth-form">
                     <h2>Welcome Back</h2>
+                    <p class="auth-subtitle">Sign in to track your progress</p>
                     <input type="email" id="login-email" placeholder="Email" required>
                     <input type="password" id="login-password" placeholder="Password" required>
                     <button onclick="signIn()" class="primary-button">Sign In</button>
                     <p class="form-message" id="signin-message"></p>
                 </div>
 
-                <!-- Sign Up Form -->
                 <div id="signup-form" class="auth-form hidden">
                     <h2>Create Account</h2>
+                    <p class="auth-subtitle">Start tracking your fitness journey</p>
                     <input type="text" id="signup-name" placeholder="Full Name" required>
                     <input type="email" id="signup-email" placeholder="Email" required>
                     <input type="password" id="signup-password" placeholder="Password (min 6 characters)" required>
@@ -73,11 +114,8 @@
         </div>
     </div>
 
-    <!-- Load Supabase -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <!-- Load YouTube IFrame API -->
     <script src="https://www.youtube.com/iframe_api"></script>
-    <!-- Your app logic -->
     <script src="js/config.js"></script>
     <script src="js/auth.js"></script>
     <script src="js/videos.js"></script>

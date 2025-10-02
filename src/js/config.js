@@ -10,6 +10,55 @@ if (!SUPABASE_URL || !SUPABASE_ANON_KEY || !YOUTUBE_API_KEY) {
     console.error('Missing API keys. Please configure environment variables.');
 }
 
+// Playlist structure
+const PLAYLISTS = [
+    {
+        id: 'beginner-0-3',
+        title: 'Beginner 0-3',
+        Description: 'Light load workout for starting',
+        thumbnail: 'https://img.youtube.com/vi/zijGs3hmXnE/maxresdefault.jpg',
+        videos: [
+            {
+                id: 'zijGs3hmXnE',
+                title: 'Squat',
+                description: 'Squat',
+                thumbnail: 'https://img.youtube.com/vi/zijGs3hmXnE/maxresdefault.jpg',
+                order: 1
+            },
+            {
+                id: 'Sc7w24mG8LE',
+                title: 'Test',
+                description: 'Test',
+                thumbnail: 'https://img.youtube.com/vi/Sc7w24mG8LE/maxresdefault.jpg',
+                order: 2
+            }
+        ]
+    },
+    {
+        id: 'intermediate-0-3',
+        title: 'Intermediate 0-3',
+        Description: 'Intermediate load workout for more challenge',
+        thumbnail: 'https://img.youtube.com/vi/Sc7w24mG8LE/maxresdefault.jpg',
+        videos: [
+            {
+                id: 'Sc7w24mG8LE',
+                title: 'Test',
+                description: 'Test',
+                thumbnail: 'https://img.youtube.com/vi/Sc7w24mG8LE/maxresdefault.jpg',
+                order: 1
+            },
+            {
+                id: 'zijGs3hmXnE',
+                title: 'Squat',
+                description: 'Squat',
+                thumbnail: 'https://img.youtube.com/vi/zijGs3hmXnE/maxresdefault.jpg',
+                order: 2
+            }
+        ]
+    },
+
+]
+
 // Your video library
 const VIDEO_MODULES = [
     {
