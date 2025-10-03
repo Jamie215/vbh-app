@@ -70,7 +70,7 @@ function showPlaylist(playlistId) {
         saveBtn.classList.remove('hidden');
         guestNotice.classList.add('hidden');
     } else {
-        saveBtn.classList.remove('hidden');
+        saveBtn.classList.add('hidden');
         guestNotice.classList.remove('hidden');
     }
 
@@ -106,7 +106,6 @@ function loadExerciseTable() {
         row.appendChild(setsRepsCell);
 
         const equipmentCell = document.createElement('td');
-        equipmentCell.innerHTML = `<span class="sets-reps-text">${video.sets} sets of ${video.reps} reps</span>`;
         if (video.equipment) {
             equipmentCell.innerHTML = `<span class="equipment-badge">${video.equipment}</span>`;
         } else {
@@ -145,29 +144,6 @@ function loadExerciseTable() {
         row.appendChild(completionCell);
 
         tbody.appendChild(row);
-    });
-}
-
-// Load today's progress
-async function loadTodayProgress() {
-    if (!currentUser) return;
-
-    const today = new Date().toISOString().split('T')[0];
-    const { data, error } = await supabase
-        .from('exercise_progress')
-        .select('*')
-        .eq('user_id', currentUser.id)
-        .eq('session_date', today);
-    
-    if (error) {
-        console.error('Error loading progress: ', error);
-        return;
-    }
-
-    todayProgress = {};
-    data.forEach(progress => {
-        const key = `${progress.playlist_id}_${progress.video_id}`;
-        todayProgress[key] = progress;
     });
 }
 

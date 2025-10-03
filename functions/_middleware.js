@@ -15,8 +15,7 @@ export async function onRequest(context) {
     <script>
       window.ENV = {
         SUPABASE_URL: '${context.env.SUPABASE_URL || ''}',
-        SUPABASE_ANON_KEY: '${context.env.SUPABASE_ANON_KEY || ''}',
-        YOUTUBE_API_KEY: '${context.env.YOUTUBE_API_KEY || ''}'
+        SUPABASE_ANON_KEY: '${context.env.SUPABASE_ANON_KEY || ''}'
       };
     </script>
   `;
