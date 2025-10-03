@@ -93,8 +93,8 @@ function loadExerciseTable() {
         `;
         row.appendChild(videoCell);
 
-        const setRepsCell = document.createElement('td');
-        setRepsCell.innerHTML = `<span class="sets-reps-text">${video.sets} sets of ${video.reps} reps</span>`;
+        const setsRepsCell = document.createElement('td');
+        setsRepsCell.innerHTML = `<span class="sets-reps-text">${video.sets} sets of ${video.reps} reps</span>`;
         row.appendChild(setsRepsCell);
 
         const equipmentCell = document.createElement('td');
