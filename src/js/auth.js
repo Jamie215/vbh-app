@@ -101,7 +101,7 @@ async function signOut() {
 
 // Listen to auth state changes
 supabase.auth.onAuthStateChange(async (event, session) => {
-    console.log('Auth event:', event); // For debugging
+    console.log('Auth event:', event, 'Session:', !!session); // For debugging
     
     if (event === 'SIGNED_IN') {
         currentUser = session.user;
@@ -116,12 +116,9 @@ supabase.auth.onAuthStateChange(async (event, session) => {
     } else if (event === 'SIGNED_OUT') {
         currentUser = null;
         todaySession = null;
+        sessionCheckboxes = {};
         updateUIForGuestUser();
-        
-        // Refresh view to hide progress
-        if (currentPlaylist) {
-            showPlaylist(currentPlaylist.id);
-        }
+        showHome();
     } else if (event === 'USER_UPDATED') {
         // Handle user profile updates
         if (session?.user) {
