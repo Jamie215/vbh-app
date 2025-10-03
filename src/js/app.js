@@ -2,7 +2,7 @@
 let currentUser = null;
 let currentPlaylist = null;
 let currentVideo = null;
-let todaySession = {};
+let todaySession = null;
 let sessionCheckboxes = {};
 
 // Initialize app
@@ -169,12 +169,12 @@ async function toggleSetCheckbox(videoId, setNumber) {
 }
 
 // Load today's progress from database (logged in users only)
-async function loadtodaySession() {
+async function loadTodaySession() {
     if (!currentUser) return;
 
     const today = new Date().toISOString().split('T')[0];
     const { data, error } = await supabase
-        .from('exercise_progress')
+        .from('workout_sessions')
         .select('*')
         .eq('user_id', currentUser.id)
         .eq('session_date', today)
@@ -238,7 +238,7 @@ async function saveProgress() {
     }
 
     // Reload progress to sync
-    await loadtodaySession();
+    await loadTodaySession();
 
     // Update button to show success
     saveBtn.classList.add('saved');
