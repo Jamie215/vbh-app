@@ -14,11 +14,6 @@ function playExerciseVideo(videoId) {
         playlistId: currentPlaylist.id
     };
 
-    // Mark as started if logged in
-    if (currentUser) {
-        markVideoStarted();
-    }
-
     openVideoPlayer();
 }
 
@@ -29,16 +24,6 @@ function openVideoPlayer() {
     document.getElementById('current-video-title').textContent = currentVideo.title;
     document.getElementById('current-video-description').textContent = 
         `${currentVideo.sets} sets of ${currentVideo.reps} reps${currentVideo.equipment ? ' • ' + currentVideo.equipment : ''}`;
-
-    // Show/hide progress tracker
-    const progressTracker = document.getElementById('progress-tracker');
-    
-    if (currentUser) {
-        progressTracker.classList.remove('hidden');
-        updateCompletionButton();
-    } else {
-        progressTracker.classList.add('hidden');
-    }
 
     // Load video
     if (player) {
@@ -62,74 +47,5 @@ function closeVideo() {
     document.getElementById('video-player-modal').classList.add('hidden');
     if (player) {
         player.stopVideo();
-    }
-    
-    // Refresh the table if we're on a playlist view
-    if (currentPlaylist) {
-        loadExerciseTable();
-    }
-}
-
-// Mark video as started
-async function markVideoStarted() {
-    const progressKey = `${currentVideo.playlistId}_${currentVideo.id}`;
-    
-    if (!userProgress[progressKey]) {
-        userProgress[progressKey] = {
-            started: true,
-            completed: false,
-            startedAt: new Date().toISOString()
-        };
-        
-        // TODO: Save to Supabase when we create the progress table
-        console.log('Video started:', progressKey);
-    }
-}
-
-// Mark video as complete
-async function markVideoComplete() {
-    if (!currentUser) {
-        alert('Please sign in to track your progress');
-        showAuthModal();
-        return;
-    }
-
-    const progressKey = `${currentVideo.playlistId}_${currentVideo.id}`;
-    
-    userProgress[progressKey] = {
-        started: true,
-        completed: true,
-        completedAt: new Date().toISOString()
-    };
-
-    // TODO: Save to Supabase
-    console.log('Video completed:', progressKey);
-
-    // Update UI
-    updateCompletionButton();
-    
-    // Show success message
-    const statusEl = document.getElementById('completion-status');
-    statusEl.textContent = '✓ Marked as complete!';
-    
-    setTimeout(() => {
-        statusEl.textContent = '';
-    }, 3000);
-}
-
-// Update completion button state
-function updateCompletionButton() {
-    const progressKey = `${currentVideo.playlistId}_${currentVideo.id}`;
-    const progress = userProgress[progressKey];
-    const btn = document.getElementById('mark-complete-btn');
-    
-    if (progress?.completed) {
-        btn.textContent = '✓ Completed';
-        btn.classList.add('completed');
-        btn.disabled = true;
-    } else {
-        btn.textContent = '✓ Mark as Complete';
-        btn.classList.remove('completed');
-        btn.disabled = false;
     }
 }

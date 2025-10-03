@@ -36,13 +36,20 @@
                     <h1 id="playlist-title"></h1>
                     <p id="playlist-description"></p>
                 </div>
-                    <button id="finish-workout-btn" class="finish-workout-btn hidden" onclick="finishWorkout()">
-                    Finish Workout
-                </button>
+                <div id="'save-progess-section">
+                    <!-- For logged in users -->
+                    <button id="save-progress-btn" class="save-progress-btn hidden" onclick="saveProgress()">
+                        Save My Progress For This Session
+                    </button>
+                    <!-- For guests -->
+                    <div id="guest-save-notice" class="guest-save-notice hidden">
+                        <p><a href="#" onclick="showAuthModal(); return false;">Sign in</a> to save your exercise progress!</p>
+                    </div>
+                </div>
             </div>
 
-            <div class="video-table-container">
-                <table class="video-table">
+            <div class="exercise-table-container">
+                <table class="exercise-table">
                     <thead>
                         <tr>
                             <th class="col-video">Name</th>
@@ -65,12 +72,6 @@
                 <div class="video-details">
                     <h2 id="current-video-title"></h2>
                     <p id="current-video-description"></p>
-                    <div id="progress-tracker" class="hidden">
-                        <button id="mark-complete-btn" onclick="markVideoComplete()">
-                            ✓ Mark as Complete
-                        </button>
-                        <span id="completion-status"></span>
-                    </div>
                 </div>
             </div>
         </div>

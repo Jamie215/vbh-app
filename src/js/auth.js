@@ -81,7 +81,6 @@ async function signIn() {
         // Clear form
         document.getElementById('login-email').value = '';
         document.getElementById('login-password').value = '';
-        // Will be handled by auth state change listener
     }
 }
 

@@ -2,9 +2,8 @@
 let currentUser = null;
 let currentPlaylist = null;
 let currentVideo = null;
-let userProgress = {};
 let todayProgress = {};
-
+let sessionCheckboxes = {};
 
 // Initialize app
 document.addEventListener('DOMContentLoaded', async () => {
@@ -63,13 +62,21 @@ function showPlaylist(playlistId) {
     document.getElementById('playlist-title').textContent = currentPlaylist.title;
     document.getElementById('playlist-description').textContent = currentPlaylist.description;
 
-    // Show finish workou button only if logged in
-    const finishBtn = document.getElementById('finish-workout-btn');
+    // Show appropriate save section based on login status
+    const saveBtn = document.getElementById('save-progress-btn');
+    const guestNotice = document.getElementById('guest-save-notice');
+
     if (currentUser) {
-        finishBtn.classList.remove('hidden');
-        updateFinishButtonState();
+        saveBtn.classList.remove('hidden');
+        guestNotice.classList.add('hidden');
     } else {
-        finishBtn.classList.add('hidden');
+        saveBtn.classList.remove('hidden');
+        guestNotice.classList.remove('hidden');
+    }
+
+    // Initialize session checkboxes for this playlist
+    if (!sessionCheckboxes[playlistId]) {
+        sessionCheckboxes[playlistId] = {};
     }
 
     loadExerciseTable();
@@ -108,32 +115,33 @@ function loadExerciseTable() {
         row.appendChild(equipmentCell);
 
         const completionCell = document.createElement('td');
-        if (currentUser) {
-            const progressKey = `${currentPlaylist.id}_${video.id}`;
-            const completedSets = todayProgress[progressKey]?.completed_sets || [];
+        const progressKey = `${currentPlaylist.id}_${video.id}`;
+        
+        // Get checked sets from either saved progress or session memory
+        let checkedSets = [];
+        if (currentUser && todayProgress[progressKey]) {
+            // Logged in user with saved progress
+            checkedSets = todayProgress[progressKey].completed_sets || [];
+        } else if (sessionCheckboxes[currentPlaylist.id] && sessionCheckboxes[currentPlaylist.id][video.id]) {
+            // Guest or logged-in user's session state
+            checkedSets = sessionCheckboxes[currentPlaylist.id][video.id] || [];
+        }
 
-            let checkboxesHTML = '<div class="sets-checkboxes">';
-            for (let i=1; i <= video.sets; i++) {
-                const isChecked = completedSets.includes(i);
-                checkboxesHTML += `
-                    <div class="set-checkbox-item">
-                        <input type="checkbox"
-                                id="set_${video.id}+${i}"
-                                ${isChecked ? 'checked': ''}
-                                onchange="toggleSet('${video.id}', ${i})">
-                        <label for="set_${video.id}_${i}">Set ${i}</label>
-                    </div>
-                `;
-            }
-            checkboxesHTML += '</div>';
-            completionCell.innerHTML = checkboxesHTML;
-        } else {
-            completionCell.innerHTML = `
-                <div class="login-prompt">
-                        <a href="#" onclick="showAuthModal(); return false;">Sign in</a> to track sets
+        let checkboxesHTML = '<div class="sets-checkboxes">';
+        for (let i = 1; i <= video.sets; i++) {
+            const isChecked = checkedSets.includes(i);
+            checkboxesHTML += `
+                <div class="set-checkbox-item">
+                    <input type="checkbox"
+                            id="set_${video.id}_${i}"
+                            ${isChecked ? 'checked' : ''}
+                            onchange="toggleSetCheckbox('${video.id}', ${i})">
+                    <label for="set_${video.id}_${i}">Set ${i}</label>
                 </div>
             `;
         }
+        checkboxesHTML += '</div>';
+        completionCell.innerHTML = checkboxesHTML;
         row.appendChild(completionCell);
 
         tbody.appendChild(row);
@@ -163,95 +171,82 @@ async function loadTodayProgress() {
     });
 }
 
-// Toggle set completion
-async function toggleSet(videoId, setNumber) {
-    if (!currentUser) {
-        showAuthModal();
-        return;
+// Toggle set checkbox
+async function toggleSetCheckbox(videoId, setNumber) {
+    if (!sessionCheckboxes[currentPlaylist.id]) {
+        sessionCheckboxes[currentPlaylist.id] = {};
+    }
+    if (!sessionCheckboxes[currentPlaylist.id][videoId]) {
+        sessionCheckboxes[currentPlaylist.id][videoId] = [];
     }
 
-    const progressKey = `${currentPlaylist.id}_${videoId}`;
-    let completedSets = todayProgress[progressKey]?.completed_sets || [];
+    let checkedSets = sessionCheckboxes[currentPlaylist.id][videoId];
 
-    if (completedSets.includes(setNumber)) {
-        completedSets = completedSets.filter(s => s!== setNumber);
+    // Toggle the set in memory
+    if (checkedSets.includes(setNumber)) {
+        sessionCheckboxes[currentPlaylist.id][videoId] = checkedSets.filter(s => s !== setNumber);
     } else {
-        completedSets.push(setNumber);
-        completedSets.sort((a, b) => a - b)
+        checkedSets.push(setNumber);
+        checkedSets.sort((a, b) => a - b);
+        sessionCheckboxes[currentPlaylist.id][videoId] = checkedSets;
     }
+}
 
-    // Save to database
+// Load today's progress from database (logged in users only)
+async function loadTodayProgress() {
+    if (!currentUser) return;
+
     const today = new Date().toISOString().split('T')[0];
     const { data, error } = await supabase
         .from('exercise_progress')
-        .upsert({
-            user_id: currentUser.id,
-            playlist_id: currentPlaylist.id,
-            video_id: videoId,
-            session_date: today,
-            completed_sets: completedSets,
-            is_workout_complete: false
-        }, {
-            onConflict: 'user_id,playlist_id,video_id,session_date'
-        })
-        .select()
-        .single();
+        .select('*')
+        .eq('user_id', currentUser.id)
+        .eq('session_date', today);
+    
     if (error) {
-        console.error('Error saving progress:', error);
-        alert('Error saving progress. Please try again.');
-        // Revert checkbox
-        const checkbox = document.getElementById(`set_${videoId}_${setNumber}`);
-        checkbox.checked = !checkbox.checked;
+        console.error('Error loading progress:', error);
         return;
     }
 
-    todayProgress[progressKey] = data;
-
-    updateFinishButtonState(); 
-}
-
-// Update finish workout button state
-function updateFinishButtonState() {
-    const finishBtn = document.getElementById('finish-workout-btn');
-    
-    // Check if all sets are completed
-    const allSetsComplete = currentPlaylist.videos.every(video => {
-        const progressKey = `${currentPlaylist.id}_${video.id}`;
-        const completedSets = todayProgress[progressKey]?.completed_sets || [];
-        return completedSets.length === video.sets;
+    todayProgress = {};
+    data.forEach(progress => {
+        const key = `${progress.playlist_id}_${progress.video_id}`;
+        todayProgress[key] = progress;
+        
+        // Also populate session checkboxes with saved data
+        if (!sessionCheckboxes[progress.playlist_id]) {
+            sessionCheckboxes[progress.playlist_id] = {};
+        }
+        sessionCheckboxes[progress.playlist_id][progress.video_id] = progress.completed_sets || [];
     });
-
-    if (allSetsComplete) {
-        finishBtn.disabled = false;
-        finishBtn.textContent = 'Finish Workout';
-    } else {
-        finishBtn.disabled = true;
-        finishBtn.textContent = 'Complete All Sets First';
-    }
 }
 
-// Finish workout
-async function finishWorkout() {
+// Save progress to database (logged in users only)
+async function saveProgress() {
     if (!currentUser) {
         showAuthModal();
         return;
     }
 
-    const today = new Date().toISOString().split('T')[0];
+    const saveBtn = document.getElementById('save-progress-btn');
+    saveBtn.disabled = true;
+    saveBtn.textContent = 'Saving...';
 
-    // Mark all exercises as workout complete
-    const updates = currentPlaylist.videos.map(video => {
-        const progressKey = `${currentPlaylist.id}_${video.id}`;
-        const completedSets = todayProgress[progressKey]?.completed_sets || [];
+    const today = new Date().toISOString().split('T')[0];
+    const updates = [];
+
+    // Get all checkbox states for current playlist
+    currentPlaylist.videos.forEach(video => {
+        const completedSets = sessionCheckboxes[currentPlaylist.id]?.[video.id] || [];
         
-        return {
+        updates.push({
             user_id: currentUser.id,
             playlist_id: currentPlaylist.id,
             video_id: video.id,
             session_date: today,
             completed_sets: completedSets,
-            is_workout_complete: true
-        };
+            is_workout_complete: false
+        });
     });
 
     const { error } = await supabase
@@ -261,18 +256,25 @@ async function finishWorkout() {
         });
 
     if (error) {
-        console.error('Error finishing workout:', error);
-        alert('Error saving workout completion. Please try again.');
+        console.error('Error saving progress:', error);
+        alert('Error saving progress. Please try again.');
+        saveBtn.disabled = false;
+        saveBtn.textContent = 'Save My Progress For This Session';
         return;
     }
 
-    // Reload progress
+    // Reload progress to sync
     await loadTodayProgress();
 
-    alert('🎉 Congratulations! Workout completed!');
-    
-    // Optionally go back to home
-    // showHome();
+    // Update button to show success
+    saveBtn.classList.add('saved');
+    saveBtn.textContent = '✓ Progress Saved!';
+
+    setTimeout(() => {
+        saveBtn.classList.remove('saved');
+        saveBtn.textContent = 'Save My Progress For This Session';
+        saveBtn.disabled = false;
+    }, 2000);
 }
 
 // Update UI for authenticated user
@@ -296,15 +298,6 @@ function updateUIForGuestUser() {
     document.getElementById('auth-button').classList.remove('hidden');
     document.getElementById('signout-button').classList.add('hidden');
     document.getElementById('user-info').classList.add('hidden');
-}
-
-// Load user progress from Supabase
-async function loadUserProgress() {
-    if (!currentUser) return;
-
-    // We'll implement this after creating the progress table
-    // For now, just use memory
-    userProgress = {};
 }
 
 // Show auth modal

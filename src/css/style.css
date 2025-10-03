@@ -160,7 +160,7 @@ body {
 }
 
 .back-button:hover {
-    color: #5568d3;
+    border-color: #667eea;
 }
 
 .playlist-info {
@@ -178,7 +178,7 @@ body {
     color: #666;
 }
 
-.finish-workout-btn {
+.save-progress-btn {
     background: #28a745;
     padding: 1rem 2rem;
     font-size: 1.1rem;
@@ -186,14 +186,47 @@ body {
     white-space: nowrap;
 }
 
-.finish-workout-btn:hover {
+.save-progress-btn:hover {
     background: #218838;
 }
 
-.finish-workout-btn:disabled {
+.save-progress-btn:disabled {
     background: #6c757d;
     cursor: not-allowed;
     opacity: 0.6;
+}
+
+.save-progress-btn.saved {
+    background: #007bff;
+}
+
+.save-progress-btn.saved:hover {
+    background: #0056b3;
+}
+
+/* Guest Save Notice */
+.guest-save-notice {
+    background: #fff3cd;
+    border: 2px solid #ffc107;
+    border-radius: 8px;
+    padding: 1rem 1.5rem;
+    text-align: center;
+}
+
+.guest-save-notice p {
+    margin: 0;
+    color: #856404;
+    font-size: 0.95rem;
+}
+
+.guest-save-notice a {
+    color: #667eea;
+    font-weight: 600;
+    text-decoration: none;
+}
+
+.guest-save-notice a:hover {
+    text-decoration: underline;
 }
 
 /* Video Table */
@@ -684,7 +717,11 @@ button:hover {
         flex-direction: column;
     }
 
-    .finish-workout-btn {
+    .save-progress-btn {
+        width: 100%;
+    }
+
+    .guest-save-notice {
         width: 100%;
     }
 
