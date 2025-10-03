@@ -184,6 +184,8 @@ async function loadTodaySession() {
             .eq('user_id', currentUser.id)
             .eq('session_date', today)
             .maybeSingle();
+
+        console.log('Session query result:', { data, error });
         
         if (error) {
             console.error('Error loading session:', error);
@@ -191,6 +193,7 @@ async function loadTodaySession() {
         }
 
         todaySession = data;
+        console.log('Today session set:', todaySession);
 
         // Populate session checkboxes with saved data
         if (data?.progress) {
