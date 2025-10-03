@@ -1,5 +1,9 @@
 let player;
 
+function onYouTubeIframeAPIReady() {
+    console.log('YouTube API Ready');
+}
+
 // Play video from table
 function playExerciseVideo(videoId) {
     const video = currentPlaylist.videos.find(v => v.id === videoId);
