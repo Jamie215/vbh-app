@@ -221,7 +221,6 @@ async function saveProgress() {
             video_id: video.id,
             session_date: today,
             completed_sets: completedSets,
-            is_workout_complete: false
         });
     });
 

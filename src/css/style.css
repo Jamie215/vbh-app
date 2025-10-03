@@ -405,7 +405,7 @@ button:hover {
 }
 
 .video-modal {
-    max-width: 1200px;
+    width: 100%;
 }
 
 .auth-modal-content {
@@ -516,6 +516,22 @@ button:hover {
 .video-thumbnail:hover {
     transform: scale(1.05);
     box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+}
+
+/* Video Player */
+#player {
+    width: 100%;
+    aspect-ratio: 16/9;
+    background: #000;
+}
+
+#video-info {
+    margin-top: 1.5rem;
+}
+
+#video-info h2 {
+    color: #333;
+    font-size: 1.75rem;
 }
 
 /* Play button overlay */
