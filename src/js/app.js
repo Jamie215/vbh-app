@@ -177,7 +177,7 @@ async function loadtodaySession() {
         .from('exercise_progress')
         .select('*')
         .eq('user_id', currentUser.id)
-        .eq('session_date', today);
+        .eq('session_date', today)
         .maybeSingle();
     
     if (error) {
