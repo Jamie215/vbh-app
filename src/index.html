@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Exercise Platform</title>
+    <title>VBH Exercise Program</title>
     <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
@@ -22,13 +22,8 @@
 
         <!-- Home View - Playlists Grid -->
         <main id="home-view">
-            <section class="hero">
-                <h2>Your Complete Exercise Library</h2>
-                <p>Browse curated playlists designed for every fitness level</p>
-            </section>
-
             <section id="playlists-section">
-                <h2>Exercise Playlists</h2>
+                <h2>Library of Exercise</h2>
                 <div id="playlists-grid"></div>
             </section>
         </main>
@@ -40,26 +35,23 @@
                 <div class="playlist-info">
                     <h1 id="playlist-title"></h1>
                     <p id="playlist-description"></p>
-                    <div class="playlist-stats">
-                        <span id="video-count"></span>
-                        <span id="playlist-progress" class="hidden"></span>
-                    </div>
                 </div>
+                    <button id="finish-workout-btn" class="finish-workout-btn hidden" onclick="finishWorkout()">
+                    Finish Workout
+                </button>
             </div>
 
             <div class="video-table-container">
                 <table class="video-table">
                     <thead>
                         <tr>
-                            <th class="col-order">#</th>
-                            <th class="col-title">Exercise</th>
-                            <th class="col-description">Description</th>
-                            <th class="col-duration">Duration</th>
-                            <th class="col-status">Status</th>
-                            <th class="col-action">Action</th>
+                            <th class="col-video">Name</th>
+                            <th class="col-sets-reps">Number of Sets/Reps</th>
+                            <th class="col-equipment">Equipment Needed</th>
+                            <th class="col-completion">Number of Sets Completed</th>
                         </tr>
                     </thead>
-                    <tbody id="video-table-body">
+                    <tbody id="exercise-table-body">
                     </tbody>
                 </table>
             </div>

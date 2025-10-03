@@ -8,7 +8,7 @@ supabase.auth.onAuthStateChange(async (event, session) => {
         
         // Refresh current view to show progress
         if (currentPlaylist) {
-            loadVideoTable();
+            showPlaylist(currentPlaylist.id);
         }
     } else if (event === 'SIGNED_OUT') {
         currentUser = null;
@@ -17,7 +17,7 @@ supabase.auth.onAuthStateChange(async (event, session) => {
         
         // Refresh view to hide progress
         if (currentPlaylist) {
-            loadVideoTable();
+            showPlaylist(currentPlaylist.id);
         }
     }
 });

@@ -3,6 +3,8 @@ let currentUser = null;
 let currentPlaylist = null;
 let currentVideo = null;
 let userProgress = {};
+let todayProgress = {};
+
 
 // Initialize app
 document.addEventListener('DOMContentLoaded', async () => {
@@ -41,7 +43,7 @@ function loadPlaylists() {
             <div class="playlist-card-content">
                 <h3>${playlist.title}</h3>
                 <p>${playlist.description}</p>
-                <span class="video-count">${playlist.videos.length} videos</span>
+                <span class="video-count">${playlist.videos.length} exercises</span>
             </div>
         `;
         grid.appendChild(card);
@@ -60,57 +62,212 @@ function showPlaylist(playlistId) {
     // Update playlist header
     document.getElementById('playlist-title').textContent = currentPlaylist.title;
     document.getElementById('playlist-description').textContent = currentPlaylist.description;
-    document.getElementById('video-count').textContent = `${currentPlaylist.videos.length} videos`;
 
-    // Show progress if logged in
+    // Show finish workou button only if logged in
+    const finishBtn = document.getElementById('finish-workout-btn');
     if (currentUser) {
-        const completed = currentPlaylist.videos.filter(v => 
-            userProgress[`${playlistId}_${v.id}`]?.completed
-        ).length;
-        const progressEl = document.getElementById('playlist-progress');
-        progressEl.classList.remove('hidden');
-        progressEl.textContent = `Progress: ${completed}/${currentPlaylist.videos.length} completed`;
+        finishBen.classList.remove('hidden');
+        updateFinishButtonState();
+    } else {
+        finishBtn.classList.add('hidden');
     }
 
-    // Load video table
-    loadVideoTable();
+    loadExerciseTable();
 }
 
 // Load video table
-function loadVideoTable() {
-    const tbody = document.getElementById('video-table-body');
+function loadExerciseTable() {
+    const tbody = document.getElementById('exercise-table-body');
     tbody.innerHTML = '';
 
-    currentPlaylist.videos.forEach((video, index) => {
-        const progressKey = `${currentPlaylist.id}_${video.id}`;
-        const progress = userProgress[progressKey];
-        
-        let statusBadge = '<span class="status-badge status-not-started">Not Started</span>';
-        if (progress?.completed) {
-            statusBadge = '<span class="status-badge status-completed">✓ Completed</span>';
-        } else if (progress?.started) {
-            statusBadge = '<span class="status-badge status-in-progress">In Progress</span>';
-        }
-
+    currentPlaylist.videos.forEach((video) => {
         const row = document.createElement('tr');
-        row.innerHTML = `
-            <td class="col-order">${video.order}</td>
-            <td class="col-title">
-                <div class="video-title">${video.title}</div>
-            </td>
-            <td class="col-description">
-                <div class="video-description">${video.description}</div>
-            </td>
-            <td class="col-duration">${video.duration}</td>
-            <td class="col-status">${currentUser ? statusBadge : '-'}</td>
-            <td class="col-action">
-                <button class="btn-watch" onclick="playVideoFromTable('${video.id}')">
-                    ▶ Watch
-                </button>
-            </td>
+        
+        const videoCell =document.createElement('td');
+        videoCell.innerHTML - `
+          <div class="exercise-video-cell">
+            <div class="video-thumbnail-wrapper" onclick="playExerciseVideo('${video.id}')">
+            </div>
+            <span class="exercise-name">${video.title}</span>
+          </div>  
         `;
+        row.appendChild(videoCell);
+
+        const setRepsCell = document.createElement('td');
+        setRepsCell = document.createElement('td');
+        setsRepsCell.innerHTML = `<span class="sets-reps-text">${video.sets} sets of ${video.reps} reps</span>`;
+        row.appendChild(setsRepsCell);
+
+        const equipmentCell = document.createElement('td');
+        setsRepsCell.innerHTML = `<span class="sets-reps-text">${video.sets} sets of ${video.reps} reps</span>`;
+        row.appendChild(equipmentCell);
+
+        const completionCell = document.createElement('td');
+        if (currentUser) {
+            const progressKey = `${currentPlaylist.id}_${video.id}`;
+            const completedSets = todayProgress[progressKey]?.completed_sets || [];
+
+            let checkboxesHTML = 'div class="sets-checkboxes">';
+            for (let i=1; i <= video.sets; i++) {
+                const isChecked = completedSets.includes(i);
+                checkboxesHTML += `
+                    <div class="set-checkbox-item">
+                        <input type="checkbox"
+                                id="set+${video.id}+${i}"
+                                ${isChecked ? 'checked': ''}
+                                onchange="toggleSet('${video.id}', ${i})">
+                        <label for="set_${video.id}_${i}>Set ${i}</label>
+                    </div>
+                `;
+            }
+            checkboxesHTML += '</div>';
+            completionCell.innerHTML = checkboxesHTML;
+        } else {
+            completionCell.innerHTML = `
+                <div class="login-prompt">
+                        <a href="#" onclick="showAuthModal(); return false;">Sign in</a> to track sets
+                </div>
+            `;
+        }
+        row.appendChild(completionCell);
+
         tbody.appendChild(row);
     });
+}
+
+// Load today's progress
+async function loadTodayProgress() {
+    if (!currentUser) return;
+
+    const today = new Date().toISOString().split('T')[0];
+    const { data, error } = await supabase
+        .from('exercise_progress')
+        .select('*')
+        .eq('user_id', currentUser.id)
+        .eq('session_date', 'today');
+    
+    if (error) {
+        console.error('Error loading progress: ', error);
+        return;
+    }
+
+    todayProgress = {};
+    data.forEach(progress => {
+        const key = `${progress.playlist_id}_${progress.video_id}`;
+        todayProgress[key] = progress;
+    });
+}
+
+// Toggle set completion
+async function toggleSet(videoId, setNumber) {
+    if (!currentUser) {
+        showAuthModal();
+        return;
+    }
+
+    const progressKey = `${currentPlaylist.id}_${videoId}`;
+    let completedSets = todayProgress[progressKey]?.completedSets || [];
+
+    if (completedSets.includes(setNumber)) {
+        completedSets = completedSets.filter(s => s!== setNumber);
+    } else {
+        completedSets.push(setNumber);
+        completedSets.sort((a, b) => a - b)
+    }
+
+    // Save to database
+    const today = new Date().toISOString().split('T')[0];
+    const { data, error } = await supabase
+        .from('exercise_progress')
+        .upsert({
+            user_id: currentUser.id,
+            playlist_id: currentPlaylist.id,
+            video_id: videoId,
+            session_date: today,
+            completed_sets: completedSets,
+            is_workout_complete: false
+        }, {
+            onConflict: 'user_id,playlist_id,video_id,session_date'
+        })
+        .select()
+        .single();
+    if (error) {
+        console.error('Error saving progress:', error);
+        alert('Error saving progress. Please try again.');
+        // Revert checkbox
+        const checkbox = document.getElementById(`set_${videoId}_${setNumber}`);
+        checkbox.checked = !checkbox.checked;
+        return;
+    }
+
+    todayProgress[progressKey] = data;
+
+    updateFinishButtonState(); 
+}
+
+// Update finish workout button state
+function updateFinishButtonState() {
+    const finishBtn = document.getElementById('finish-workout-btn');
+    
+    // Check if all sets are completed
+    const allSetsComplete = currentPlaylist.videos.every(video => {
+        const progressKey = `${currentPlaylist.id}_${video.id}`;
+        const completedSets = todayProgress[progressKey]?.completed_sets || [];
+        return completedSets.length === video.sets;
+    });
+
+    if (allSetsComplete) {
+        finishBtn.disabled = false;
+        finishBtn.textContent = 'Finish Workout';
+    } else {
+        finishBtn.disabled = true;
+        finishBtn.textContent = 'Complete All Sets First';
+    }
+}
+
+// Finish workout
+async function finishWorkout() {
+    if (!currentUser) {
+        showAuthModal();
+        return;
+    }
+
+    const today = new Date().toISOString().split('T')[0];
+
+    // Mark all exercises as workout complete
+    const updates = currentPlaylist.videos.map(video => {
+        const progressKey = `${currentPlaylist.id}_${video.id}`;
+        const completedSets = todayProgress[progressKey]?.completed_sets || [];
+        
+        return {
+            user_id: currentUser.id,
+            playlist_id: currentPlaylist.id,
+            video_id: video.id,
+            session_date: today,
+            completed_sets: completedSets,
+            is_workout_complete: true
+        };
+    });
+
+    const { error } = await supabase
+        .from('exercise_progress')
+        .upsert(updates, {
+            onConflict: 'user_id,playlist_id,video_id,session_date'
+        });
+
+    if (error) {
+        console.error('Error finishing workout:', error);
+        alert('Error saving workout completion. Please try again.');
+        return;
+    }
+
+    // Reload progress
+    await loadTodayProgress();
+
+    alert('🎉 Congratulations! Workout completed!');
+    
+    // Optionally go back to home
+    // showHome();
 }
 
 // Update UI for authenticated user

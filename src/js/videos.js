@@ -27,10 +27,12 @@ function openVideoPlayer() {
     document.getElementById('video-player-modal').classList.remove('hidden');
     
     document.getElementById('current-video-title').textContent = currentVideo.title;
-    document.getElementById('current-video-description').textContent = currentVideo.description;
+    document.getElementById('current-video-description').textContent = 
+        `${currentVideo.sets} sets of ${currentVideo.reps} reps${currentVideo.equipment ? ' • ' + currentVideo.equipment : ''}`;
 
     // Show/hide progress tracker
     const progressTracker = document.getElementById('progress-tracker');
+    
     if (currentUser) {
         progressTracker.classList.remove('hidden');
         updateCompletionButton();

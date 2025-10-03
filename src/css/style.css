@@ -141,6 +141,10 @@ body {
     border-radius: 12px;
     margin-bottom: 2rem;
     box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 2rem;
 }
 
 .back-button {
@@ -149,34 +153,48 @@ body {
     border: none;
     font-size: 1rem;
     padding: 0.5rem 0;
-    margin-bottom: 1rem;
     cursor: pointer;
     display: flex;
     align-items: center;
     gap: 0.5rem;
+    flex-shrink: 0;
 }
 
 .back-button:hover {
     color: #5568d3;
 }
 
+.playlist-info {
+    flex: 1;
+}
+
 .playlist-info h1 {
-    font-size: 2.5rem;
+    font-size: 2rem;
     color: #333;
     margin-bottom: 0.5rem;
 }
 
 .playlist-info p {
-    font-size: 1.1rem;
+    font-size: 1rem;
     color: #666;
-    margin-bottom: 1rem;
 }
 
-.playlist-stats {
-    display: flex;
-    gap: 2rem;
-    font-size: 0.95rem;
-    color: #888;
+.finish-workout-btn {
+    background: #28a745;
+    padding: 1rem 2rem;
+    font-size: 1.1rem;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.finish-workout-btn:hover {
+    background: #218838;
+}
+
+.finish-workout-btn:disabled {
+    background: #6c757d;
+    cursor: not-allowed;
+    opacity: 0.6;
 }
 
 /* Video Table */
@@ -383,56 +401,204 @@ button:hover {
     background: rgba(0, 0, 0, 0.7);
 }
 
-/* Video Player */
-#player {
+/* Exercise Table */
+.exercise-table-container {
+    background: white;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.exercise-table {
     width: 100%;
-    aspect-ratio: 16/9;
-    background: #000;
-    border-radius: 8px;
+    border-collapse: collapse;
 }
 
-.video-details {
-    margin-top: 1.5rem;
-}
-
-.video-details h2 {
-    font-size: 1.75rem;
-    color: #333;
-    margin-bottom: 0.5rem;
-}
-
-.video-details p {
-    color: #666;
-    margin-bottom: 1rem;
-}
-
-#progress-tracker {
+.exercise-table thead {
     background: #f8f9fa;
-    padding: 1rem;
-    border-radius: 8px;
-    margin-top: 1rem;
+    border-bottom: 2px solid #dee2e6;
+}
+
+.exercise-table th {
+    padding: 1.25rem 1.5rem;
+    text-align: left;
+    font-weight: 600;
+    color: #333;
+    font-size: 0.95rem;
+}
+
+.exercise-table td {
+    padding: 1.5rem 1.5rem;
+    border-bottom: 1px solid #f0f0f0;
+    vertical-align: middle;
+}
+
+.exercise-table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+.exercise-table tbody tr {
+    transition: background 0.2s ease;
+}
+
+.exercise-table tbody tr:hover {
+    background: #f8f9fa;
+}
+
+/* Column widths */
+.col-video {
+    width: 30%;
+}
+
+.col-sets-reps {
+    width: 20%;
+}
+
+.col-equipment {
+    width: 20%;
+}
+
+.col-completion {
+    width: 30%;
+}
+
+/* Video thumbnail and info */
+.exercise-video-cell {
     display: flex;
     align-items: center;
     gap: 1rem;
 }
 
-#mark-complete-btn {
-    background: #28a745;
+.video-thumbnail {
+    width: 160px;
+    height: 90px;
+    border-radius: 8px;
+    object-fit: cover;
+    cursor: pointer;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    flex-shrink: 0;
+    background: #e0e0e0;
+    position: relative;
 }
 
-#mark-complete-btn:hover {
-    background: #218838;
+.video-thumbnail:hover {
+    transform: scale(1.05);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
 }
 
-#mark-complete-btn.completed {
-    background: #6c757d;
-    cursor: not-allowed;
+/* Play button overlay */
+.video-thumbnail-wrapper {
+    position: relative;
+    width: 160px;
+    height: 90px;
+    flex-shrink: 0;
+    cursor: pointer;
 }
 
-#completion-status {
+.video-thumbnail-wrapper::after {
+    content: '▶';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: rgba(0, 0, 0, 0.7);
+    color: white;
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+    padding-left: 4px;
+    transition: background 0.2s ease;
+}
+
+.video-thumbnail-wrapper:hover::after {
+    background: rgba(102, 126, 234, 0.9);
+}
+
+.exercise-name {
+    font-weight: 600;
+    font-size: 1.05rem;
+    color: #333;
+}
+
+/* Sets and reps */
+.sets-reps-text {
+    color: #555;
+    font-size: 0.95rem;
+}
+
+/* Equipment badge */
+.equipment-badge {
+    display: inline-block;
+    background: #e9ecef;
+    color: #495057;
+    padding: 0.4rem 0.9rem;
+    border-radius: 20px;
+    font-size: 0.9rem;
+}
+
+.no-equipment {
+    color: #999;
+    font-style: italic;
+}
+
+/* Set checkboxes */
+.sets-checkboxes {
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+}
+
+.set-checkbox-item {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+}
+
+.set-checkbox-item input[type="checkbox"] {
+    width: 20px;
+    height: 20px;
+    cursor: pointer;
+    accent-color: #667eea;
+}
+
+.set-checkbox-item label {
+    font-size: 0.95rem;
+    color: #555;
+    cursor: pointer;
+    user-select: none;
+}
+
+.set-checkbox-item input[type="checkbox"]:checked + label {
     color: #28a745;
     font-weight: 600;
 }
+
+.set-checkbox-item input[type="checkbox"]:disabled {
+    cursor: not-allowed;
+    opacity: 0.5;
+}
+
+.login-prompt {
+    color: #999;
+    font-size: 0.9rem;
+    font-style: italic;
+}
+
+.login-prompt a {
+    color: #667eea;
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.login-prompt a:hover {
+    text-decoration: underline;
+}
+
+
 
 /* Auth Tabs */
 #auth-tabs {
@@ -514,30 +680,56 @@ button:hover {
 }
 
 /* Responsive */
+@media (max-width: 1024px) {
+    .playlist-header {
+        flex-direction: column;
+    }
+
+    .finish-workout-btn {
+        width: 100%;
+    }
+
+    .video-thumbnail-wrapper {
+        width: 120px;
+        height: 68px;
+    }
+
+    .video-thumbnail {
+        width: 120px;
+        height: 68px;
+    }
+}
+
 @media (max-width: 768px) {
-    .hero h2 {
-        font-size: 1.75rem;
+    .exercise-table {
+        font-size: 0.85rem;
     }
 
-    #playlists-grid {
-        grid-template-columns: 1fr;
+    .exercise-table th,
+    .exercise-table td {
+        padding: 1rem 0.75rem;
     }
 
-    .video-table {
-        font-size: 0.9rem;
+    .exercise-video-cell {
+        flex-direction: column;
+        align-items: flex-start;
     }
 
-    .video-table th,
-    .video-table td {
-        padding: 0.75rem 0.5rem;
+    .video-thumbnail-wrapper {
+        width: 100%;
+        max-width: 200px;
     }
 
-    .col-description,
-    .col-duration {
+    .video-thumbnail {
+        width: 100%;
+    }
+
+    .col-equipment,
+    .col-sets-reps {
         display: none;
     }
 
     .playlist-info h1 {
-        font-size: 1.75rem;
+        font-size: 1.5rem;
     }
 }

@@ -15,20 +15,24 @@ const PLAYLISTS = [
     {
         id: 'beginner-0-3',
         title: 'Beginner 0-3',
-        Description: 'Light load workout for starting',
+        description: 'Light load workout for starting',
         thumbnail: 'https://img.youtube.com/vi/zijGs3hmXnE/maxresdefault.jpg',
         videos: [
             {
                 id: 'zijGs3hmXnE',
-                title: 'Squat',
-                description: 'Squat',
+                title: 'Squats',
+                sets: 3,
+                reps: 8,
+                equipment: null,
                 thumbnail: 'https://img.youtube.com/vi/zijGs3hmXnE/maxresdefault.jpg',
                 order: 1
             },
             {
                 id: 'Sc7w24mG8LE',
-                title: 'Test',
-                description: 'Test',
+                title: 'Test Video',
+                sets: 3,
+                reps: 8,
+                equipment: "Cloth",
                 thumbnail: 'https://img.youtube.com/vi/Sc7w24mG8LE/maxresdefault.jpg',
                 order: 2
             }
@@ -37,20 +41,20 @@ const PLAYLISTS = [
     {
         id: 'intermediate-0-3',
         title: 'Intermediate 0-3',
-        Description: 'Intermediate load workout for more challenge',
+        description: 'Intermediate load workout for more challenge',
         thumbnail: 'https://img.youtube.com/vi/Sc7w24mG8LE/maxresdefault.jpg',
         videos: [
             {
                 id: 'Sc7w24mG8LE',
                 title: 'Test',
-                description: 'Test',
+                setsnreps: '3 Sets of 8 Reps',
                 thumbnail: 'https://img.youtube.com/vi/Sc7w24mG8LE/maxresdefault.jpg',
                 order: 1
             },
             {
                 id: 'zijGs3hmXnE',
                 title: 'Squat',
-                description: 'Squat',
+                setsnreps: '3 Sets of 8 Reps',
                 thumbnail: 'https://img.youtube.com/vi/zijGs3hmXnE/maxresdefault.jpg',
                 order: 2
             }
