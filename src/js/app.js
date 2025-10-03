@@ -176,32 +176,37 @@ async function toggleSetCheckbox(videoId, setNumber) {
 async function loadTodaySession() {
     if (!currentUser) return;
 
-    const today = new Date().toISOString().split('T')[0];
-    const { data, error } = await supabase
-        .from('workout_sessions')
-        .select('*')
-        .eq('user_id', currentUser.id)
-        .eq('session_date', today)
-        .maybeSingle();
-    
-    if (error) {
-        console.error('Error loading session:', error);
-        return;
-    }
+    try {
+        const today = new Date().toISOString().split('T')[0];
+        const { data, error } = await supabase
+            .from('workout_sessions')
+            .select('*')
+            .eq('user_id', currentUser.id)
+            .eq('session_date', today)
+            .maybeSingle();
+        
+        if (error) {
+            console.error('Error loading session:', error);
+            return;
+        }
 
-    todaySession = data;
+        todaySession = data;
 
-    // Populate session checkboxes with saved data
-    if (data?.progress) {
-        Object.keys(data.progress).forEach(playlistId => {
-            if (!sessionCheckboxes[playlistId]) {
-                sessionCheckboxes[playlistId] = {};
-            }
-            Object.keys(data.progress[playlistId]).forEach(videoId => {
-                sessionCheckboxes[playlistId][videoId] = data.progress[playlistId][videoId] || [];
+        // Populate session checkboxes with saved data
+        if (data?.progress) {
+            Object.keys(data.progress).forEach(playlistId => {
+                if (!sessionCheckboxes[playlistId]) {
+                    sessionCheckboxes[playlistId] = {};
+                }
+                Object.keys(data.progress[playlistId]).forEach(videoId => {
+                    sessionCheckboxes[playlistId][videoId] = data.progress[playlistId][videoId] || [];
+                });
             });
-        });
+        }
+    } catch (error) {
+        console.error('Exception in loadTodaySession:', error);
     }
+    
 }
 
 // Save progress to database (logged in users only)
