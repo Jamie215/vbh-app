@@ -7,17 +7,21 @@ let sessionCheckboxes = {};
 
 // Initialize app
 document.addEventListener('DOMContentLoaded', async () => {
-    const { data: { session } } = await supabase.auth.getSession();
-    
-    if (session) {
-        currentUser = session.user;
-        await updateUIForAuthenticatedUser(session.user);
-        await loadTodaySession();
-    } else {
-        updateUIForGuestUser();
+    try {
+        const { data: { session } } = await supabase.auth.getSession();
+            
+        if (session) {
+            currentUser = session.user;
+            await updateUIForAuthenticatedUser(session.user);
+            await loadTodaySession();
+        } else {
+            updateUIForGuestUser();
+        }
+    } catch(error) {
+        console.error('Initialization error:', error);
+    } finally {
+        showHome();
     }
-
-    showHome();
 });
 
 // Show home view with playlists
@@ -181,7 +185,7 @@ async function loadTodaySession() {
         .maybeSingle();
     
     if (error) {
-        console.error('Error loading progress:', error);
+        console.error('Error loading session:', error);
         return;
     }
 
