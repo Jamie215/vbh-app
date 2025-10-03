@@ -5,7 +5,7 @@ function onYouTubeIframeAPIReady() {
 }
 
 // Play video from table
-function playVideoFromTable(videoId) {
+function playExerciseVideo(videoId) {
     const video = currentPlaylist.videos.find(v => v.id === videoId);
     if (!video) return;
 
@@ -66,7 +66,7 @@ function closeVideo() {
     
     // Refresh the table if we're on a playlist view
     if (currentPlaylist) {
-        loadVideoTable();
+        loadExerciseTable();
     }
 }
 

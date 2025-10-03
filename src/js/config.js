@@ -46,15 +46,19 @@ const PLAYLISTS = [
         videos: [
             {
                 id: 'Sc7w24mG8LE',
-                title: 'Test',
-                setsnreps: '3 Sets of 8 Reps',
+                title: 'Test Video',
+                sets: 3,
+                reps: 8,
+                equipment: "Cloth",
                 thumbnail: 'https://img.youtube.com/vi/Sc7w24mG8LE/maxresdefault.jpg',
                 order: 1
             },
             {
                 id: 'zijGs3hmXnE',
                 title: 'Squat',
-                setsnreps: '3 Sets of 8 Reps',
+                sets: 3,
+                reps: 8,
+                equipment: null,
                 thumbnail: 'https://img.youtube.com/vi/zijGs3hmXnE/maxresdefault.jpg',
                 order: 2
             }

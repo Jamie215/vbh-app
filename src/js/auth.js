@@ -3,7 +3,7 @@ supabase.auth.onAuthStateChange(async (event, session) => {
     if (event === 'SIGNED_IN') {
         currentUser = session.user;
         await updateUIForAuthenticatedUser(session.user);
-        await loadUserProgress();
+        await loadTodayProgress();
         closeAuthModal();
         
         // Refresh current view to show progress

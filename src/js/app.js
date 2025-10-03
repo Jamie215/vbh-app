@@ -13,7 +13,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (session) {
         currentUser = session.user;
         await updateUIForAuthenticatedUser(session.user);
-        await loadUserProgress();
+        await loadTodayProgress();
     } else {
         updateUIForGuestUser();
     }
@@ -66,7 +66,7 @@ function showPlaylist(playlistId) {
     // Show finish workou button only if logged in
     const finishBtn = document.getElementById('finish-workout-btn');
     if (currentUser) {
-        finishBen.classList.remove('hidden');
+        finishBtn.classList.remove('hidden');
         updateFinishButtonState();
     } else {
         finishBtn.classList.add('hidden');
@@ -84,9 +84,10 @@ function loadExerciseTable() {
         const row = document.createElement('tr');
         
         const videoCell =document.createElement('td');
-        videoCell.innerHTML - `
+        videoCell.innerHTML = `
           <div class="exercise-video-cell">
             <div class="video-thumbnail-wrapper" onclick="playExerciseVideo('${video.id}')">
+                <img src="${video.thumbnail}" alt="${video.title}" class="video-thumbnail">
             </div>
             <span class="exercise-name">${video.title}</span>
           </div>  
@@ -98,7 +99,12 @@ function loadExerciseTable() {
         row.appendChild(setsRepsCell);
 
         const equipmentCell = document.createElement('td');
-        setsRepsCell.innerHTML = `<span class="sets-reps-text">${video.sets} sets of ${video.reps} reps</span>`;
+        equipmentCell.innerHTML = `<span class="sets-reps-text">${video.sets} sets of ${video.reps} reps</span>`;
+        if (video.equipment) {
+            equipmentCell.innerHTML = `<span class="equipment-badge">${video.equipment}</span>`;
+        } else {
+            equipmentCell.innerHTML = `<span class="no-equipment">—</span>`;
+        }
         row.appendChild(equipmentCell);
 
         const completionCell = document.createElement('td');
@@ -106,16 +112,16 @@ function loadExerciseTable() {
             const progressKey = `${currentPlaylist.id}_${video.id}`;
             const completedSets = todayProgress[progressKey]?.completed_sets || [];
 
-            let checkboxesHTML = 'div class="sets-checkboxes">';
+            let checkboxesHTML = '<div class="sets-checkboxes">';
             for (let i=1; i <= video.sets; i++) {
                 const isChecked = completedSets.includes(i);
                 checkboxesHTML += `
                     <div class="set-checkbox-item">
                         <input type="checkbox"
-                                id="set+${video.id}+${i}"
+                                id="set_${video.id}+${i}"
                                 ${isChecked ? 'checked': ''}
                                 onchange="toggleSet('${video.id}', ${i})">
-                        <label for="set_${video.id}_${i}>Set ${i}</label>
+                        <label for="set_${video.id}_${i}">Set ${i}</label>
                     </div>
                 `;
             }
@@ -143,7 +149,7 @@ async function loadTodayProgress() {
         .from('exercise_progress')
         .select('*')
         .eq('user_id', currentUser.id)
-        .eq('session_date', 'today');
+        .eq('session_date', today);
     
     if (error) {
         console.error('Error loading progress: ', error);
@@ -165,7 +171,7 @@ async function toggleSet(videoId, setNumber) {
     }
 
     const progressKey = `${currentPlaylist.id}_${videoId}`;
-    let completedSets = todayProgress[progressKey]?.completedSets || [];
+    let completedSets = todayProgress[progressKey]?.completed_sets || [];
 
     if (completedSets.includes(setNumber)) {
         completedSets = completedSets.filter(s => s!== setNumber);
