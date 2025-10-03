@@ -106,7 +106,7 @@ supabase.auth.onAuthStateChange(async (event, session) => {
     if (event === 'SIGNED_IN') {
         currentUser = session.user;
         await updateUIForAuthenticatedUser(session.user);
-        await loadTodayProgress();
+        await loadTodaySession();
         closeAuthModal();
         
         // Refresh current view to show progress
@@ -115,7 +115,7 @@ supabase.auth.onAuthStateChange(async (event, session) => {
         }
     } else if (event === 'SIGNED_OUT') {
         currentUser = null;
-        todayProgress = {};
+        todaySession = null;
         updateUIForGuestUser();
         
         // Refresh view to hide progress

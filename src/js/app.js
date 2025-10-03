@@ -2,7 +2,7 @@
 let currentUser = null;
 let currentPlaylist = null;
 let currentVideo = null;
-let todayProgress = {};
+let todaySession = {};
 let sessionCheckboxes = {};
 
 // Initialize app
@@ -12,7 +12,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (session) {
         currentUser = session.user;
         await updateUIForAuthenticatedUser(session.user);
-        await loadTodayProgress();
+        await loadTodaySession();
     } else {
         updateUIForGuestUser();
     }
@@ -118,10 +118,10 @@ function loadExerciseTable() {
         
         // Get checked sets from either saved progress or session memory
         let checkedSets = [];
-        if (currentUser && todayProgress[progressKey]) {
+        if (currentUser && todaySession?.progress?.[currentPlaylist.id]?.[video.id]) {
             // Logged in user with saved progress
-            checkedSets = todayProgress[progressKey].completed_sets || [];
-        } else if (sessionCheckboxes[currentPlaylist.id] && sessionCheckboxes[currentPlaylist.id][video.id]) {
+            checkedSets = todaySession.progress[currentPlaylist.id][video.id] || [];
+        } else if (sessionCheckboxes[currentPlaylist.id]?.[video.id]) {
             // Guest or logged-in user's session state
             checkedSets = sessionCheckboxes[currentPlaylist.id][video.id] || [];
         }
@@ -169,7 +169,7 @@ async function toggleSetCheckbox(videoId, setNumber) {
 }
 
 // Load today's progress from database (logged in users only)
-async function loadTodayProgress() {
+async function loadtodaySession() {
     if (!currentUser) return;
 
     const today = new Date().toISOString().split('T')[0];
@@ -178,23 +178,26 @@ async function loadTodayProgress() {
         .select('*')
         .eq('user_id', currentUser.id)
         .eq('session_date', today);
+        .maybeSingle();
     
     if (error) {
         console.error('Error loading progress:', error);
         return;
     }
 
-    todayProgress = {};
-    data.forEach(progress => {
-        const key = `${progress.playlist_id}_${progress.video_id}`;
-        todayProgress[key] = progress;
-        
-        // Also populate session checkboxes with saved data
-        if (!sessionCheckboxes[progress.playlist_id]) {
-            sessionCheckboxes[progress.playlist_id] = {};
-        }
-        sessionCheckboxes[progress.playlist_id][progress.video_id] = progress.completed_sets || [];
-    });
+    todaySession = data;
+
+    // Populate session checkboxes with saved data
+    if (data?.progress) {
+        Object.keys(data.progress).forEach(playlistId => {
+            if (!sessionCheckboxes[playlistId]) {
+                sessionCheckboxes[playlistId] = {};
+            }
+            Object.keys(data.progress[playlistId]).forEach(videoId => {
+                sessionCheckboxes[playlistId][videoId] = data.progress[playlistId][videoId] || [];
+            });
+        });
+    }
 }
 
 // Save progress to database (logged in users only)
@@ -209,26 +212,22 @@ async function saveProgress() {
     saveBtn.textContent = 'Saving...';
 
     const today = new Date().toISOString().split('T')[0];
-    const updates = [];
 
-    // Get all checkbox states for current playlist
-    currentPlaylist.videos.forEach(video => {
-        const completedSets = sessionCheckboxes[currentPlaylist.id]?.[video.id] || [];
-        
-        updates.push({
-            user_id: currentUser.id,
-            playlist_id: currentPlaylist.id,
-            video_id: video.id,
-            session_date: today,
-            completed_sets: completedSets,
-        });
+    // Build progress object from sessionCheckboxes
+    const progressData = {};
+    Object.keys(sessionCheckboxes).forEach(playlistId => {
+        progressData[playlistId] = sessionCheckboxes[playlistId];
     });
 
     const { error } = await supabase
-        .from('exercise_progress')
-        .upsert(updates, {
-            onConflict: 'user_id,playlist_id,video_id,session_date'
-        });
+        .from('workout_sessions')
+            .upsert({
+                user_id: currentUser.id,
+                session_date: today,
+                progress: progressData
+            }, {
+                onConflict: 'user_id,session_date'
+            });
 
     if (error) {
         console.error('Error saving progress:', error);
@@ -239,7 +238,7 @@ async function saveProgress() {
     }
 
     // Reload progress to sync
-    await loadTodayProgress();
+    await loadtodaySession();
 
     // Update button to show success
     saveBtn.classList.add('saved');
