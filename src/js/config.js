@@ -47,7 +47,7 @@ const PLAYLISTS = [
                 sets: 3,
                 reps: 8,
                 equipment: "Cloth",
-                thumbnail: 'https://img.youtube.com/vi/Sc7w24mG8LE/maxresdefault.jpg',
+                thumbnail: 'https://img.youtube.com/vi/KkJWk44cnbU/maxresdefault.jpg',
                 order: 1
             },
             {
