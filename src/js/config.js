@@ -13,24 +13,24 @@ const PLAYLISTS = [
         id: 'beginner-0-3',
         title: 'Beginner 0-3',
         description: 'Light load workout for starting',
-        thumbnail: 'https://img.youtube.com/vi/zijGs3hmXnE/maxresdefault.jpg',
+        thumbnail: 'https://img.youtube.com/vi/HQFwKn5zzN4/maxresdefault.jpg',
         videos: [
             {
-                id: 'zijGs3hmXnE',
+                id: 'HQFwKn5zzN4',
                 title: 'Squats',
                 sets: 3,
                 reps: 8,
-                equipment: null,
-                thumbnail: 'https://img.youtube.com/vi/zijGs3hmXnE/maxresdefault.jpg',
+                equipment: "Chair",
+                thumbnail: 'https://img.youtube.com/vi/HQFwKn5zzN4/maxresdefault.jpg',
                 order: 1
             },
             {
-                id: 'Sc7w24mG8LE',
-                title: 'Test Video',
+                id: 'KkJWk44cnbU',
+                title: 'Cloth Slide',
                 sets: 3,
                 reps: 8,
                 equipment: "Cloth",
-                thumbnail: 'https://img.youtube.com/vi/Sc7w24mG8LE/maxresdefault.jpg',
+                thumbnail: 'https://img.youtube.com/vi/KkJWk44cnbU/maxresdefault.jpg',
                 order: 2
             }
         ]
@@ -39,11 +39,11 @@ const PLAYLISTS = [
         id: 'intermediate-0-3',
         title: 'Intermediate 0-3',
         description: 'Intermediate load workout for more challenge',
-        thumbnail: 'https://img.youtube.com/vi/Sc7w24mG8LE/maxresdefault.jpg',
+        thumbnail: 'https://img.youtube.com/vi/KkJWk44cnbU/maxresdefault.jpg',
         videos: [
             {
-                id: 'Sc7w24mG8LE',
-                title: 'Test Video',
+                id: 'KkJWk44cnbU',
+                title: 'Cloth Slide',
                 sets: 3,
                 reps: 8,
                 equipment: "Cloth",
@@ -51,12 +51,12 @@ const PLAYLISTS = [
                 order: 1
             },
             {
-                id: 'zijGs3hmXnE',
+                id: 'HQFwKn5zzN4',
                 title: 'Squat',
                 sets: 3,
                 reps: 8,
-                equipment: null,
-                thumbnail: 'https://img.youtube.com/vi/zijGs3hmXnE/maxresdefault.jpg',
+                equipment: "Chair",
+                thumbnail: 'https://img.youtube.com/vi/HQFwKn5zzN4/maxresdefault.jpg',
                 order: 2
             }
         ]
