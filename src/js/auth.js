@@ -117,6 +117,7 @@ supabase.auth.onAuthStateChange(async (event, session) => {
         currentUser = null;
         todaySession = null;
         sessionCheckboxes = {};
+        currentPlaylist = null;
         updateUIForGuestUser();
         showHome();
     } else if (event === 'USER_UPDATED') {
