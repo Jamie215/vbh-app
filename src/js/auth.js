@@ -112,6 +112,8 @@ supabase.auth.onAuthStateChange(async (event, session) => {
         // Refresh current view to show progress
         if (currentPlaylist) {
             showPlaylist(currentPlaylist.id);
+        } else {
+            loadPlaylists();
         }
     } else if (event === 'SIGNED_OUT') {
         currentUser = null;
