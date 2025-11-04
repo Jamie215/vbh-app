@@ -36,6 +36,18 @@ function loadPlaylists() {
     const grid = document.getElementById('playlists-grid');
     grid.innerHTML = '';
 
+    // Show authentication for guests
+    if (!currentUser) {
+        grid.innerHTML = `
+            <div class="auth-prompt">
+                <h3>Sign in to access exercise modules</h3>
+                <p>Create an account or sign in to view and track your exercise progress.</p>
+                <button onclick="showAuthModal()" class="primary-button">Sign In / Sign Up</button>
+            </div>
+        `;
+        return;
+    }
+
     PLAYLISTS.forEach(playlist => {
         const card = document.createElement('div');
         card.className = 'playlist-card';
@@ -55,6 +67,12 @@ function loadPlaylists() {
 
 // Show specific playlist with video table
 function showPlaylist(playlistId) {
+    // Require authentication to view playlists
+    if (!currentUser) {
+        showAuthModal();
+        return;
+    }
+
     currentPlaylist = PLAYLISTS.find(p => p.id === playlistId);
     
     if (!currentPlaylist) return;
@@ -66,17 +84,8 @@ function showPlaylist(playlistId) {
     document.getElementById('playlist-title').textContent = currentPlaylist.title;
     document.getElementById('playlist-description').textContent = currentPlaylist.description;
 
-    // Show appropriate save section based on login status
+    // Show save button
     const saveBtn = document.getElementById('save-progress-btn');
-    const guestNotice = document.getElementById('guest-save-notice');
-
-    if (currentUser) {
-        saveBtn.classList.remove('hidden');
-        guestNotice.classList.add('hidden');
-    } else {
-        saveBtn.classList.add('hidden');
-        guestNotice.classList.remove('hidden');
-    }
 
     // Initialize session checkboxes for this playlist
     if (!sessionCheckboxes[playlistId]) {
@@ -120,13 +129,11 @@ function loadExerciseTable() {
         const completionCell = document.createElement('td');
         const progressKey = `${currentPlaylist.id}_${video.id}`;
         
-        // Get checked sets from either saved progress or session memory
+        // Get checked sets from saved progress
         let checkedSets = [];
-        if (currentUser && todaySession?.progress?.[currentPlaylist.id]?.[video.id]) {
-            // Logged in user with saved progress
+        if (todaySession?.progress?.[currentPlaylist.id]?.[video.id]) {
             checkedSets = todaySession.progress[currentPlaylist.id][video.id] || [];
         } else if (sessionCheckboxes[currentPlaylist.id]?.[video.id]) {
-            // Guest or logged-in user's session state
             checkedSets = sessionCheckboxes[currentPlaylist.id][video.id] || [];
         }
 
@@ -172,7 +179,7 @@ async function toggleSetCheckbox(videoId, setNumber) {
     }
 }
 
-// Load today's progress from database (logged in users only)
+// Load today's progress from database
 async function loadTodaySession() {
     if (!currentUser) return;
 
@@ -214,11 +221,6 @@ async function loadTodaySession() {
 
 // Save progress to database (logged in users only)
 async function saveProgress() {
-    if (!currentUser) {
-        showAuthModal();
-        return;
-    }
-
     const saveBtn = document.getElementById('save-progress-btn');
     saveBtn.disabled = true;
     saveBtn.textContent = 'Saving...';

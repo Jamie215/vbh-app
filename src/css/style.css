@@ -727,6 +727,44 @@ button:hover {
     color: #060;
 }
 
+.auth-prompt {
+    text-align: center;
+    padding: 60px 20px;
+    max-width: 500px;
+    margin: 0 auto;
+    background: #f8f9fa;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.auth-prompt h3 {
+    font-size: 24px;
+    margin-bottom: 16px;
+    color: #333;
+}
+
+.auth-prompt p {
+    font-size: 16px;
+    color: #666;
+    margin-bottom: 24px;
+    line-height: 1.6;
+}
+
+.auth-prompt .primary-button {
+    padding: 12px 32px;
+    font-size: 16px;
+    background: #007bff;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background 0.3s;
+}
+
+.auth-prompt .primary-button:hover {
+    background: #0056b3;
+}
+
 /* Responsive */
 @media (max-width: 1024px) {
     .playlist-header {
