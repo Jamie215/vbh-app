@@ -84,8 +84,9 @@ function showPlaylist(playlistId) {
     document.getElementById('playlist-title').textContent = currentPlaylist.title;
     document.getElementById('playlist-description').textContent = currentPlaylist.description;
 
-    // Show save button
+    // Show save button (always visible since user must be logged in)
     const saveBtn = document.getElementById('save-progress-btn');
+    saveBtn.classList.remove('hidden');
 
     // Initialize session checkboxes for this playlist
     if (!sessionCheckboxes[playlistId]) {
