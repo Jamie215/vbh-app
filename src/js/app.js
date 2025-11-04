@@ -45,8 +45,13 @@ function loadPlaylists() {
                 <button onclick="showAuthModal()" class="primary-button">Sign In / Sign Up</button>
             </div>
         `;
+        // Hide recent activity for guests
+        document.getElementById('recent-activity-section').classList.add('hidden');
         return;
     }
+
+    // Load recent activity
+    loadRecentActivity();
 
     PLAYLISTS.forEach(playlist => {
         const card = document.createElement('div');
@@ -216,8 +221,120 @@ async function loadTodaySession() {
         }
     } catch (error) {
         console.error('Exception in loadTodaySession:', error);
+    }   
+}
+
+// Load most recent workout session
+async function loadRecentActivity() {
+    if (!currentUser) {
+        document.getElementById('recent-activity-section').classList.add('hidden');
+        return;
     }
+
+    try {
+        const { data, error } = await supabase
+            .from('workout_sessions')
+            .select('*')
+            .eq('user_id', currentUser.id)
+            .order('session_date', {ascending: false})
+            .limit(1)
+            .maybeSingle();
+
+        if (error) {
+            console.error('Error loading recent activity: ', error);
+            document.getElementById('recent-activity-section').classList.add('hidden');
+            return;
+        }
+
+        if (!data || !data.progress) {
+            document.getElementById('recent-activity-section').classList.add('hidden');
+            return;
+        }
+
+        displayRecentActivity(data);
+    } catch (error) {
+        console.error('Error loading recent activity: ', error);
+        document.getElementById('recent-activity-section').classList.add('hidden');
+        return;
+    }
+}
+
+function displayRecentActivity(session) {
+    const recentActivityCard = document.getElementById('recent-activity-card');
+    const recentActivitySection = document.getElementById('recent-activity-section');
+
+    // Get all playlist from recent session
+    const playlistIds = Object.keys(session.progress);
+    if(playlistIds.length === 0) {
+        recentActivitySection.classList.add('hidden');
+        return;
+    }
+
+    // Format the datetime
+    const sessionDate = new Date(session.session_date + 'T00:00:00');
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
     
+    const isToday = sessionDate.getTime() === today.getTime();
+    const formattedDate = isToday ? 'Today' : sessionDate.toLocaleDateString('en-US', { 
+        month: 'long', 
+        day: 'numeric', 
+        year: 'numeric' 
+    });
+    
+    const badgeText = isToday ? 'Today\'s Session' : 'Last Session';
+
+    // Build HTML for all playlists
+    let playlistCardsHTML = '';
+    
+    playlistIds.forEach(playlistId => {
+        const playlist = PLAYLISTS.find(p => p.id === playlistId);
+        if (!playlist) return;
+
+        // Calculate completion stats for this playlist
+        const completedVideos = Object.keys(session.progress[playlistId] || {}).length;
+        const totalVideos = playlist.videos.length;
+        const completionPercentage = Math.round((completedVideos / totalVideos) * 100);
+        
+        // Count total sets completed
+        let totalSetsCompleted = 0;
+        Object.values(session.progress[playlistId] || {}).forEach(sets => {
+            totalSetsCompleted += sets.length;
+        });
+
+        playlistCardsHTML += `
+            <div class="recent-playlist-card" onclick="showPlaylist('${playlist.id}')">
+                <div class="recent-playlist-thumbnail">
+                    <img src="${playlist.thumbnail}" alt="${playlist.title}">
+                </div>
+                <div class="recent-playlist-content">
+                    <h4>${playlist.title}</h4>
+                    <div class="recent-playlist-stats">
+                        <span class="stat-badge">✓ ${completedVideos}/${totalVideos} exercises</span>
+                        <span class="stat-badge">📊 ${completionPercentage}%</span>
+                        <span class="stat-badge">💪 ${totalSetsCompleted} sets</span>
+                    </div>
+                </div>
+            </div>
+        `;
+    });
+
+    // Create the main card
+    recentActivityCard.innerHTML = `
+        <div class="recent-activity-container">
+            <div class="recent-activity-header">
+                <div>
+                    <div class="recent-badge-inline">${badgeText}</div>
+                    <h3 class="recent-session-title">📅 ${formattedDate}</h3>
+                </div>
+            </div>
+            <div class="recent-playlists-grid">
+                ${playlistCardsHTML}
+            </div>
+        </div>
+    `;
+
+    recentActivitySection.classList.remove('hidden');
 }
 
 // Save progress to database (logged in users only)
@@ -254,6 +371,9 @@ async function saveProgress() {
 
     // Reload progress to sync
     await loadTodaySession();
+
+    // Update recent activity on home page
+    await loadRecentActivity();
 
     // Update button to show success
     saveBtn.classList.add('saved');
