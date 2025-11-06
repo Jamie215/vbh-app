@@ -302,22 +302,18 @@ function displayRecentActivity(sessions) {
         // Format the date for display
         let formattedDate;
         if(isToday) {
-            formattedDate = "Today";
-        } else {
-            const sessionDate = new Date(session.session_date + 'T00:00:00');
-            formattedDate = sessionDate.toLocaleDateString('en-US', {
-                weekday: 'long',
+            formattedDate = new Date().toLocaleDateString('en-US', {
                 month: 'long',
                 day: 'numeric',
                 year: 'numeric'
             });
-        }
-
-        let dateHeader;
-        if(isToday) {
-            dateHeader = "Today's Session";
         } else {
-            dateHeader = `Last Session - ${formattedDate}`;
+            const sessionDate = new Date(session.session_date + 'T00:00:00');
+            formattedDate = sessionDate.toLocaleDateString('en-US', {
+                month: 'long',
+                day: 'numeric',
+                year: 'numeric'
+            });
         }
 
         // Build cards for all playlist in this session
@@ -337,7 +333,6 @@ function displayRecentActivity(sessions) {
         if (sessionCardsHTML) {
             allSectionsHTML += `
                 <div class="session-group">
-                    <h3 class="session-date-header">${dateHeader}</h3>
                     <div class="session-playlists-grid">
                         ${sessionCardsHTML}
                     </div>
@@ -364,9 +359,12 @@ function buildPlaylistCard(playlist, progress, formattedDate) {
             completedExercises++;
         }
     });
-    
-    const completionPercentage = Math.round((completedExercises / totalExercises) * 100);
-    
+
+    // Create completion message based on whether it's today
+    const completionMessage = isToday 
+        ? `Completed today, ${formattedDate}`
+        : `Completed ${formattedDate}`;
+        
     // Create card with same styling as library playlists
     return `
         <div class="playlist-card" onclick="showPlaylist('${playlist.id}')">
@@ -376,7 +374,7 @@ function buildPlaylistCard(playlist, progress, formattedDate) {
                 <p>${playlist.description}</p>
                 <div class="recent-activity-stats">
                     <span class="video-count">✓ ${completedExercises}/${totalExercises} exercises</span>
-                    <span class="completion-date">Completed on ${formattedDate}</span>
+                    <span class="completion-date">${completionMessage}</span>
                 </div>
             </div>
         </div>
