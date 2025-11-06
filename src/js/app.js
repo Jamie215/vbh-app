@@ -326,7 +326,7 @@ function displayRecentActivity(sessions) {
 
             const playlistProgress = session.progress[playlistId];
             // Pass the formatted date to the card builder
-            sessionCardsHTML += buildPlaylistCard(playlist, playlistProgress, formattedDate);
+            sessionCardsHTML += buildPlaylistCard(playlist, playlistProgress, isToday, formattedDate);
         });
 
         // Add this session group
@@ -346,7 +346,7 @@ function displayRecentActivity(sessions) {
 }
 
 // Helper function to build a playlist card
-function buildPlaylistCard(playlist, progress, formattedDate) {
+function buildPlaylistCard(playlist, progress, isToday, formattedDate) {
     // Calculate completion stats
     let completedExercises = 0;
     const totalExercises = playlist.videos.length;
