@@ -299,18 +299,25 @@ function displayRecentActivity(sessions) {
     sessions.forEach(session => {
         const isToday = session.session_date === today;
 
-        let dateHeader;
+        // Format the date for display
+        let formattedDate;
         if(isToday) {
-            dateHeader = "Today's Session";
+            formattedDate = "Today";
         } else {
             const sessionDate = new Date(session.session_date + 'T00:00:00');
-            const formattedDate = sessionDate.toLocaleDateString('en-US', {
+            formattedDate = sessionDate.toLocaleDateString('en-US', {
                 weekday: 'long',
                 month: 'long',
                 day: 'numeric',
                 year: 'numeric'
             });
-            dateHeader = `You completed this playlist on ${formattedDate}`;
+        }
+
+        let dateHeader;
+        if(isToday) {
+            dateHeader = "Today's Session";
+        } else {
+            dateHeader = `Last Session - ${formattedDate}`;
         }
 
         // Build cards for all playlist in this session
@@ -322,7 +329,8 @@ function displayRecentActivity(sessions) {
             if (!playlist) return;
 
             const playlistProgress = session.progress[playlistId];
-            sessionCardsHTML += buildPlaylistCard(playlist, playlistProgress);
+            // Pass the formatted date to the card builder
+            sessionCardsHTML += buildPlaylistCard(playlist, playlistProgress, formattedDate);
         });
 
         // Add this session group
@@ -343,7 +351,7 @@ function displayRecentActivity(sessions) {
 }
 
 // Helper function to build a playlist card
-function buildPlaylistCard(playlist, progress) {
+function buildPlaylistCard(playlist, progress, formattedDate) {
     // Calculate completion stats
     let completedExercises = 0;
     const totalExercises = playlist.videos.length;
@@ -359,12 +367,6 @@ function buildPlaylistCard(playlist, progress) {
     
     const completionPercentage = Math.round((completedExercises / totalExercises) * 100);
     
-    // Count total sets completed across all exercises
-    let totalSetsCompleted = 0;
-    Object.values(progress).forEach(sets => {
-        totalSetsCompleted += sets.length;
-    });
-
     // Create card with same styling as library playlists
     return `
         <div class="playlist-card" onclick="showPlaylist('${playlist.id}')">
@@ -374,8 +376,7 @@ function buildPlaylistCard(playlist, progress) {
                 <p>${playlist.description}</p>
                 <div class="recent-activity-stats">
                     <span class="video-count">✓ ${completedExercises}/${totalExercises} exercises</span>
-                    <span class="video-count">${completionPercentage}% complete</span>
-                    <span class="video-count">${totalSetsCompleted} sets</span>
+                    <span class="completion-date">Completed on ${formattedDate}</span>
                 </div>
             </div>
         </div>
