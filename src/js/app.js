@@ -196,9 +196,8 @@ async function loadTodaySession() {
             .select('*')
             .eq('user_id', currentUser.id)
             .eq('session_date', today)
-            .order('updated_at', { ascending: false })  // Get most recent
-            .limit(1)  // Only get one
-            .maybeSingle();  // Now safe since we limited to 1
+            .order('updated_at', { ascending: false })
+            .maybeSingle();
 
         console.log('Session query result:', { data, error });
         
@@ -241,7 +240,7 @@ async function loadRecentActivity() {
             .from('workout_sessions')
             .select('*')
             .eq('user_id', currentUser.id)
-            .order('session_date', today)
+            .eq('session_date', today)
             .maybeSingle()
 
         if (todayError) {
@@ -255,8 +254,7 @@ async function loadRecentActivity() {
             .select('*')
             .eq('user_id', currentUser.id)
             .lt('session_date', today)
-            .order('session_date', { ascending: false})
-            .limit(1)
+            .eq('session_date', { ascending: false })
             .maybeSingle();
 
         if (lastError) {
