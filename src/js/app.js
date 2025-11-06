@@ -309,7 +309,7 @@ function displayRecentActivity(sessions) {
                 day: 'numeric',
                 year: 'numeric'
             });
-            dateHeader = `you completed this playlist on ${formattedDate}`;
+            dateHeader = `You completed this playlist on ${formattedDate}`;
         }
 
         // Build cards for all playlist in this session
