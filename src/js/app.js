@@ -254,7 +254,8 @@ async function loadRecentActivity() {
             .select('*')
             .eq('user_id', currentUser.id)
             .lt('session_date', today)
-            .eq('session_date', { ascending: false })
+            .order('session_date', { ascending: false })
+            .limit(1)
             .maybeSingle();
 
         if (lastError) {
