@@ -196,7 +196,9 @@ async function loadTodaySession() {
             .select('*')
             .eq('user_id', currentUser.id)
             .eq('session_date', today)
-            .maybeSingle();
+            .order('updated_at', { ascending: false })  // Get most recent
+            .limit(1)  // Only get one
+            .maybeSingle();  // Now safe since we limited to 1
 
         console.log('Session query result:', { data, error });
         
