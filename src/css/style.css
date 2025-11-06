@@ -783,20 +783,6 @@ button:hover {
     gap: 2rem;
 }
 
-/* Session Group */
-.session-group {
-    display: flex;
-    flex-direction: column;
-    gap: 1.5rem;
-}
-
-/* Session Playlists Grid */
-.session-playlists-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
-    gap: 2rem;
-}
-
 /* Recent activity stats styling */
 .recent-activity-stats {
     display: flex;
@@ -808,7 +794,7 @@ button:hover {
 .completion-date {
     display: block;
     font-size: 0.85rem;
-    color: green;
+    color: #28a745;
     font-weight: 500;
     margin-top: 0.5rem;
     font-style: italic;

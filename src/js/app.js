@@ -293,7 +293,6 @@ function displayRecentActivity(sessions) {
     }
 
     const today = new Date().toISOString().split('T')[0];
-    let allSectionsHTML = '';
 
     // Collect all unique playlists
     const playlistMap = new Map();
@@ -342,7 +341,7 @@ function displayRecentActivity(sessions) {
         allCardsHTML += buildPlaylistCard(playlist, progress, isToday, formattedDate);
     });
 
-    recentActivityCard.innerHTML = allSectionsHTML;
+    recentActivityCard.innerHTML = allCardsHTML;
     recentActivitySection.classList.remove('hidden');
 }
 
