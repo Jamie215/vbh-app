@@ -232,26 +232,49 @@ async function loadRecentActivity() {
     }
 
     try {
-        const { data, error } = await supabase
+        const today = new Date().toISOString().split('T')[0];
+
+        // Get today's session if available
+        const { data: todayData, error: todayError } = await supabase
             .from('workout_sessions')
             .select('*')
             .eq('user_id', currentUser.id)
-            .order('session_date', {ascending: false})
+            .order('session_date', today)
+            .maybeSingle()
+
+        if (todayError) {
+            console.error('Error loading recent activity: ', error);
+            return;
+        }
+
+        // Get most recent previous session before today
+        const { data: lastData, error: lastError } = await supabase
+            .from('workout_sessions')
+            .select('*')
+            .eq('user_id', currentUser.id)
+            .lt('session_date', today)
+            .order('session_date', { ascending: false})
             .limit(1)
             .maybeSingle();
 
-        if (error) {
-            console.error('Error loading recent activity: ', error);
+        if (lastError) {
+            console.error('Error loading last session: ', lastError);
+        }
+
+        const sessions = [];
+        if (todayData?.progress && Object.keys(todayData.progress).length > 0) {
+            sessions.push(todayData);
+        }
+        if (lastData?.progress && Object.keys(lastData.progress).length > 0) {
+            sessions.push(lastData);
+        }
+
+        if (sessions.length === 0) {
             document.getElementById('recent-activity-section').classList.add('hidden');
             return;
         }
 
-        if (!data || !data.progress) {
-            document.getElementById('recent-activity-section').classList.add('hidden');
-            return;
-        }
-
-        displayRecentActivity(data);
+        displayRecentActivity(sessions);
     } catch (error) {
         console.error('Error loading recent activity: ', error);
         document.getElementById('recent-activity-section').classList.add('hidden');
@@ -259,82 +282,103 @@ async function loadRecentActivity() {
     }
 }
 
-function displayRecentActivity(session) {
+function displayRecentActivity(sessions) {
     const recentActivityCard = document.getElementById('recent-activity-card');
     const recentActivitySection = document.getElementById('recent-activity-section');
 
-    // Get all playlist from recent session
-    const playlistIds = Object.keys(session.progress);
-    if(playlistIds.length === 0) {
+    if (!sessions || sessions.length === 0) {
         recentActivitySection.classList.add('hidden');
         return;
     }
 
-    // Format the datetime
-    const sessionDate = new Date(session.session_date + 'T00:00:00');
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    
-    const isToday = sessionDate.getTime() === today.getTime();
-    const formattedDate = isToday ? 'Today' : sessionDate.toLocaleDateString('en-US', { 
-        month: 'long', 
-        day: 'numeric', 
-        year: 'numeric' 
-    });
-    
-    const badgeText = isToday ? 'Today\'s Session' : 'Last Session';
+    const today = new Date().toISOString().split('T')[0];
+    let allSectionsHTML = '';
 
-    // Build HTML for all playlists
-    let playlistCardsHTML = '';
-    
-    playlistIds.forEach(playlistId => {
-        const playlist = PLAYLISTS.find(p => p.id === playlistId);
-        if (!playlist) return;
+    // Process each session
+    sessions.forEach(session => {
+        const isToday = session.session_date === today;
 
-        // Calculate completion stats for this playlist
-        const completedVideos = Object.keys(session.progress[playlistId] || {}).length;
-        const totalVideos = playlist.videos.length;
-        const completionPercentage = Math.round((completedVideos / totalVideos) * 100);
-        
-        // Count total sets completed
-        let totalSetsCompleted = 0;
-        Object.values(session.progress[playlistId] || {}).forEach(sets => {
-            totalSetsCompleted += sets.length;
+        let dateHeader;
+        if(isToday) {
+            dateHeader = "Today's Session";
+        } else {
+            const sessionDate = new Date(session.session_date + 'T00:00:00');
+            const formattedDate = sessionDate.toLocaleDateString('en-US', {
+                weekday: 'long',
+                month: 'long',
+                day: 'numeric',
+                year: 'numeric'
+            });
+            dateHeader = `you completed this playlist on ${formattedDate}`;
+        }
+
+        // Build cards for all playlist in this session
+        let sessionCardsHTML = '';
+        const playlistIds = Object.keys(session.progress);
+
+        playlistIds.forEach(playlistId => {
+            const playlist = PLAYLISTS.find(p => p.id === playlistId);
+            if (!playlist) return;
+
+            const playlistProgress = session.progress[playlistId];
+            sessionCardsHTML += buildPlaylistCard(playlist, playlistProgress);
         });
 
-        playlistCardsHTML += `
-            <div class="recent-playlist-card" onclick="showPlaylist('${playlist.id}')">
-                <div class="recent-playlist-thumbnail">
-                    <img src="${playlist.thumbnail}" alt="${playlist.title}">
-                </div>
-                <div class="recent-playlist-content">
-                    <h4>${playlist.title}</h4>
-                    <div class="recent-playlist-stats">
-                        <span class="stat-badge">✓ ${completedVideos}/${totalVideos} exercises</span>
-                        <span class="stat-badge">📊 ${completionPercentage}%</span>
-                        <span class="stat-badge">💪 ${totalSetsCompleted} sets</span>
+        // Add this session group
+        if (sessionCardsHTML) {
+            allSectionsHTML += `
+                <div class="session-group">
+                    <h3 class="session-date-header">${dateHeader}</h3>
+                    <div class="session-playlists-grid">
+                        ${sessionCardsHTML}
                     </div>
                 </div>
-            </div>
-        `;
+            `;
+        }
     });
 
-    // Create the main card
-    recentActivityCard.innerHTML = `
-        <div class="recent-activity-container">
-            <div class="recent-activity-header">
-                <div>
-                    <div class="recent-badge-inline">${badgeText}</div>
-                    <h3 class="recent-session-title">📅 ${formattedDate}</h3>
+    recentActivityCard.innerHTML = allSectionsHTML;
+    recentActivitySection.classList.remove('hidden');
+}
+
+// Helper function to build a playlist card
+function buildPlaylistCard(playlist, progress) {
+    // Calculate completion stats
+    let completedExercises = 0;
+    const totalExercises = playlist.videos.length;
+    
+    // Check each video - count as completed if user has logged ANY sets
+    playlist.videos.forEach(video => {
+        const completedSets = progress[video.id] || [];
+        // Exercise is completed if at least one set is logged
+        if (completedSets.length > 0) {
+            completedExercises++;
+        }
+    });
+    
+    const completionPercentage = Math.round((completedExercises / totalExercises) * 100);
+    
+    // Count total sets completed across all exercises
+    let totalSetsCompleted = 0;
+    Object.values(progress).forEach(sets => {
+        totalSetsCompleted += sets.length;
+    });
+
+    // Create card with same styling as library playlists
+    return `
+        <div class="playlist-card" onclick="showPlaylist('${playlist.id}')">
+            <img src="${playlist.thumbnail}" alt="${playlist.title}">
+            <div class="playlist-card-content">
+                <h3>${playlist.title}</h3>
+                <p>${playlist.description}</p>
+                <div class="recent-activity-stats">
+                    <span class="video-count">✓ ${completedExercises}/${totalExercises} exercises</span>
+                    <span class="video-count">${completionPercentage}% complete</span>
+                    <span class="video-count">${totalSetsCompleted} sets</span>
                 </div>
-            </div>
-            <div class="recent-playlists-grid">
-                ${playlistCardsHTML}
             </div>
         </div>
     `;
-
-    recentActivitySection.classList.remove('hidden');
 }
 
 // Save progress to database (logged in users only)
