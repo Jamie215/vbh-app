@@ -778,9 +778,9 @@ button:hover {
 
 /* Recent Activity Card Container */
 #recent-activity-card {
-    display: flex;
-    flex-direction: column;
-    gap: 3rem;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+    gap: 2rem;
 }
 
 /* Session Group */
@@ -805,15 +805,10 @@ button:hover {
     margin-top: 0.5rem;
 }
 
-.recent-activity-stats .video-count {
-    display: block;
-    margin-bottom: 0.25rem;
-}
-
 .completion-date {
     display: block;
     font-size: 0.85rem;
-    color: #667eea;
+    color: green;
     font-weight: 500;
     margin-top: 0.5rem;
     font-style: italic;

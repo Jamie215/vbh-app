@@ -295,20 +295,43 @@ function displayRecentActivity(sessions) {
     const today = new Date().toISOString().split('T')[0];
     let allSectionsHTML = '';
 
+    // Collect all unique playlists
+    const playlistMap = new Map();
+
     // Process each session
     sessions.forEach(session => {
         const isToday = session.session_date === today;
+        const playlistIds = Object.keys(session.progress);
 
+        playlistIds.forEach(playlistId => {
+            // Only add if not already added, or if this is today's version (override previous)
+            if (!playlistMap.has(playlistId) || isToday) {
+                const playlist = PLAYLISTS.find(p => p.id === playlistId);
+                if (playlist) {
+                    playlistMap.set(playlistId, {
+                        playlist: playlist,
+                        progress: session.progress[playlistId],
+                        isToday: isToday,
+                        date: session.session_date
+                    });
+                }
+            }
+        });
+    });
+
+    // Build all cards in one continuous grid
+    let allCardsHTML = '';
+    playlistMap.forEach(({ playlist, progress, isToday, date }) => {
         // Format the date for display
         let formattedDate;
-        if(isToday) {
+        if (isToday) {
             formattedDate = new Date().toLocaleDateString('en-US', {
                 month: 'long',
                 day: 'numeric',
                 year: 'numeric'
             });
         } else {
-            const sessionDate = new Date(session.session_date + 'T00:00:00');
+            const sessionDate = new Date(date + 'T00:00:00');
             formattedDate = sessionDate.toLocaleDateString('en-US', {
                 month: 'long',
                 day: 'numeric',
@@ -316,29 +339,7 @@ function displayRecentActivity(sessions) {
             });
         }
 
-        // Build cards for all playlist in this session
-        let sessionCardsHTML = '';
-        const playlistIds = Object.keys(session.progress);
-
-        playlistIds.forEach(playlistId => {
-            const playlist = PLAYLISTS.find(p => p.id === playlistId);
-            if (!playlist) return;
-
-            const playlistProgress = session.progress[playlistId];
-            // Pass the formatted date to the card builder
-            sessionCardsHTML += buildPlaylistCard(playlist, playlistProgress, isToday, formattedDate);
-        });
-
-        // Add this session group
-        if (sessionCardsHTML) {
-            allSectionsHTML += `
-                <div class="session-group">
-                    <div class="session-playlists-grid">
-                        ${sessionCardsHTML}
-                    </div>
-                </div>
-            `;
-        }
+        allCardsHTML += buildPlaylistCard(playlist, progress, isToday, formattedDate);
     });
 
     recentActivityCard.innerHTML = allSectionsHTML;
@@ -362,8 +363,8 @@ function buildPlaylistCard(playlist, progress, isToday, formattedDate) {
 
     // Create completion message based on whether it's today
     const completionMessage = isToday 
-        ? `Completed today, ${formattedDate}`
-        : `Completed ${formattedDate}`;
+        ? `Completed ${completedExercises}/${totalExercises} exercises today, ${formattedDate}`
+        : `Completed ${completedExercises}/${totalExercises} exercises on ${formattedDate}`;
         
     // Create card with same styling as library playlists
     return `
@@ -373,7 +374,6 @@ function buildPlaylistCard(playlist, progress, isToday, formattedDate) {
                 <h3>${playlist.title}</h3>
                 <p>${playlist.description}</p>
                 <div class="recent-activity-stats">
-                    <span class="video-count">✓ ${completedExercises}/${totalExercises} exercises</span>
                     <span class="completion-date">${completionMessage}</span>
                 </div>
             </div>
