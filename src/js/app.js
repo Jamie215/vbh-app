@@ -243,7 +243,7 @@ async function loadRecentActivity() {
             .maybeSingle()
 
         if (todayError) {
-            console.error('Error loading recent activity: ', error);
+            console.error('Error loading recent activity: ', todayError);
             return;
         }
 
