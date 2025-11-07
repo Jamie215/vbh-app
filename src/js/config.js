@@ -65,15 +65,15 @@ const PLAYLISTS = [
         id: 'advanced-0-3',
         title: 'Advanced 0-3',
         description: 'Advanced load workout for most challenge',
-        thumbnail: 'https://img.youtube.com/vi/8RTh6Oh0weY/maxresdefault.jpg',
+        thumbnail: 'https://img.youtube.com/vi/gqzZ0ExlyMc/maxresdefault.jpg',
         videos: [
             {
-                id: '8RTh6Oh0weY',
+                id: 'gqzZ0ExlyMc',
                 title: 'Band External Rotation',
                 sets: 3,
                 reps: 8,
                 equipment: ["Resistance Band"],
-                thumbnail: 'https://img.youtube.com/vi/8RTh6Oh0weY/maxresdefault.jpg',
+                thumbnail: 'https://img.youtube.com/vi/gqzZ0ExlyMc/maxresdefault.jpg',
                 order: 1
             }
         ]
