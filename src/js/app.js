@@ -246,7 +246,7 @@ function updateSetsCount(videoId, maxSets) {
 }
 
 function updateSetsUI(videoId, currentCount, maxSets) {
-    const input = document.getElementById(`sets_{videoId}`);
+    const input = document.getElementById(`sets_${videoId}`);
     const minusBtn = input.previousElementSibling;
     const plusBtn = input.nextElementSibling;
 
