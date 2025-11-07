@@ -623,41 +623,102 @@ button:hover {
     font-style: italic;
 }
 
-/* Set checkboxes */
-.sets-checkboxes {
-    display: flex;
-    flex-direction: column;
-    gap: 0.6rem;
-}
-
-.set-checkbox-item {
+/* Set counter */
+.sets-counter {
     display: flex;
     align-items: center;
-    gap: 0.6rem;
+    gap: 0.5rem;
 }
 
-.set-checkbox-item input[type="checkbox"] {
-    width: 20px;
-    height: 20px;
+.counter-btn {
+    width: 36px;
+    height: 36px;
+    border: 2px solid #667eea;
+    background: white;
+    color: #667eea;
+    border-radius: 6px;
+    font-size: 1.25rem;
+    font-weight: bold;
     cursor: pointer;
-    accent-color: #667eea;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+    padding: 0;
+    line-height: 1;
 }
 
-.set-checkbox-item label {
-    font-size: 0.95rem;
-    color: #555;
-    cursor: pointer;
-    user-select: none;
+.counter-btn:hover:not(:disabled) {
+    background: #667eea;
+    color: white;
+    transform: scale(1.05);
 }
 
-.set-checkbox-item input[type="checkbox"]:checked + label {
-    color: #28a745;
-    font-weight: 600;
+.counter-btn:active:not(:disabled) {
+    transform: scale(0.95);
 }
 
-.set-checkbox-item input[type="checkbox"]:disabled {
+.counter-btn:disabled {
+    border-color: #ddd;
+    color: #ccc;
     cursor: not-allowed;
     opacity: 0.5;
+}
+
+.minus-btn {
+    border-color: #dc3545;
+    color: #dc3545;
+}
+
+.minus-btn:hover:not(:disabled) {
+    background: #dc3545;
+    color: white;
+}
+
+.plus-btn {
+    border-color: #28a745;
+    color: #28a745;
+}
+
+.plus-btn:hover:not(:disabled) {
+    background: #28a745;
+    color: white;
+}
+
+.sets-input {
+    width: 60px;
+    height: 36px;
+    text-align: center;
+    border: 2px solid #e0e0e0;
+    border-radius: 6px;
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #333;
+    background: #f8f9fa;
+    cursor: default;
+}
+
+.sets-input:focus {
+    outline: none;
+    border-color: #667eea;
+}
+
+/* Remove spinner arrows from number input */
+.sets-input::-webkit-inner-spin-button,
+.sets-input::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+.sets-input[type=number] {
+    -moz-appearance: textfield;
+}
+
+.sets-label {
+    color: #666;
+    font-size: 0.95rem;
+    font-weight: 500;
+    white-space: nowrap;
 }
 
 .login-prompt {

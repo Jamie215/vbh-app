@@ -3,7 +3,7 @@ let currentUser = null;
 let currentPlaylist = null;
 let currentVideo = null;
 let todaySession = null;
-let sessionCheckboxes = {};
+let sessionProgress = {};
 
 // Initialize app
 document.addEventListener('DOMContentLoaded', async () => {
@@ -111,8 +111,8 @@ function showPlaylist(playlistId) {
     saveBtn.classList.remove('hidden');
 
     // Initialize session checkboxes for this playlist
-    if (!sessionCheckboxes[playlistId]) {
-        sessionCheckboxes[playlistId] = {};
+    if (!sessionProgress[playlistId]) {
+        sessionProgress[playlistId] = {};
     }
 
     loadExerciseTable();
@@ -157,58 +157,105 @@ function loadExerciseTable() {
         row.appendChild(equipmentCell);
 
         const completionCell = document.createElement('td');
-        const progressKey = `${currentPlaylist.id}_${video.id}`;
         
-        // Get checked sets from saved progress
-        let checkedSets = [];
+        // Get completed sets from saved progress
+        let completedSets = 0;
         if (todaySession?.progress?.[currentPlaylist.id]?.[video.id]) {
-            checkedSets = todaySession.progress[currentPlaylist.id][video.id] || [];
-        } else if (sessionCheckboxes[currentPlaylist.id]?.[video.id]) {
-            checkedSets = sessionCheckboxes[currentPlaylist.id][video.id] || [];
+            completedSets = todaySession.progress[currentPlaylist.id][video.id] || 0;
+        } else if (sessionProgress[currentPlaylist.id]?.[video.id]) {
+            completedSets = sessionProgress[currentPlaylist.id][video.id] || 0;
         }
-
-        let checkboxesHTML = '<div class="sets-checkboxes">';
-        for (let i = 1; i <= video.sets; i++) {
-            const isChecked = checkedSets.includes(i);
-            checkboxesHTML += `
-                <div class="set-checkbox-item">
-                    <input type="checkbox"
-                            id="set_${video.id}_${i}"
-                            ${isChecked ? 'checked' : ''}
-                            onchange="toggleSetCheckbox('${video.id}', ${i})">
-                    <label for="set_${video.id}_${i}">Set ${i}</label>
-                </div>
-            `;
-        }
-        checkboxesHTML += '</div>';
-        completionCell.innerHTML = checkboxesHTML;
+        
+        // Create number input with +/- buttons
+        completionCell.innerHTML = `
+            <div class="sets-counter">
+                <button type="button" 
+                        class="counter-btn minus-btn" 
+                        onclick="decrementSets('${video.id}', ${video.sets})"
+                        ${completedSets <= 0 ? 'disabled' : ''}>
+                    −
+                </button>
+                <input type="number" 
+                       id="sets_${video.id}"
+                       class="sets-input" 
+                       value="${completedSets}" 
+                       min="0" 
+                       max="${video.sets}"
+                       onchange="updateSetsCount('${video.id}', ${video.sets})"
+                       readonly>
+                <button type="button" 
+                        class="counter-btn plus-btn" 
+                        onclick="incrementSets('${video.id}', ${video.sets})"
+                        ${completedSets >= video.sets ? 'disabled' : ''}>
+                    +
+                </button>
+                <span class="sets-label">/ ${video.sets} sets</span>
+            </div>
+        `;
         row.appendChild(completionCell);
 
         tbody.appendChild(row);
     });
 }
 
-// Toggle set checkbox
-async function toggleSetCheckbox(videoId, setNumber) {
-    if (!sessionCheckboxes[currentPlaylist.id]) {
-        sessionCheckboxes[currentPlaylist.id] = {};
-    }
-    if (!sessionCheckboxes[currentPlaylist.id][videoId]) {
-        sessionCheckboxes[currentPlaylist.id][videoId] = [];
+// Increment sets completed
+function incrementSets(videoId, maxSets) {
+    if (!sessionProgress[currentPlaylist.id]) {
+        sessionProgress[currentPlaylist.id] = {};
     }
 
-    let checkedSets = sessionCheckboxes[currentPlaylist.id][videoId];
+    let currentCount = sessionProgress[currentPlaylist.id][videoId] || 0;
 
-    // Toggle the set in memory
-    if (checkedSets.includes(setNumber)) {
-        sessionCheckboxes[currentPlaylist.id][videoId] = checkedSets.filter(s => s !== setNumber);
-    } else {
-        checkedSets.push(setNumber);
-        checkedSets.sort((a, b) => a - b);
-        sessionCheckboxes[currentPlaylist.id][videoId] = checkedSets;
+    if (currentCount < maxSets) {
+        currentCount++;
+        sessionProgress[currentPlaylist.id][videoId] = currentCount;
+
+        updateSetsUI(videoId, currentCount, maxSets);
     }
 }
 
+// Decrement sets completed
+function decrementSets(videoId, maxSets) {
+    if (!sessionProgress[currentPlaylist.id]) {
+        sessionProgress[currentPlaylist.id] = {};
+    }
+
+    let currentCount = sessionProgress[currentPlaylist.id][videoId] || 0;
+
+    if (currentCount > 0) {
+        currentCount--;
+        sessionProgress[currentPlaylist.id][videoId] = currentCount;
+
+        updateSetsUI(videoId, currentCount, maxSets);
+    }
+}
+
+function updateSetsCount(videoId, maxSets) {
+    const input = document.getElementById(`sets_${videoId}`);
+    let value = parseInt(input.value) || 0;
+
+    value = Math.max(0, Math.min(maxSets, value));
+
+    if (!sessionProgress[currentPlaylist.id]) {
+        sessionProgress[currentPlaylist.id] = {};
+    }
+
+    sessionProgress[currentPlaylist.id][videoId] = value;
+
+    updateSetsUI(videoId, value, maxSets);
+}
+
+function updateSetsUI(videoId, currentCount, maxSets) {
+    const input = document.getElementById(`sets_{videoId}`);
+    const minusBtn = input.previousElementSibling;
+    const plusBtn = input.nextElementSibling;
+
+    input.value = currentCount;
+
+    minusBtn.disabled = currentCount <= 0;
+    plusBtn.disabled = currentCount >= maxSets;
+}
+ 
 // Load today's progress from database
 async function loadTodaySession() {
     if (!currentUser) return;
@@ -236,11 +283,11 @@ async function loadTodaySession() {
         // Populate session checkboxes with saved data
         if (data?.progress) {
             Object.keys(data.progress).forEach(playlistId => {
-                if (!sessionCheckboxes[playlistId]) {
-                    sessionCheckboxes[playlistId] = {};
+                if (!sessionProgress[playlistId]) {
+                    sessionProgress[playlistId] = {};
                 }
                 Object.keys(data.progress[playlistId]).forEach(videoId => {
-                    sessionCheckboxes[playlistId][videoId] = data.progress[playlistId][videoId] || [];
+                    sessionProgress[playlistId][videoId] = data.progress[playlistId][videoId] || [];
                 });
             });
         }
@@ -412,10 +459,10 @@ async function saveProgress() {
 
     const today = new Date().toISOString().split('T')[0];
 
-    // Build progress object from sessionCheckboxes
+    // Build progress object from sessionProgress
     const progressData = {};
-    Object.keys(sessionCheckboxes).forEach(playlistId => {
-        progressData[playlistId] = sessionCheckboxes[playlistId];
+    Object.keys(sessionProgress).forEach(playlistId => {
+        progressData[playlistId] = sessionProgress[playlistId];
     });
 
     const { error } = await supabase
