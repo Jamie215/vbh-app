@@ -424,9 +424,9 @@ function buildPlaylistCard(playlist, progress, isToday, formattedDate) {
     
     // Check each video - count as completed if user has logged ANY sets
     playlist.videos.forEach(video => {
-        const completedSets = progress[video.id] || [];
+        const completedSets = progress[video.id] || 0;
         // Exercise is completed if at least one set is logged
-        if (completedSets.length > 0) {
+        if (completedSets > 0) {
             completedExercises++;
         }
     });
