@@ -253,7 +253,7 @@ function updateSetsUI(videoId, currentCount, maxSets) {
     input.value = currentCount;
 
     minusBtn.disabled = currentCount <= 0;
-    plusBtn.disabled = currentCount >= maxSets;
+    // plusBtn.disabled = currentCount >= maxSets;
 }
  
 // Load today's progress from database
