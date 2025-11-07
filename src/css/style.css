@@ -581,13 +581,43 @@ button:hover {
 /* Equipment badge */
 .equipment-badge {
     display: inline-block;
-    background: #e9ecef;
-    color: #495057;
     padding: 0.4rem 0.9rem;
     border-radius: 20px;
     font-size: 0.9rem;
+    margin-right: 0.5rem;
+    margin-bottom: 0.25rem;
+    font-weight: 500;
 }
 
+/* Easier difficulty - Green */
+.equipment-badge.badge-easier {
+    background: #d4edda;
+    color: #155724;
+    border: 1px solid #c3e6cb;
+}
+
+/* More Challenging difficulty - Orange */
+.equipment-badge.badge-more-challenging {
+    background: #fff3cd;
+    color: #856404;
+    border: 1px solid #ffeaa7;
+}
+
+/* Challenging difficulty - Red */
+.equipment-badge.badge-challenging {
+    background: #f8d7da;
+    color: #721c24;
+    border: 1px solid #f5c6cb;
+}
+
+/* Neutral/Default - Gray (no difficulty specified) */
+.equipment-badge.badge-neutral {
+    background: #e9ecef;
+    color: #495057;
+    border: 1px solid #dee2e6;
+}
+
+/* No equipment */
 .no-equipment {
     color: #999;
     font-style: italic;

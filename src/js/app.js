@@ -70,6 +70,23 @@ function loadPlaylists() {
     });
 }
 
+// Helper function to determine equipment badge class based on difficulty
+function getEquipmentBadgeClass(equipmentText) {
+    const lowerText = equipmentText.toLowerCase();
+    
+    // Check for difficulty keywords (order matters - check "more challenging" before "challenging")
+    if (lowerText.includes('easier')) {
+        return 'badge-easier';
+    } else if (lowerText.includes('more challenging')) {
+        return 'badge-more-challenging';
+    } else if (lowerText.includes('challenging')) {
+        return 'badge-challenging';
+    }
+    
+    // Default neutral badge
+    return 'badge-neutral';
+}
+
 // Show specific playlist with video table
 function showPlaylist(playlistId) {
     // Require authentication to view playlists
@@ -125,7 +142,14 @@ function loadExerciseTable() {
         row.appendChild(setsRepsCell);
 
         const equipmentCell = document.createElement('td');
-        if (video.equipment) {
+        if (video.equipment && Array.isArray(video.equipment) && video.equipment.length > 0) {
+            const badges = video.equipment.map(item => {
+                const badgeClass = getEquipmentBadgeClass(item);
+                return `<span class="equipment-badge ${badgeClass}">${item}</span>`;
+            }).join(' ');
+            equipmentCell.innerHTML = badges;
+        } else if (video.equipment && typeof video.equipment === 'string') {
+            // Fallback for old string format
             equipmentCell.innerHTML = `<span class="equipment-badge">${video.equipment}</span>`;
         } else {
             equipmentCell.innerHTML = `<span class="no-equipment">—</span>`;

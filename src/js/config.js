@@ -13,24 +13,24 @@ const PLAYLISTS = [
         id: 'beginner-0-3',
         title: 'Beginner 0-3',
         description: 'Light load workout for starting',
-        thumbnail: 'https://img.youtube.com/vi/HQFwKn5zzN4/maxresdefault.jpg',
+        thumbnail: 'https://img.youtube.com/vi/hq60J8wfNZY/maxresdefault.jpg',
         videos: [
             {
-                id: 'HQFwKn5zzN4',
-                title: 'Squats',
+                id: 'hq60J8wfNZY',
+                title: 'Reverse Lunge',
                 sets: 3,
                 reps: 8,
-                equipment: "Chair",
-                thumbnail: 'https://img.youtube.com/vi/HQFwKn5zzN4/maxresdefault.jpg',
+                equipment: ["Chair (Easier)", "No Chair (More Challenging)"],
+                thumbnail: 'https://img.youtube.com/vi/hq60J8wfNZY/maxresdefault.jpg',
                 order: 1
             },
             {
-                id: 'KkJWk44cnbU',
-                title: 'Cloth Slide',
+                id: 'bcEDTtncUD0',
+                title: 'Squat',
                 sets: 3,
                 reps: 8,
-                equipment: "Cloth",
-                thumbnail: 'https://img.youtube.com/vi/KkJWk44cnbU/maxresdefault.jpg',
+                equipment:["Chair (Easier)", "No Chair (More Challenging)", "Weight (Challenging)"],
+                thumbnail: 'https://img.youtube.com/vi/bcEDTtncUD0/maxresdefault.jpg',
                 order: 2
             }
         ]
@@ -39,29 +39,45 @@ const PLAYLISTS = [
         id: 'intermediate-0-3',
         title: 'Intermediate 0-3',
         description: 'Intermediate load workout for more challenge',
-        thumbnail: 'https://img.youtube.com/vi/KkJWk44cnbU/maxresdefault.jpg',
+        thumbnail: 'https://img.youtube.com/vi/6a3qaXho5Q4/maxresdefault.jpg',
         videos: [
             {
-                id: 'KkJWk44cnbU',
-                title: 'Cloth Slide',
+                id: '6a3qaXho5Q4',
+                title: 'Single Leg Deadlift',
                 sets: 3,
                 reps: 8,
-                equipment: "Cloth",
-                thumbnail: 'https://img.youtube.com/vi/KkJWk44cnbU/maxresdefault.jpg',
+                equipment: ["Chair (Easier)", "No Chair (More Challenging)"],
+                thumbnail: 'https://img.youtube.com/vi/6a3qaXho5Q4/maxresdefault.jpg',
                 order: 1
             },
             {
-                id: 'HQFwKn5zzN4',
-                title: 'Squat',
+                id: '8RTh6Oh0weY',
+                title: 'Hip Hinge',
                 sets: 3,
                 reps: 8,
-                equipment: "Chair",
-                thumbnail: 'https://img.youtube.com/vi/HQFwKn5zzN4/maxresdefault.jpg',
+                equipment: ["Dowel (Easier)", "Weights (More Challenging)"],
+                thumbnail: 'https://img.youtube.com/vi/8RTh6Oh0weY/maxresdefault.jpg',
                 order: 2
             }
         ]
     },
-
+    {
+        id: 'advanced-0-3',
+        title: 'Advanced 0-3',
+        description: 'Advanced load workout for most challenge',
+        thumbnail: 'https://img.youtube.com/vi/8RTh6Oh0weY/maxresdefault.jpg',
+        videos: [
+            {
+                id: '8RTh6Oh0weY',
+                title: 'Band External Rotation',
+                sets: 3,
+                reps: 8,
+                equipment: ["Resistance Band"],
+                thumbnail: 'https://img.youtube.com/vi/8RTh6Oh0weY/maxresdefault.jpg',
+                order: 1
+            }
+        ]
+    }
 ]
 
 // Initialize Supabase
