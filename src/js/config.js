@@ -51,12 +51,12 @@ const PLAYLISTS = [
                 order: 1
             },
             {
-                id: '8RTh6Oh0weY',
+                id: '2bRnmaLAS7o',
                 title: 'Hip Hinge',
                 sets: 3,
                 reps: 8,
                 equipment: ["Dowel (Easier)", "Weights (More Challenging)"],
-                thumbnail: 'https://img.youtube.com/vi/8RTh6Oh0weY/hqdefault.jpg',
+                thumbnail: 'https://img.youtube.com/vi/2bRnmaLAS7o/hqdefault.jpg',
                 order: 2
             }
         ]
