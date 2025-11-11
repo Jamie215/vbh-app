@@ -206,12 +206,10 @@ function incrementSets(videoId, maxSets) {
 
     let currentCount = sessionProgress[currentPlaylist.id][videoId] || 0;
 
-    if (currentCount < maxSets) {
-        currentCount++;
-        sessionProgress[currentPlaylist.id][videoId] = currentCount;
+    currentCount++;
+    sessionProgress[currentPlaylist.id][videoId] = currentCount;
 
-        updateSetsUI(videoId, currentCount, maxSets);
-    }
+    updateSetsUI(videoId, currentCount, maxSets);
 }
 
 // Decrement sets completed
