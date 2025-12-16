@@ -11,8 +11,8 @@ if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
 const PLAYLISTS = [
     {
         id: 'beginner-0-3',
-        title: 'Beginner 0-3',
-        description: 'Light load workout for starting',
+        title: 'Beginner Weeks 0-3',
+        description: 'Workout playlist for Week 0 to 3',
         thumbnail: 'https://img.youtube.com/vi/hq60J8wfNZY/hqdefault.jpg',
         videos: [
             {
@@ -20,6 +20,7 @@ const PLAYLISTS = [
                 title: 'Reverse Lunge',
                 sets: 3,
                 reps: 8,
+                seconds: 0,
                 equipment: ["Chair (Easier)", "No Chair (More Challenging)"],
                 thumbnail: 'https://img.youtube.com/vi/hq60J8wfNZY/hqdefault.jpg',
                 order: 1
@@ -29,6 +30,7 @@ const PLAYLISTS = [
                 title: 'Squat',
                 sets: 3,
                 reps: 8,
+                seconds: 0,
                 equipment:["Chair (Easier)", "No Chair (More Challenging)", "Weight (Challenging)"],
                 thumbnail: 'https://img.youtube.com/vi/bcEDTtncUD0/hqdefault.jpg',
                 order: 2
@@ -36,9 +38,9 @@ const PLAYLISTS = [
         ]
     },
     {
-        id: 'intermediate-0-3',
-        title: 'Intermediate 0-3',
-        description: 'Intermediate load workout for more challenge',
+        id: 'advanced-4-6',
+        title: 'Advanced Weeks 4-6',
+        description: 'Workout playlist for Week 4 to 6',
         thumbnail: 'https://img.youtube.com/vi/6a3qaXho5Q4/hqdefault.jpg',
         videos: [
             {
@@ -46,6 +48,7 @@ const PLAYLISTS = [
                 title: 'Single Leg Deadlift',
                 sets: 3,
                 reps: 8,
+                seconds: 0,
                 equipment: ["Chair (Easier)", "No Chair (More Challenging)"],
                 thumbnail: 'https://img.youtube.com/vi/6a3qaXho5Q4/hqdefault.jpg',
                 order: 1
@@ -55,23 +58,17 @@ const PLAYLISTS = [
                 title: 'Hip Hinge',
                 sets: 3,
                 reps: 8,
+                seconds: 0,
                 equipment: ["Dowel (Easier)", "Weights (More Challenging)"],
                 thumbnail: 'https://img.youtube.com/vi/2bRnmaLAS7o/hqdefault.jpg',
                 order: 2
-            }
-        ]
-    },
-    {
-        id: 'advanced-0-3',
-        title: 'Advanced 0-3',
-        description: 'Advanced load workout for most challenge',
-        thumbnail: 'https://img.youtube.com/vi/gqzZ0ExlyMc/hqdefault.jpg',
-        videos: [
+            },
             {
                 id: 'gqzZ0ExlyMc',
                 title: 'Band External Rotation',
                 sets: 3,
                 reps: 8,
+                seconds: 0,
                 equipment: ["Resistance Band"],
                 thumbnail: 'https://img.youtube.com/vi/gqzZ0ExlyMc/hqdefault.jpg',
                 order: 1

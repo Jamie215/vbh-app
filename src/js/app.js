@@ -1,9 +1,11 @@
 // Track current user and state
 let currentUser = null;
+let userProfile = null;
 let currentPlaylist = null;
 let currentVideo = null;
 let todaySession = null;
 let sessionProgress = {};
+let completionHistory = {};
 
 // Initialize app
 document.addEventListener('DOMContentLoaded', async () => {
@@ -14,6 +16,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             currentUser = session.user;
             await updateUIForAuthenticatedUser(session.user);
             await loadTodaySession();
+            await loadCompletionHistory();
         } else {
             updateUIForGuestUser();
         }
@@ -28,7 +31,123 @@ document.addEventListener('DOMContentLoaded', async () => {
 function showHome() {
     document.getElementById('home-view').classList.remove('hidden');
     document.getElementById('playlist-view').classList.add('hidden');
+    
+    document.querySelectorAll('.nav-link').forEach(link => link.classList.remove('active'));
+    document.querySelector('.nav-link')?.classList.add('active');
+
     loadPlaylists();
+}
+
+// Calculate user's weekly progress in the program
+function calculateUserWeek() {
+    // No history means Week 0
+    if (!completionHistory || Object.keys(completionHistory).length === 0) {
+        return 0;
+    }
+    
+    const dates = Object.keys(completionHistory).sort();
+    if (dates.length === 0) return 0;
+    
+    const firstDate = new Date(dates[0] + 'T00:00:00');
+    const today = new Date();
+
+    const diffTime = today - firstDate;
+    const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+    let weekNumber = Math.floor(diffDays / 7) + 1;
+
+    // For Weeks 0-3: Progress never resets regardless of missed weeks
+    if (weekNumber <= 3) return weekNumber;
+
+    // For Weeks 4-6: Allow 2 weeks of missing progress before resetting to Week 4
+    const mostRecentDate = new Date(dates[dates.length - 1] + 'T00:00:00');
+    const daysSinceLastActivity = Math.floor((today - mostRecentDate));
+
+    if (daysSinceLastActivity >= 14) return 4;
+
+    return weekNumber
+}
+
+// Display the suggested workout playlist for today based on user's progress
+function getSuggestedWorkout() {
+    const userWeek = calculateUserWeek();
+
+    if (week <=3) {
+        return PLAYLISTS.find(p => p.id === 'beginner-0-3')
+    } else {
+        return PLAYLISTS.find(p => p.id === 'advanced-4-6')
+    }
+}
+
+async function loadCompletionHistory() {
+    if (!currentUser) return;
+    
+    try {
+        const { data, error } = await supabase
+            .from('workout_sessions')
+            .select('session_date, progress')
+            .eq('user_id', currentUser.id)
+            .order('session_date', { ascending: true });
+
+        if (error) {
+            console.error('Error loading completion history:', error);
+            return;
+        }
+
+        completionHistory = {};
+        data.forEach(session => {
+            if (!completionHistory[session.session_date]) {
+                completionHistory[session.session_date = session.progress];
+            }
+        });
+    } catch (error) {
+        console.error('Exception in loadCompletionHistory:', error);
+    }   
+}
+
+function getPlaylistLastCompletion(playlistId) {
+    const playlist = PLAYLISTS.find(p => p.id === playlistId);
+    if (!playlist || !completionHistory) return null;
+
+    const dates = Object.keys(completionHistory).sort().reverse();
+
+    for (const date of dates) {
+        const progress = completionHistory[date];
+        if (progress && progress[playlistId]) {
+            let completedCount = 0;
+            const totalExercises = playlist.videos.length;
+
+            playlist.videos.forEach(video => {
+                const completedSets = progress[playlistId][video.id] || 0;
+                if (completedSets > 0) completedCount++;
+            });
+
+            if (completedCount > 0) {
+                return {
+                    date: date,
+                    completedExercises: progress.completedExercises,
+                    totalExercises: progress.totalExercises
+                };
+            }
+            
+        }
+    }
+
+    return null;
+}
+
+function formatCompletionDate(dateStr) {
+    const date = new Date(dateStr + 'T00:00:00');
+    const today = new Date();
+    today.setHours(0,0,0,0);
+
+    const dateOnly = new Date(date);
+    dateOnly.setHours(0,0,0,0);
+
+    if (dateOnly.getTime() === today.getTime()) {
+        return 'today';
+    }
+
+    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
 }
 
 // Load and display playlists
@@ -46,28 +165,123 @@ function loadPlaylists() {
             </div>
         `;
         // Hide recent activity for guests
-        document.getElementById('recent-activity-section').classList.add('hidden');
+        document.getElementById('user-greeting-section').classList.add('hidden');
+        document.getElementById('todays-workout-section').classList.add('hidden');
+        document.getElementById('all-workouts-section').classList.add('hidden');
+
         return;
     }
 
-    // Load recent activity
-    loadRecentActivity();
+    document.getElementById('user-greeting-section').classList.remove('hidden');
+    document.getElementById('todays-workout-section').classList.remove('hidden');
+    document.getElementById('all-workouts-section').classList.remove('hidden');
+
+    const userName = userProfile?.full_name?.split(' ')[0] || currentUser.email?.split('@')[0] || 'there';
+    document.getElementById('user-name').textContent = userName;
+    const userWeek = calculateUserWeek();
+    const weekDisplay = document.getElementById('user-week');
+    weekDisplay.textContent = userWeek;
+
+    const greetingP = document.querySelector('#user-greeting-section p');
+    if (userWeek === 0) {
+        greetingP.innerHTML = `Welcome to the program! Start with <strong>Week 0</strong> and take it from there. Let's get started!`;
+    } else {
+        greetingP,innerHTML = `You've reached <strong>Week ${userWeek}</strong>. Keep it up!`;
+    }
+
+    loadTodaysWorkout();
 
     PLAYLISTS.forEach(playlist => {
-        const card = document.createElement('div');
-        card.className = 'playlist-card';
-        card.onclick = () => showPlaylist(playlist.id);
-        
-        card.innerHTML = `
-            <img src="${playlist.thumbnail}" alt="${playlist.title}">
-            <div class="playlist-card-content">
-                <h3>${playlist.title}</h3>
-                <p>${playlist.description}</p>
-                <span class="video-count">${playlist.videos.length} exercises</span>
-            </div>
-        `;
+        const card = createPlaylistCard(playlist);
         grid.appendChild(card);
     });
+}
+
+function createPlaylistCard(playlist) {
+    const card = document.createElement('div');
+    card.className = 'playlist-card';
+    card.onclick = () => showPlaylist(playlist.id);
+
+    // Determine overlay style based on playlist type
+    const isAdvanced = playlist.id.includes('advanced');
+    const overlayClass = isAdvanced ? 'advanced' : 'beginner';
+    const weekText = isAdvanced ? 'Advanced<br>Weeks 4-6 Workout' : 'Beginner<br>Weeks 0-3 Workout';
+
+    // Get completion status
+    const completion = getPlaylistLastCompletion(playlist.id);
+    let completionHTML = '';
+    
+    if (completion) {
+        const dateStr = formatCompletionDate(completion.date);
+        completionHTML = `
+            <div class="completion-status">
+                <div class="checkmark">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                        <path d="M20 6L9 17l-5-5"/>
+                    </svg>
+                </div>
+                <span>You completed ${completion.completedExercises}/${completion.totalExercises} exercises on ${dateStr}</span>
+            </div>
+        `;
+    }
+    
+    card.innerHTML = `
+        <div class="playlist-thumbnail-wrapper">
+            <img src="${playlist.thumbnail}" alt="${playlist.title}">
+            <div class="playlist-overlay ${overlayClass}">
+                <span class="week-label">${weekText}</span>
+            </div>
+        </div>
+        <div class="playlist-card-content">
+            <h3>${playlist.title}</h3>
+            <p>${playlist.description}</p>
+            ${completionHTML}
+            <a href="#" class="go-to-workout-link" onclick="event.stopPropagation(); showPlaylist('${playlist.id}'); return false;">
+                Go to Workout 
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M5 12h14M12 5l7 7-7 7"/>
+                </svg>
+            </a>
+        </div>
+    `;
+
+    return card;
+}
+
+function loadTodaysWorkout() {
+    const section = document.getElementById('todays-workout-section');
+    const container = document.getElementById('todays-workout-card');
+
+    if(!currentUser) {
+        section.classList.add('hidden');
+        return;
+    }
+
+    section.classList.remove('hidden');
+    const suggested = getSuggestedWorkout();
+
+    if (!suggested) {
+        section.classList.add('hidden');
+        return;
+    }
+
+    const isAdvanced = suggested.id.includes('advanced');
+    const overlayClass = isAdvanced ? 'advanced' : 'beginner';
+    const weekText = isAdvanced ? 'Advanced<br>Weeks 3-6 Workout' : 'Beginner<br>Weeks 0-3 Workout';
+    
+    container.innerHTML = `
+        <div class="todays-workout-thumbnail">
+            <img src="${suggested.thumbnail}" alt="${suggested.title}">
+            <div class="playlist-overlay ${overlayClass}">
+                <span class="week-label">${weekText}</span>
+            </div>
+        </div>
+        <div class="todays-workout-info">
+            <h3>${suggested.title}</h3>
+            <p>Your suggested workout for today</p>
+            <button class="start-workout-btn" onclick="showPlaylist('${suggested.id}')">Start Workout</button>
+        </div>
+    `;
 }
 
 // Helper function to determine equipment badge class based on difficulty
@@ -294,125 +508,6 @@ async function loadTodaySession() {
     }   
 }
 
-// Load most recent workout session
-async function loadRecentActivity() {
-    if (!currentUser) {
-        document.getElementById('recent-activity-section').classList.add('hidden');
-        return;
-    }
-
-    try {
-        const today = new Date().toISOString().split('T')[0];
-
-        // Get today's session if available
-        const { data: todayData, error: todayError } = await supabase
-            .from('workout_sessions')
-            .select('*')
-            .eq('user_id', currentUser.id)
-            .eq('session_date', today)
-            .maybeSingle()
-
-        if (todayError) {
-            console.error('Error loading recent activity: ', todayError);
-            return;
-        }
-
-        // Get most recent previous session before today
-        const { data: lastData, error: lastError } = await supabase
-            .from('workout_sessions')
-            .select('*')
-            .eq('user_id', currentUser.id)
-            .lt('session_date', today)
-            .order('session_date', { ascending: false })
-            .limit(1)
-            .maybeSingle();
-
-        if (lastError) {
-            console.error('Error loading last session: ', lastError);
-        }
-
-        const sessions = [];
-        if (todayData?.progress && Object.keys(todayData.progress).length > 0) {
-            sessions.push(todayData);
-        }
-        if (lastData?.progress && Object.keys(lastData.progress).length > 0) {
-            sessions.push(lastData);
-        }
-
-        if (sessions.length === 0) {
-            document.getElementById('recent-activity-section').classList.add('hidden');
-            return;
-        }
-
-        displayRecentActivity(sessions);
-    } catch (error) {
-        console.error('Error loading recent activity: ', error);
-        document.getElementById('recent-activity-section').classList.add('hidden');
-        return;
-    }
-}
-
-function displayRecentActivity(sessions) {
-    const recentActivityCard = document.getElementById('recent-activity-card');
-    const recentActivitySection = document.getElementById('recent-activity-section');
-
-    if (!sessions || sessions.length === 0) {
-        recentActivitySection.classList.add('hidden');
-        return;
-    }
-
-    const today = new Date().toISOString().split('T')[0];
-
-    // Collect all unique playlists
-    const playlistMap = new Map();
-
-    // Process each session
-    sessions.forEach(session => {
-        const isToday = session.session_date === today;
-        const playlistIds = Object.keys(session.progress);
-
-        playlistIds.forEach(playlistId => {
-            // Only add if not already added, or if this is today's version (override previous)
-            if (!playlistMap.has(playlistId) || isToday) {
-                const playlist = PLAYLISTS.find(p => p.id === playlistId);
-                if (playlist) {
-                    playlistMap.set(playlistId, {
-                        playlist: playlist,
-                        progress: session.progress[playlistId],
-                        isToday: isToday,
-                        date: session.session_date
-                    });
-                }
-            }
-        });
-    });
-
-    // Build all cards in one continuous grid
-    let allCardsHTML = '';
-    playlistMap.forEach(({ playlist, progress, isToday, date }) => {
-        // Format the date for display
-        let formattedDate;
-        if (isToday) {
-            formattedDate = new Date().toLocaleDateString('en-US', {
-                month: 'long',
-                day: 'numeric',
-                year: 'numeric'
-            });
-        } else {
-            const sessionDate = new Date(date + 'T00:00:00');
-            formattedDate = sessionDate.toLocaleDateString('en-US', {
-                month: 'long',
-                day: 'numeric',
-                year: 'numeric'
-            });
-        }
-
-        allCardsHTML += buildPlaylistCard(playlist, progress, isToday, formattedDate);
-    });
-
-    recentActivityCard.innerHTML = allCardsHTML;
-    recentActivitySection.classList.remove('hidden');
-}
 
 // Helper function to build a playlist card
 function buildPlaylistCard(playlist, progress, isToday, formattedDate) {
@@ -481,11 +576,7 @@ async function saveProgress() {
         return;
     }
 
-    // Reload progress to sync
     await loadTodaySession();
-
-    // Update recent activity on home page
-    await loadRecentActivity();
 
     // Update button to show success
     saveBtn.classList.add('saved');

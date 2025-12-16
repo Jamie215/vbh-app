@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VBH Exercise Program</title>
+    <title>HandsUP</title>
     <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
@@ -11,23 +11,45 @@
         <!-- Navigation Bar -->
         <nav class="navbar">
             <div class="nav-container">
-                <h1 class="logo" onclick="showHome()" style="cursor: pointer;">Exercise Platform</h1>
+                <div class="nav-left">
+                    <div class="logo" onclick="showHome()" style="cursor: pointer;">
+                        <span class="logo-icon">EXERCISELOGO</span>
+                        <span class="logo-text">HandsUP</span>
+                    </div>
+                    <div class="nav-links">
+                        <a href="#" class="nav-link active" onclick="showHome(); return false;">Exercises</a>
+                        <a href="#" class="nav-link" onclick="showHowToUse(); return false;">How to Use the Program</a>
+                    </div>
+                </div>
                 <div class="nav-right">
-                    <div id="user-info" class="hidden"></div>
+                    <div id="user-info" class="hidden">
+                        <span id="user-name-display"></span>
+                        <div id="user-avatar">
+                            <span id="user-initial"></span>
+                        </div>
+                    </div>
                     <button id="auth-button" onclick="showAuthModal()">Sign In</button>
                     <button id="signout-button" class="hidden" onclick="signOut()">Sign Out</button>
                 </div>
             </div>
         </nav>
 
-        <!-- Home View - Playlists Grid -->
+        <!-- Home View -->
         <main id="home-view">
-            <section id="recent-activity-section" class="hidden">
-                <h2>Your Recent Workout</h2>
-                <div id="recent-activity-card"></div>
+            <section id="user-greeting-section">
+                <h1>Hello, <span id="user-name">there</span></h1>
+                <p>You've reached <strong>Week <span id="user-week">1</span></strong>. Keep it up!</p>
             </section>
-            <section id="playlists-section">
-                <h2>All Workouts</h2>
+            <section id="todays-workout-section">
+                <div class="section-header">
+                    <h2>Today's Workout</h2>
+                </div>
+                <div id="todays-workout-card"></div>
+            </section>
+            <section id="all-workouts-section">
+                <div class="section-header">
+                    <h2>All Workouts</h2>
+                </div>
                 <div id="playlists-grid"></div>
             </section>
         </main>
@@ -109,7 +131,7 @@
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://www.youtube.com/iframe_api"></script>
-    <script src="js/config.js"></script>
+    <script src="js/videoPlaylists.js"></script>
     <script src="js/auth.js"></script>
     <script src="js/videos.js"></script>
     <script src="js/app.js"></script>
