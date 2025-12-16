@@ -84,7 +84,7 @@ async function loadCompletionHistory() {
     try {
         const { data, error } = await supabase
             .from('workout_sessions')
-            .select('session_date, progress')
+            .select('session_date')
             .eq('user_id', currentUser.id)
             .order('session_date', { ascending: true });
 
