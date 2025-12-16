@@ -71,7 +71,7 @@ function calculateUserWeek() {
 function getSuggestedWorkout() {
     const userWeek = calculateUserWeek();
 
-    if (week <=3) {
+    if (userWeek <= 3) {
         return PLAYLISTS.find(p => p.id === 'beginner-0-3')
     } else {
         return PLAYLISTS.find(p => p.id === 'advanced-4-6')
@@ -84,7 +84,7 @@ async function loadCompletionHistory() {
     try {
         const { data, error } = await supabase
             .from('workout_sessions')
-            .select('session_date')
+            .select('session_date, progress')
             .eq('user_id', currentUser.id)
             .order('session_date', { ascending: true });
 
