@@ -96,7 +96,7 @@ async function loadCompletionHistory() {
         completionHistory = {};
         data.forEach(session => {
             if (!completionHistory[session.session_date]) {
-                completionHistory[session.session_date = session.progress];
+                completionHistory[session.session_date] = session.progress;
             }
         });
     } catch (error) {

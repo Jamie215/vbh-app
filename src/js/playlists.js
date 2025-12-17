@@ -1,4 +1,3 @@
-// Debugging comment
 // Supabase configuration
 const SUPABASE_URL = window.ENV?.SUPABASE_URL || '';
 const SUPABASE_ANON_KEY = window.ENV?.SUPABASE_ANON_KEY || '';
