@@ -23,7 +23,7 @@ async function signUp() {
     }
 
     // Sign up with Supabase
-    const { data, error } = await supabase.auth.signUp({
+    const { data, error } = await window.supabaseClient.auth.signUp({
         email: email,
         password: password,
         options: {
@@ -63,7 +63,7 @@ async function signIn() {
     }
 
     // Sign in with Supabase
-    const { data, error } = await supabase.auth.signInWithPassword({
+    const { data, error } = await window.supabaseClient.auth.signInWithPassword({
         email: email,
         password: password
     });
@@ -89,7 +89,7 @@ async function signOut() {
     const confirmed = confirm('Are you sure you want to sign out?');
     if (!confirmed) return;
 
-    const { error } = await supabase.auth.signOut();
+    const { error } = await window.supabaseClient.auth.signOut();
     
     if (error) {
         alert('Error signing out: ' + error.message);
@@ -100,7 +100,7 @@ async function signOut() {
 }
 
 // Listen to auth state changes
-supabase.auth.onAuthStateChange(async (event, session) => {
+window.supabaseClient.auth.onAuthStateChange(async (event, session) => {
     console.log('Auth event:', event, 'Session:', !!session); // For debugging
     
     if (event === 'SIGNED_IN') {

@@ -78,5 +78,4 @@ const PLAYLISTS = [
 ];
 
 // Initialize Supabase
-const { createClient } = window.supabase;
-const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+window.supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
