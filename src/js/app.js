@@ -60,7 +60,7 @@ function calculateUserWeek() {
 
     // For Weeks 4-6: Allow 2 weeks of missing progress before resetting to Week 4
     const mostRecentDate = new Date(dates[dates.length - 1] + 'T00:00:00');
-    const daysSinceLastActivity = Math.floor((today - mostRecentDate));
+    const daysSinceLastActivity = Math.floor((today - mostRecentDate) / (1000 * 60 * 60 * 24));
 
     if (daysSinceLastActivity >= 14) return 4;
 
@@ -124,8 +124,8 @@ function getPlaylistLastCompletion(playlistId) {
             if (completedCount > 0) {
                 return {
                     date: date,
-                    completedExercises: progress.completedExercises,
-                    totalExercises: progress.totalExercises
+                    completedExercises: completedCount,
+                    totalExercises: totalExercises
                 };
             }
             
@@ -186,7 +186,7 @@ function loadPlaylists() {
     if (userWeek === 0) {
         greetingP.innerHTML = `Welcome to the program! Start with <strong>Week 0</strong> and take it from there. Let's get started!`;
     } else {
-        greetingP,innerHTML = `You've reached <strong>Week ${userWeek}</strong>. Keep it up!`;
+        greetingP.innerHTML = `You've reached <strong>Week ${userWeek}</strong>. Keep it up!`;
     }
 
     loadTodaysWorkout();
