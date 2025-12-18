@@ -8,8 +8,8 @@
 </head>
 <body>
     <div id="app">
-        <!-- Navigation Bar -->
-        <nav class="navbar">
+        <!-- Navigation Bar (hidden for guests) -->
+        <nav id="navbar" class="navbar hidden">
             <div class="nav-container">
                 <div class="nav-left">
                     <div class="logo" onclick="showHome()" style="cursor: pointer;">
@@ -28,14 +28,73 @@
                             <span id="user-initial"></span>
                         </div>
                     </div>
-                    <button id="auth-button" onclick="showAuthModal()">Sign In</button>
                     <button id="signout-button" class="hidden" onclick="signOut()">Sign Out</button>
                 </div>
             </div>
         </nav>
 
+        <!-- Authentication Page View (shown for guests) -->
+        <main id="auth-view">
+            <div class="auth-container">
+                <div class="auth-header">
+                    <span class="auth-logo-text">HandsUP Exercise Program</span>
+                </div>
+                
+                <!-- Sign In Form -->
+                <div id="signin-view" class="auth-form-container">
+                    <h1>Log In</h1>
+                    <p class="auth-subtitle">Enter your email and password to log in</p>
+                    <div class="form-group">
+                        <label for="login-email">Email</label>
+                        <input type="email" id="login-email" placeholder="test@email.com" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="login-password">Password</label>
+                        <div class="password-wrapper">
+                            <input type="password" id="login-password" placeholder="Enter your password" required>
+                            <button type="button" onclick="togglePasswordVisibility('login-password', 'login-toggle')" class="toggle-password-btn" id="login-toggle">Show</button>
+                        </div>
+                    </div>
+                    <button onclick="signIn()" class="primary-button">Sign In</button>
+                    <p class="form-message" id="signin-message"></p>
+                    <p class="auth-switch-text">
+                        Don't have an account? <a href="#" onclick="showSignUpView(); return false;">Sign Up</a>
+                    </p>
+                    <a href="#" class="forgot-password-link" onclick="showForgotPassword(); return false;">Forgot Password?</a>
+                </div>
+                
+                <!-- Sign Up Form -->
+                <div id="signup-view" class="auth-form-container hidden">
+                    <h1>Sign Up</h1>
+                    <p class="auth-subtitle">Register your account</p>
+                    <div class="form-group">
+                        <label for="signup-name">Name</label>
+                        <input type="text" id="signup-name" placeholder="Your name" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="signup-email">Email</label>
+                        <input type="email" id="signup-email" placeholder="test@email.com" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="signup-password">Password</label>
+                        <div class="password-wrapper">
+                            <input type="password" id="signup-password" placeholder="8+ characters" required>
+                            <button type="button" onclick="togglePasswordVisibility('signup-password', 'signup-toggle')" class="toggle-password-btn" id="signup-toggle">Show</button>
+                        </div>
+                    </div>
+                    <div class="signup-footer">
+                        <p class="auth-switch-text">
+                            Already have an account? <a href="#" onclick="showSignInView(); return false;">Sign In</a>
+                        </p>
+                        <button onclick="signUp()" class="primary-button">Sign Up</button>
+                    </div>
+                    <p class="form-message" id="signup-message"></p>
+                </div>
+            </div>
+        </main>
+
         <!-- Home View -->
-        <main id="home-view">
+        <main id="home-view" class="hidden">
             <section id="user-greeting-section">
                 <h1>Hello, <span id="user-name">there</span></h1>
                 <p>You've reached <strong>Week <span id="user-week">1</span></strong>. Keep it up!</p>
@@ -62,8 +121,7 @@
                     <h1 id="playlist-title"></h1>
                     <p id="playlist-description"></p>
                 </div>
-                <div id="'save-progess-section">
-                    <!-- For logged in users -->
+                <div id="save-progress-section">
                     <button id="save-progress-btn" class="save-progress-btn hidden" onclick="saveProgress()">
                         Save My Progress For This Session
                     </button>
@@ -75,7 +133,7 @@
                     <thead>
                         <tr>
                             <th class="col-video">Name</th>
-                            <th class="col-sets-reps">Recommented Number of Sets/Reps</th>
+                            <th class="col-sets-reps">Recommended Number of Sets/Reps</th>
                             <th class="col-equipment">Recommended Equipment(s)</th>
                             <th class="col-completion">Number of Sets Completed</th>
                         </tr>
@@ -94,36 +152,6 @@
                 <div class="video-details">
                     <h2 id="current-video-title"></h2>
                     <p id="current-video-description"></p>
-                </div>
-            </div>
-        </div>
-
-        <!-- Auth Modal -->
-        <div id="auth-modal" class="modal hidden">
-            <div class="modal-content auth-modal-content">
-                <button class="close-button" onclick="closeAuthModal()">✕</button>
-                <div id="auth-tabs">
-                    <button class="tab-button active" onclick="switchAuthTab('signin')">Sign In</button>
-                    <button class="tab-button" onclick="switchAuthTab('signup')">Sign Up</button>
-                </div>
-                
-                <div id="signin-form" class="auth-form">
-                    <h2>Welcome Back</h2>
-                    <p class="auth-subtitle">Sign in to track your progress</p>
-                    <input type="email" id="login-email" placeholder="Email" required>
-                    <input type="password" id="login-password" placeholder="Password" required>
-                    <button onclick="signIn()" class="primary-button">Sign In</button>
-                    <p class="form-message" id="signin-message"></p>
-                </div>
-
-                <div id="signup-form" class="auth-form hidden">
-                    <h2>Create Account</h2>
-                    <p class="auth-subtitle">Start tracking your fitness journey</p>
-                    <input type="text" id="signup-name" placeholder="Full Name" required>
-                    <input type="email" id="signup-email" placeholder="Email" required>
-                    <input type="password" id="signup-password" placeholder="Password (min 6 characters)" required>
-                    <button onclick="signUp()" class="primary-button">Sign Up</button>
-                    <p class="form-message" id="signup-message"></p>
                 </div>
             </div>
         </div>

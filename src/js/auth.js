@@ -36,13 +36,7 @@ async function signUp() {
     if (error) {
         showMessage('signup-message', error.message, true);
     } else {
-        // Check if email confirmation is required
-        if (data.user && !data.session) {
-            showMessage('signup-message', 'Success! Please check your email to verify your account.', false);
-        } else {
-            showMessage('signup-message', 'Account created successfully!', false);
-            // Will be handled by auth state change listener
-        }
+        showMessage('signup-message', 'Account created successfully!', false);
         
         // Clear form
         document.getElementById('signup-name').value = '';
@@ -99,6 +93,47 @@ async function signOut() {
     }
 }
 
+function showSignInView()  {
+    document.getElementById('signin-view').classList.remove('hidden');
+    document.getElementById('signup-view').classList.add('hidden');
+    clearAuthMessages();
+}
+
+function showSignUpView()  {
+    document.getElementById('signup-view').classList.remove('hidden');
+    document.getElementById('signin-view').classList.add('hidden');
+    clearAuthMessages();
+}
+
+function showAuthPage() {
+    document.getElementById('auth-view').classList.remove('hidden');
+    document.getElementById('home-view').classList.add('hidden');
+    document.getElementById('playlist-view').classList.add('hidden');
+    document.getElementById('navbar').classList.add('hidden');
+}
+
+function hideAuthPage() {
+    document.getElementById('auth-view').classList.add('hidden');
+    document.getElementById('navbar').classList.remove('hidden');
+}
+
+function togglePasswordVisibility(inputId, toggleId) {
+    const passwordInput = document.getElementById(inputId);
+    const toggleBtn = document.getElementById(toggleId);
+
+    if (passwordInput.type === 'password') {
+        passwordInput.type = 'text';
+        toggleBtn.textContent = 'Hide';
+    } else {
+        passwordInput.type = 'password';
+        toggleBtn.textContent = 'Show';
+    }
+}
+
+function showForgotPassword() {
+    alert("TODO: This feature will be implemented soon.");
+}
+
 // Listen to auth state changes
 window.supabaseClient.auth.onAuthStateChange(async (event, session) => {
     console.log('Auth event:', event, 'Session:', !!session); // For debugging
@@ -107,21 +142,17 @@ window.supabaseClient.auth.onAuthStateChange(async (event, session) => {
         currentUser = session.user;
         await updateUIForAuthenticatedUser(session.user);
         await loadTodaySession();
-        closeAuthModal();
-        
-        // Refresh current view to show progress
-        if (currentPlaylist) {
-            showPlaylist(currentPlaylist.id);
-        } else {
-            loadPlaylists();
-        }
+        await loadCompletionHistory();
+        hideAuthPage();
+        showHome();
     } else if (event === 'SIGNED_OUT') {
         currentUser = null;
         todaySession = null;
-        sessionCheckboxes = {};
+        sessionProgress = {};
+        completionHistory = {};
         currentPlaylist = null;
         updateUIForGuestUser();
-        showHome();
+        showAuthPage();
     } else if (event === 'USER_UPDATED') {
         // Handle user profile updates
         if (session?.user) {
@@ -130,6 +161,17 @@ window.supabaseClient.auth.onAuthStateChange(async (event, session) => {
         }
     }
 });
+
+function clearAuthMessages() {
+    document.getElementById('signin-message').textContent = '';
+    document.getElementById('signup-message').textContent = '';
+}
+
+function showMessage(elementId, message, isError = false) {
+    const messageElem = document.getElementById(elementId);
+    messageElem.textContent = message;
+    messageElem.className = `form-message ${isError ? 'error' : 'success'}`;
+}
 
 // Handle Enter key press in auth forms
 document.addEventListener('DOMContentLoaded', () => {

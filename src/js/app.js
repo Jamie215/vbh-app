@@ -17,20 +17,28 @@ document.addEventListener('DOMContentLoaded', async () => {
             await updateUIForAuthenticatedUser(session.user);
             await loadTodaySession();
             await loadCompletionHistory();
+            hideAuthPage();
+            showHome();
         } else {
             updateUIForGuestUser();
+            showAuthPage();
         }
     } catch(error) {
         console.error('Initialization error:', error);
-    } finally {
-        showHome();
+        showAuthPage();
     }
 });
 
 // Show home view with playlists
 function showHome() {
+    if (!currentUser) {
+        showAuthPage();
+        return;
+    }
+
     document.getElementById('home-view').classList.remove('hidden');
     document.getElementById('playlist-view').classList.add('hidden');
+    document.getElementById('auth-view').classList.add('hidden');
     
     document.querySelectorAll('.nav-link').forEach(link => link.classList.remove('active'));
     document.querySelector('.nav-link')?.classList.add('active');
@@ -128,7 +136,6 @@ function getPlaylistLastCompletion(playlistId) {
                     totalExercises: totalExercises
                 };
             }
-            
         }
     }
 
@@ -153,22 +160,13 @@ function formatCompletionDate(dateStr) {
 // Load and display playlists
 function loadPlaylists() {
     const grid = document.getElementById('playlists-grid');
+    if (!grid) return;
+
     grid.innerHTML = '';
 
     // Show authentication for guests
     if (!currentUser) {
-        grid.innerHTML = `
-            <div class="auth-prompt">
-                <h3>Sign in to access exercise modules</h3>
-                <p>Create an account or sign in to view and track your exercise progress.</p>
-                <button onclick="showAuthModal()" class="primary-button">Sign In / Sign Up</button>
-            </div>
-        `;
-        // Hide recent activity for guests
-        document.getElementById('user-greeting-section').classList.add('hidden');
-        document.getElementById('todays-workout-section').classList.add('hidden');
-        document.getElementById('all-workouts-section').classList.add('hidden');
-
+        showAuthPage();
         return;
     }
 
@@ -178,6 +176,7 @@ function loadPlaylists() {
 
     const userName = userProfile?.full_name?.split(' ')[0] || currentUser.email?.split('@')[0] || 'there';
     document.getElementById('user-name').textContent = userName;
+
     const userWeek = calculateUserWeek();
     const weekDisplay = document.getElementById('user-week');
     weekDisplay.textContent = userWeek;
@@ -227,7 +226,6 @@ function createPlaylistCard(playlist) {
     
     card.innerHTML = `
         <div class="playlist-thumbnail-wrapper">
-            <img src="${playlist.thumbnail}" alt="${playlist.title}">
             <div class="playlist-overlay ${overlayClass}">
                 <span class="week-label">${weekText}</span>
             </div>
@@ -288,7 +286,6 @@ function loadTodaysWorkout() {
 function getEquipmentBadgeClass(equipmentText) {
     const lowerText = equipmentText.toLowerCase();
     
-    // Check for difficulty keywords (order matters - check "more challenging" before "challenging")
     if (lowerText.includes('easier')) {
         return 'badge-easier';
     } else if (lowerText.includes('more challenging')) {
@@ -591,8 +588,8 @@ async function saveProgress() {
 
 // Update UI for authenticated user
 async function updateUIForAuthenticatedUser(user) {
-    document.getElementById('auth-button').classList.add('hidden');
-    document.getElementById('signout-button').classList.remove('hidden');
+    const signoutBtn = document.getElementById('signout-button');
+    if (signoutBtn) signoutBtn.classList.remove('hidden');
     
     const { data: profile } = await window.supabaseClient
         .from('profiles')
@@ -600,61 +597,49 @@ async function updateUIForAuthenticatedUser(user) {
         .eq('id', user.id)
         .single();
 
+    userProfile = profile;
+
     const userInfo = document.getElementById('user-info');
-    userInfo.classList.remove('hidden');
-    userInfo.innerHTML = `Welcome, ${profile?.full_name || user.email}!`;
+    if (userInfo) {
+        userInfo.classList.remove('hidden');
+        
+        const fullName = profile?.full_name || user.email;
+        const firstName = fullName.split(' ')[0];
+        
+        const nameDisplay = document.getElementById('user-name-display');
+        const initialDisplay = document.getElementById('user-initial');
+        
+        if (nameDisplay) nameDisplay.textContent = firstName;
+        if (initialDisplay) initialDisplay.textContent = firstName.charAt(0).toUpperCase();
+    }
 }
 
 // Update UI for guest user
 function updateUIForGuestUser() {
-    document.getElementById('auth-button').classList.remove('hidden');
-    document.getElementById('signout-button').classList.add('hidden');
-    document.getElementById('user-info').classList.add('hidden');
-}
-
-// Show auth modal
-function showAuthModal() {
-    document.getElementById('auth-modal').classList.remove('hidden');
-}
-
-// Close auth modal
-function closeAuthModal() {
-    document.getElementById('auth-modal').classList.add('hidden');
-    clearAuthMessages();
-}
-
-// Switch auth tabs
-function switchAuthTab(tab) {
-    const signinForm = document.getElementById('signin-form');
-    const signupForm = document.getElementById('signup-form');
-    const tabs = document.querySelectorAll('.tab-button');
-
-    if (tab === 'signin') {
-        signinForm.classList.remove('hidden');
-        signupForm.classList.add('hidden');
-        tabs[0].classList.add('active');
-        tabs[1].classList.remove('active');
-    } else {
-        signinForm.classList.add('hidden');
-        signupForm.classList.remove('hidden');
-        tabs[0].classList.remove('active');
-        tabs[1].classList.add('active');
-    }
+    const signoutBtn = document.getElementById('signout-button');
+    if (signoutBtn) signoutBtn.classList.add('hidden');
     
-    clearAuthMessages();
+    const userInfo = document.getElementById('user-info');
+    if (userInfo) userInfo.classList.add('hidden');
 }
 
-// Clear auth messages
-function clearAuthMessages() {
-    document.getElementById('signin-message').textContent = '';
-    document.getElementById('signup-message').textContent = '';
-    document.getElementById('signin-message').className = 'form-message';
-    document.getElementById('signup-message').className = 'form-message';
+function showAuthPage() {
+    const authView = document.getElementById('auth-view');
+    const homeView = document.getElementById('home-view');
+    const playlistView = document.getElementById('playlist-view');
+    const navbar = document.getElementById('navbar');
+    
+    if (authView) authView.classList.remove('hidden');
+    if (homeView) homeView.classList.add('hidden');
+    if (playlistView) playlistView.classList.add('hidden');
+    if (navbar) navbar.classList.add('hidden');
 }
 
-// Show message helper
-function showMessage(elementId, message, isError = false) {
-    const element = document.getElementById(elementId);
-    element.textContent = message;
-    element.className = `form-message ${isError ? 'error' : 'success'}`;
+// Hide auth page (for logged in users)
+function hideAuthPage() {
+    const authView = document.getElementById('auth-view');
+    const navbar = document.getElementById('navbar');
+    
+    if (authView) authView.classList.add('hidden');
+    if (navbar) navbar.classList.remove('hidden');
 }
