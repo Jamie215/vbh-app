@@ -10,7 +10,7 @@ let completionHistory = {};
 // Initialize app
 document.addEventListener('DOMContentLoaded', async () => {
     try {
-        const { data: { session } } = await window.supabaseClient.auth.getSession();
+        const { data: { session } } = await supabase.auth.getSession();
             
         if (session) {
             currentUser = session.user;
