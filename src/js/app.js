@@ -82,7 +82,7 @@ async function loadCompletionHistory() {
     if (!currentUser) return;
     
     try {
-        const { data, error } = await supabase
+        const { data, error } = await window.supabaseClient
             .from('workout_sessions')
             .select('session_date, progress')
             .eq('user_id', currentUser.id)
@@ -474,7 +474,7 @@ async function loadTodaySession() {
 
     try {
         const today = new Date().toISOString().split('T')[0];
-        const { data, error } = await supabase
+        const { data, error } = await window.supabaseClient
             .from('workout_sessions')
             .select('*')
             .eq('user_id', currentUser.id)
@@ -558,7 +558,7 @@ async function saveProgress() {
         progressData[playlistId] = sessionProgress[playlistId];
     });
 
-    const { error } = await supabase
+    const { error } = await window.supabaseClient
         .from('workout_sessions')
             .upsert({
                 user_id: currentUser.id,
@@ -594,7 +594,7 @@ async function updateUIForAuthenticatedUser(user) {
     document.getElementById('auth-button').classList.add('hidden');
     document.getElementById('signout-button').classList.remove('hidden');
     
-    const { data: profile } = await supabase
+    const { data: profile } = await window.supabaseClient
         .from('profiles')
         .select('*')
         .eq('id', user.id)
