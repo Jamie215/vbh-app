@@ -9,6 +9,7 @@ let completionHistory = {};
 
 // Initialize app
 document.addEventListener('DOMContentLoaded', async () => {
+    console.log("under DOMContentLoaded");
     if (!window.supabaseClient) {
         console.error('Supabase client not initialized');
         showAuthPage();
