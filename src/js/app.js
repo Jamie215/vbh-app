@@ -9,7 +9,6 @@ let completionHistory = {};
 
 // Initialize app
 document.addEventListener('DOMContentLoaded', async () => {
-    const loadingScreen = document.getElementById('loading-screen');
     try {
         const { data: { session } } = await window.supabaseClient.auth.getSession();
             
@@ -18,6 +17,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             await updateUIForAuthenticatedUser(session.user);
             await loadTodaySession();
             await loadCompletionHistory();
+            hideLoadingScreen();
             hideAuthPage();
             showHome();
         } else {
