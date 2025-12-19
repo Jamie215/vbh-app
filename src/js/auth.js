@@ -105,6 +105,13 @@ function showSignUpView()  {
     clearAuthMessages();
 }
 
+function hideLoadingScreen() {
+    const loadingScreen = document.getElementById('loading-screen');
+    if (loadingScreen) {
+        loadingScreen.classList.add('hidden');
+    }
+}
+
 function showAuthPage() {
     document.getElementById('auth-view').classList.remove('hidden');
     document.getElementById('home-view').classList.add('hidden');
@@ -143,6 +150,7 @@ window.supabaseClient.auth.onAuthStateChange(async (event, session) => {
         await updateUIForAuthenticatedUser(session.user);
         await loadTodaySession();
         await loadCompletionHistory();
+        hideLoadingScreen();
         hideAuthPage();
         showHome();
     } else if (event === 'SIGNED_OUT') {
@@ -152,6 +160,7 @@ window.supabaseClient.auth.onAuthStateChange(async (event, session) => {
         completionHistory = {};
         currentPlaylist = null;
         updateUIForGuestUser();
+        hideLoadingScreen();
         showAuthPage();
     } else if (event === 'USER_UPDATED') {
         // Handle user profile updates
