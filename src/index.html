@@ -9,7 +9,13 @@
 </head>
 <body>
     <div id="app">
-        <!-- Navigation Bar (hidden for guests) -->
+        <!-- Loading Screen (shown first) -->
+        <div id="loading-screen">
+            <img src="icon.png" alt="HandsUP" class="loading-logo">
+            <p>Loading...</p>
+        </div>
+
+        <!-- Navigation Bar (hidden by default) -->
         <nav id="navbar" class="navbar hidden">
             <div class="nav-container">
                 <div class="nav-left">
@@ -34,13 +40,7 @@
             </div>
         </nav>
 
-        <!-- Loading overlay that shows first -->
-        <div id="loading-screen">
-            <img src="icon.png" alt="HandsUP" class="loading-logo">
-            <p>Loading...</p>
-        </div>
-
-        <!-- Authentication Page View (shown for guests) -->
+        <!-- Authentication Page View (hidden by default) -->
         <main id="auth-view" class="hidden">
             <div class="auth-container">
                 <div class="auth-header">
@@ -101,7 +101,7 @@
             </div>
         </main>
 
-        <!-- Home View -->
+        <!-- Home View (hidden by default) -->
         <main id="home-view" class="hidden">
             <section id="user-greeting-section">
                 <h1>Hello, <span id="user-name">there</span></h1>
@@ -121,7 +121,7 @@
             </section>
         </main>
 
-        <!-- Playlist View - Video List -->
+        <!-- Playlist View (hidden by default) -->
         <main id="playlist-view" class="hidden">
             <button class="back-button" onclick="showHome()">← Back to Playlists</button>
             <div class="playlist-header">
@@ -165,11 +165,23 @@
         </div>
     </div>
 
+    <!-- 1. External dependencies -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://www.youtube.com/iframe_api"></script>
+    
+    <!-- 2. Supabase client & data (must be first of our scripts) -->
     <script src="js/playlists.js"></script>
+    
+    <!-- 3. Navigation controller (provides view switching functions) -->
+    <script src="js/navigation.js"></script>
+    
+    <!-- 4. Auth module (depends on navigation) -->
     <script src="js/auth.js"></script>
+    
+    <!-- 5. Videos module -->
     <script src="js/videos.js"></script>
+    
+    <!-- 6. Main app (depends on all above) -->
     <script src="js/app.js"></script>
 </body>
 </html>

@@ -1,4 +1,4 @@
-// Track current user and state
+// ==================== App State ====================
 let currentUser = null;
 let userProfile = null;
 let currentPlaylist = null;
@@ -7,15 +7,27 @@ let todaySession = null;
 let sessionProgress = {};
 let completionHistory = {};
 
-// Initialize app
+// ==================== App Initialization ====================
 document.addEventListener('DOMContentLoaded', async () => {
+    // Initialize auth form listeners
+    if (typeof initAuthFormListeners === 'function') {
+        initAuthFormListeners();
+    }
+
+    // Check if Supabase client is available
     if (!window.supabaseClient) {
         console.error('Supabase client not initialized');
-        showAuthPage();
         hideLoadingScreen();
+        showAuthPage();
         return;
     }
-    
+
+    // Initialize auth state listener
+    if (typeof initAuthListener === 'function') {
+        initAuthListener();
+    }
+
+    // Check for existing session
     try {
         const { data: { session } } = await window.supabaseClient.auth.getSession();
             
@@ -24,41 +36,22 @@ document.addEventListener('DOMContentLoaded', async () => {
             await updateUIForAuthenticatedUser(session.user);
             await loadTodaySession();
             await loadCompletionHistory();
-            hideAuthPage();
+            hideLoadingScreen();
             showHome();
         } else {
             updateUIForGuestUser();
+            hideLoadingScreen();
             showAuthPage();
         }
-    } catch(error) {
+    } catch (error) {
         console.error('Initialization error:', error);
-        showAuthPage();
-    } finally {
         hideLoadingScreen();
+        showAuthPage();
     }
 });
 
-// Show home view with playlists
-function showHome() {
-    if (!currentUser) {
-        showAuthPage();
-        return;
-    }
-
-    document.getElementById('home-view').classList.remove('hidden');
-    document.getElementById('playlist-view').classList.add('hidden');
-    document.getElementById('loading-screen').classList.add('hidden');
-    document.getElementById('auth-view').classList.add('hidden');
-    
-    document.querySelectorAll('.nav-link').forEach(link => link.classList.remove('active'));
-    document.querySelector('.nav-link')?.classList.add('active');
-
-    loadPlaylists();
-}
-
-// Calculate user's weekly progress in the program
+// ==================== Week Calculation ====================
 function calculateUserWeek() {
-    // No history means Week 0
     if (!completionHistory || Object.keys(completionHistory).length === 0) {
         return 0;
     }
@@ -68,34 +61,33 @@ function calculateUserWeek() {
     
     const firstDate = new Date(dates[0] + 'T00:00:00');
     const today = new Date();
+    today.setHours(0, 0, 0, 0);
 
     const diffTime = today - firstDate;
     const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
-    let weekNumber = Math.floor(diffDays / 7) + 1;
+    let weekNumber = Math.floor(diffDays / 7);
 
-    // For Weeks 0-3: Progress never resets regardless of missed weeks
     if (weekNumber <= 3) return weekNumber;
 
-    // For Weeks 4-6: Allow 2 weeks of missing progress before resetting to Week 4
     const mostRecentDate = new Date(dates[dates.length - 1] + 'T00:00:00');
     const daysSinceLastActivity = Math.floor((today - mostRecentDate) / (1000 * 60 * 60 * 24));
 
     if (daysSinceLastActivity >= 14) return 4;
 
-    return weekNumber
+    return Math.min(weekNumber, 6);
 }
 
-// Display the suggested workout playlist for today based on user's progress
 function getSuggestedWorkout() {
     const userWeek = calculateUserWeek();
 
     if (userWeek <= 3) {
-        return PLAYLISTS.find(p => p.id === 'beginner-0-3')
+        return PLAYLISTS.find(p => p.id === 'beginner-0-3');
     } else {
-        return PLAYLISTS.find(p => p.id === 'advanced-4-6')
+        return PLAYLISTS.find(p => p.id === 'advanced-4-6');
     }
 }
 
+// ==================== Data Loading ====================
 async function loadCompletionHistory() {
     if (!currentUser) return;
     
@@ -112,7 +104,7 @@ async function loadCompletionHistory() {
         }
 
         completionHistory = {};
-        data.forEach(session => {
+        data?.forEach(session => {
             if (!completionHistory[session.session_date]) {
                 completionHistory[session.session_date] = session.progress;
             }
@@ -122,6 +114,42 @@ async function loadCompletionHistory() {
     }   
 }
 
+async function loadTodaySession() {
+    if (!currentUser) return;
+
+    try {
+        const today = new Date().toISOString().split('T')[0];
+        const { data, error } = await window.supabaseClient
+            .from('workout_sessions')
+            .select('*')
+            .eq('user_id', currentUser.id)
+            .eq('session_date', today)
+            .order('updated_at', { ascending: false })
+            .maybeSingle();
+
+        if (error) {
+            console.error('Error loading session:', error);
+            return;
+        }
+
+        todaySession = data;
+
+        if (data?.progress) {
+            Object.keys(data.progress).forEach(playlistId => {
+                if (!sessionProgress[playlistId]) {
+                    sessionProgress[playlistId] = {};
+                }
+                Object.keys(data.progress[playlistId]).forEach(videoId => {
+                    sessionProgress[playlistId][videoId] = data.progress[playlistId][videoId] || 0;
+                });
+            });
+        }
+    } catch (error) {
+        console.error('Exception in loadTodaySession:', error);
+    }   
+}
+
+// ==================== Playlist Completion Helpers ====================
 function getPlaylistLastCompletion(playlistId) {
     const playlist = PLAYLISTS.find(p => p.id === playlistId);
     if (!playlist || !completionHistory) return null;
@@ -155,10 +183,10 @@ function getPlaylistLastCompletion(playlistId) {
 function formatCompletionDate(dateStr) {
     const date = new Date(dateStr + 'T00:00:00');
     const today = new Date();
-    today.setHours(0,0,0,0);
+    today.setHours(0, 0, 0, 0);
 
     const dateOnly = new Date(date);
-    dateOnly.setHours(0,0,0,0);
+    dateOnly.setHours(0, 0, 0, 0);
 
     if (dateOnly.getTime() === today.getTime()) {
         return 'today';
@@ -167,35 +195,45 @@ function formatCompletionDate(dateStr) {
     return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
 }
 
-// Load and display playlists
+// ==================== Playlist Display ====================
 function loadPlaylists() {
     const grid = document.getElementById('playlists-grid');
     if (!grid) return;
 
     grid.innerHTML = '';
 
-    // Show authentication for guests
     if (!currentUser) {
         showAuthPage();
         return;
     }
 
-    document.getElementById('user-greeting-section').classList.remove('hidden');
-    document.getElementById('todays-workout-section').classList.remove('hidden');
-    document.getElementById('all-workouts-section').classList.remove('hidden');
+    // Show sections
+    const greetingSection = document.getElementById('user-greeting-section');
+    const todaysSection = document.getElementById('todays-workout-section');
+    const allWorkoutsSection = document.getElementById('all-workouts-section');
+    
+    if (greetingSection) greetingSection.classList.remove('hidden');
+    if (todaysSection) todaysSection.classList.remove('hidden');
+    if (allWorkoutsSection) allWorkoutsSection.classList.remove('hidden');
 
+    // Update user name
     const userName = userProfile?.full_name?.split(' ')[0] || currentUser.email?.split('@')[0] || 'there';
-    document.getElementById('user-name').textContent = userName;
+    const userNameEl = document.getElementById('user-name');
+    if (userNameEl) userNameEl.textContent = userName;
 
+    // Update week display
     const userWeek = calculateUserWeek();
     const weekDisplay = document.getElementById('user-week');
-    weekDisplay.textContent = userWeek;
+    if (weekDisplay) weekDisplay.textContent = userWeek;
 
+    // Update greeting message
     const greetingP = document.querySelector('#user-greeting-section p');
-    if (userWeek === 0) {
-        greetingP.innerHTML = `Welcome to the program! Start with <strong>Week 0</strong> and take it from there. Let's get started!`;
-    } else {
-        greetingP.innerHTML = `You've reached <strong>Week ${userWeek}</strong>. Keep it up!`;
+    if (greetingP) {
+        if (userWeek === 0) {
+            greetingP.innerHTML = `Welcome to the program! Start with <strong>Week 0</strong> and take it from there. Let's get started!`;
+        } else {
+            greetingP.innerHTML = `You've reached <strong>Week ${userWeek}</strong>. Keep it up!`;
+        }
     }
 
     loadTodaysWorkout();
@@ -211,12 +249,10 @@ function createPlaylistCard(playlist) {
     card.className = 'playlist-card';
     card.onclick = () => showPlaylist(playlist.id);
 
-    // Determine overlay style based on playlist type
     const isAdvanced = playlist.id.includes('advanced');
     const overlayClass = isAdvanced ? 'advanced' : 'beginner';
     const weekText = isAdvanced ? 'Advanced<br>Weeks 4-6 Workout' : 'Beginner<br>Weeks 0-3 Workout';
 
-    // Get completion status
     const completion = getPlaylistLastCompletion(playlist.id);
     let completionHTML = '';
     
@@ -236,6 +272,7 @@ function createPlaylistCard(playlist) {
     
     card.innerHTML = `
         <div class="playlist-thumbnail-wrapper">
+            <img src="${playlist.thumbnail}" alt="${playlist.title}">
             <div class="playlist-overlay ${overlayClass}">
                 <span class="week-label">${weekText}</span>
             </div>
@@ -257,28 +294,19 @@ function createPlaylistCard(playlist) {
 }
 
 function loadTodaysWorkout() {
-    const section = document.getElementById('todays-workout-section');
     const container = document.getElementById('todays-workout-card');
+    if (!container) return;
 
-    if(!currentUser) {
-        section.classList.add('hidden');
-        return;
-    }
-
-    section.classList.remove('hidden');
     const suggested = getSuggestedWorkout();
-
-    if (!suggested) {
-        section.classList.add('hidden');
-        return;
-    }
+    if (!suggested) return;
 
     const isAdvanced = suggested.id.includes('advanced');
     const overlayClass = isAdvanced ? 'advanced' : 'beginner';
-    const weekText = isAdvanced ? 'Advanced<br>Weeks 3-6 Workout' : 'Beginner<br>Weeks 0-3 Workout';
+    const weekText = isAdvanced ? 'Advanced<br>Weeks 4-6 Workout' : 'Beginner<br>Weeks 0-3 Workout';
     
     container.innerHTML = `
         <div class="todays-workout-thumbnail">
+            <img src="${suggested.thumbnail}" alt="${suggested.title}">
             <div class="playlist-overlay ${overlayClass}">
                 <span class="week-label">${weekText}</span>
             </div>
@@ -291,7 +319,43 @@ function loadTodaysWorkout() {
     `;
 }
 
-// Helper function to determine equipment badge class based on difficulty
+// ==================== Playlist View ====================
+function showPlaylist(playlistId) {
+    if (!currentUser) {
+        showAuthPage();
+        return;
+    }
+
+    currentPlaylist = PLAYLISTS.find(p => p.id === playlistId);
+    if (!currentPlaylist) return;
+
+    // Hide other views, show playlist view
+    const homeView = document.getElementById('home-view');
+    const playlistView = document.getElementById('playlist-view');
+    const authView = document.getElementById('auth-view');
+    
+    if (homeView) homeView.classList.add('hidden');
+    if (playlistView) playlistView.classList.remove('hidden');
+    if (authView) authView.classList.add('hidden');
+
+    // Update playlist info
+    const titleEl = document.getElementById('playlist-title');
+    const descEl = document.getElementById('playlist-description');
+    if (titleEl) titleEl.textContent = currentPlaylist.title;
+    if (descEl) descEl.textContent = currentPlaylist.description;
+
+    // Show save button
+    const saveBtn = document.getElementById('save-progress-btn');
+    if (saveBtn) saveBtn.classList.remove('hidden');
+
+    // Initialize session progress for this playlist
+    if (!sessionProgress[playlistId]) {
+        sessionProgress[playlistId] = {};
+    }
+
+    loadExerciseTable();
+}
+
 function getEquipmentBadgeClass(equipmentText) {
     const lowerText = equipmentText.toLowerCase();
     
@@ -303,50 +367,20 @@ function getEquipmentBadgeClass(equipmentText) {
         return 'badge-challenging';
     }
     
-    // Default neutral badge
     return 'badge-neutral';
 }
 
-// Show specific playlist with video table
-function showPlaylist(playlistId) {
-    // Require authentication to view playlists
-    if (!currentUser) {
-        showAuthModal();
-        return;
-    }
-
-    currentPlaylist = PLAYLISTS.find(p => p.id === playlistId);
-    
-    if (!currentPlaylist) return;
-
-    document.getElementById('home-view').classList.add('hidden');
-    document.getElementById('playlist-view').classList.remove('hidden');
-
-    // Update playlist header
-    document.getElementById('playlist-title').textContent = currentPlaylist.title;
-    document.getElementById('playlist-description').textContent = currentPlaylist.description;
-
-    // Show save button (always visible since user must be logged in)
-    const saveBtn = document.getElementById('save-progress-btn');
-    saveBtn.classList.remove('hidden');
-
-    // Initialize session checkboxes for this playlist
-    if (!sessionProgress[playlistId]) {
-        sessionProgress[playlistId] = {};
-    }
-
-    loadExerciseTable();
-}
-
-// Load video table
 function loadExerciseTable() {
     const tbody = document.getElementById('exercise-table-body');
+    if (!tbody) return;
+    
     tbody.innerHTML = '';
 
     currentPlaylist.videos.forEach((video) => {
         const row = document.createElement('tr');
         
-        const videoCell =document.createElement('td');
+        // Video cell
+        const videoCell = document.createElement('td');
         videoCell.innerHTML = `
           <div class="exercise-video-cell">
             <div class="video-thumbnail-wrapper" onclick="playExerciseVideo('${video.id}')">
@@ -357,10 +391,12 @@ function loadExerciseTable() {
         `;
         row.appendChild(videoCell);
 
+        // Sets/reps cell
         const setsRepsCell = document.createElement('td');
         setsRepsCell.innerHTML = `<span class="sets-reps-text">${video.sets} sets of ${video.reps} reps</span>`;
         row.appendChild(setsRepsCell);
 
+        // Equipment cell
         const equipmentCell = document.createElement('td');
         if (video.equipment && Array.isArray(video.equipment) && video.equipment.length > 0) {
             const badges = video.equipment.map(item => {
@@ -369,16 +405,15 @@ function loadExerciseTable() {
             }).join(' ');
             equipmentCell.innerHTML = badges;
         } else if (video.equipment && typeof video.equipment === 'string') {
-            // Fallback for old string format
             equipmentCell.innerHTML = `<span class="equipment-badge">${video.equipment}</span>`;
         } else {
             equipmentCell.innerHTML = `<span class="no-equipment">—</span>`;
         }
         row.appendChild(equipmentCell);
 
+        // Completion cell
         const completionCell = document.createElement('td');
         
-        // Get completed sets from saved progress
         let completedSets = 0;
         if (todaySession?.progress?.[currentPlaylist.id]?.[video.id]) {
             completedSets = todaySession.progress[currentPlaylist.id][video.id] || 0;
@@ -386,7 +421,6 @@ function loadExerciseTable() {
             completedSets = sessionProgress[currentPlaylist.id][video.id] || 0;
         }
         
-        // Create number input with +/- buttons
         completionCell.innerHTML = `
             <div class="sets-counter">
                 <button type="button" 
@@ -405,8 +439,7 @@ function loadExerciseTable() {
                        readonly>
                 <button type="button" 
                         class="counter-btn plus-btn" 
-                        onclick="incrementSets('${video.id}', ${video.sets})"
-                        ${completedSets >= video.sets ? 'disabled' : ''}>
+                        onclick="incrementSets('${video.id}', ${video.sets})">
                     +
                 </button>
                 <span class="sets-label">/ ${video.sets} sets</span>
@@ -418,21 +451,19 @@ function loadExerciseTable() {
     });
 }
 
-// Increment sets completed
+// ==================== Set Counter Functions ====================
 function incrementSets(videoId, maxSets) {
     if (!sessionProgress[currentPlaylist.id]) {
         sessionProgress[currentPlaylist.id] = {};
     }
 
     let currentCount = sessionProgress[currentPlaylist.id][videoId] || 0;
-
     currentCount++;
     sessionProgress[currentPlaylist.id][videoId] = currentCount;
 
     updateSetsUI(videoId, currentCount, maxSets);
 }
 
-// Decrement sets completed
 function decrementSets(videoId, maxSets) {
     if (!sessionProgress[currentPlaylist.id]) {
         sessionProgress[currentPlaylist.id] = {};
@@ -443,15 +474,15 @@ function decrementSets(videoId, maxSets) {
     if (currentCount > 0) {
         currentCount--;
         sessionProgress[currentPlaylist.id][videoId] = currentCount;
-
         updateSetsUI(videoId, currentCount, maxSets);
     }
 }
 
 function updateSetsCount(videoId, maxSets) {
     const input = document.getElementById(`sets_${videoId}`);
+    if (!input) return;
+    
     let value = parseInt(input.value) || 0;
-
     value = Math.max(0, Math.min(maxSets, value));
 
     if (!sessionProgress[currentPlaylist.id]) {
@@ -459,113 +490,37 @@ function updateSetsCount(videoId, maxSets) {
     }
 
     sessionProgress[currentPlaylist.id][videoId] = value;
-
     updateSetsUI(videoId, value, maxSets);
 }
 
 function updateSetsUI(videoId, currentCount, maxSets) {
     const input = document.getElementById(`sets_${videoId}`);
+    if (!input) return;
+    
     const minusBtn = input.previousElementSibling;
-    const plusBtn = input.nextElementSibling;
 
     input.value = currentCount;
-
-    minusBtn.disabled = currentCount <= 0;
-    // plusBtn.disabled = currentCount >= maxSets;
-}
- 
-// Load today's progress from database
-async function loadTodaySession() {
-    if (!currentUser) return;
-
-    try {
-        const today = new Date().toISOString().split('T')[0];
-        const { data, error } = await window.supabaseClient
-            .from('workout_sessions')
-            .select('*')
-            .eq('user_id', currentUser.id)
-            .eq('session_date', today)
-            .order('updated_at', { ascending: false })
-            .maybeSingle();
-
-        console.log('Session query result:', { data, error });
-        
-        if (error) {
-            console.error('Error loading session:', error);
-            return;
-        }
-
-        todaySession = data;
-        console.log('Today session set:', todaySession);
-
-        // Populate session checkboxes with saved data
-        if (data?.progress) {
-            Object.keys(data.progress).forEach(playlistId => {
-                if (!sessionProgress[playlistId]) {
-                    sessionProgress[playlistId] = {};
-                }
-                Object.keys(data.progress[playlistId]).forEach(videoId => {
-                    sessionProgress[playlistId][videoId] = data.progress[playlistId][videoId] || [];
-                });
-            });
-        }
-    } catch (error) {
-        console.error('Exception in loadTodaySession:', error);
-    }   
+    if (minusBtn) minusBtn.disabled = currentCount <= 0;
 }
 
-
-// Helper function to build a playlist card
-function buildPlaylistCard(playlist, progress, isToday, formattedDate) {
-    // Calculate completion stats
-    let completedExercises = 0;
-    const totalExercises = playlist.videos.length;
-    
-    // Check each video - count as completed if user has logged ANY sets
-    playlist.videos.forEach(video => {
-        const completedSets = progress[video.id] || 0;
-        // Exercise is completed if at least one set is logged
-        if (completedSets > 0) {
-            completedExercises++;
-        }
-    });
-
-    // Create completion message based on whether it's today
-    const completionMessage = isToday 
-        ? `Completed ${completedExercises}/${totalExercises} exercises today, ${formattedDate}`
-        : `Completed ${completedExercises}/${totalExercises} exercises on ${formattedDate}`;
-        
-    // Create card with same styling as library playlists
-    return `
-        <div class="playlist-card" onclick="showPlaylist('${playlist.id}')">
-            <img src="${playlist.thumbnail}" alt="${playlist.title}">
-            <div class="playlist-card-content">
-                <h3>${playlist.title}</h3>
-                <p>${playlist.description}</p>
-                <div class="recent-activity-stats">
-                    <span class="completion-date">${completionMessage}</span>
-                </div>
-            </div>
-        </div>
-    `;
-}
-
-// Save progress to database (logged in users only)
+// ==================== Save Progress ====================
 async function saveProgress() {
     const saveBtn = document.getElementById('save-progress-btn');
+    if (!saveBtn) return;
+    
     saveBtn.disabled = true;
     saveBtn.textContent = 'Saving...';
 
     const today = new Date().toISOString().split('T')[0];
 
-    // Build progress object from sessionProgress
     const progressData = {};
     Object.keys(sessionProgress).forEach(playlistId => {
         progressData[playlistId] = sessionProgress[playlistId];
     });
 
-    const { error } = await window.supabaseClient
-        .from('workout_sessions')
+    try {
+        const { error } = await window.supabaseClient
+            .from('workout_sessions')
             .upsert({
                 user_id: currentUser.id,
                 session_date: today,
@@ -574,88 +529,69 @@ async function saveProgress() {
                 onConflict: 'user_id,session_date'
             });
 
-    if (error) {
-        console.error('Error saving progress:', error);
+        if (error) {
+            console.error('Error saving progress:', error);
+            alert('Error saving progress. Please try again.');
+            saveBtn.disabled = false;
+            saveBtn.textContent = 'Save My Progress For This Session';
+            return;
+        }
+
+        await loadTodaySession();
+        await loadCompletionHistory();
+
+        saveBtn.classList.add('saved');
+        saveBtn.textContent = '✓ Progress Saved!';
+
+        setTimeout(() => {
+            saveBtn.classList.remove('saved');
+            saveBtn.textContent = 'Save My Progress For This Session';
+            saveBtn.disabled = false;
+        }, 2000);
+    } catch (error) {
+        console.error('Exception saving progress:', error);
         alert('Error saving progress. Please try again.');
         saveBtn.disabled = false;
         saveBtn.textContent = 'Save My Progress For This Session';
-        return;
     }
-
-    await loadTodaySession();
-
-    // Update button to show success
-    saveBtn.classList.add('saved');
-    saveBtn.textContent = '✓ Progress Saved!';
-
-    setTimeout(() => {
-        saveBtn.classList.remove('saved');
-        saveBtn.textContent = 'Save My Progress For This Session';
-        saveBtn.disabled = false;
-    }, 2000);
 }
 
-// Update UI for authenticated user
+// ==================== UI Update Functions ====================
 async function updateUIForAuthenticatedUser(user) {
     const signoutBtn = document.getElementById('signout-button');
     if (signoutBtn) signoutBtn.classList.remove('hidden');
     
-    const { data: profile } = await window.supabaseClient
-        .from('profiles')
-        .select('*')
-        .eq('id', user.id)
-        .single();
+    try {
+        const { data: profile } = await window.supabaseClient
+            .from('profiles')
+            .select('*')
+            .eq('id', user.id)
+            .single();
 
-    userProfile = profile;
+        userProfile = profile;
 
-    const userInfo = document.getElementById('user-info');
-    if (userInfo) {
-        userInfo.classList.remove('hidden');
-        
-        const fullName = profile?.full_name || user.email;
-        const firstName = fullName.split(' ')[0];
-        
-        const nameDisplay = document.getElementById('user-name-display');
-        const initialDisplay = document.getElementById('user-initial');
-        
-        if (nameDisplay) nameDisplay.textContent = firstName;
-        if (initialDisplay) initialDisplay.textContent = firstName.charAt(0).toUpperCase();
+        const userInfo = document.getElementById('user-info');
+        if (userInfo) {
+            userInfo.classList.remove('hidden');
+            
+            const fullName = profile?.full_name || user.email;
+            const firstName = fullName.split(' ')[0];
+            
+            const nameDisplay = document.getElementById('user-name-display');
+            const initialDisplay = document.getElementById('user-initial');
+            
+            if (nameDisplay) nameDisplay.textContent = firstName;
+            if (initialDisplay) initialDisplay.textContent = firstName.charAt(0).toUpperCase();
+        }
+    } catch (error) {
+        console.error('Error loading user profile:', error);
     }
 }
 
-// Update UI for guest user
 function updateUIForGuestUser() {
     const signoutBtn = document.getElementById('signout-button');
     if (signoutBtn) signoutBtn.classList.add('hidden');
     
     const userInfo = document.getElementById('user-info');
     if (userInfo) userInfo.classList.add('hidden');
-}
-
-function hideLoadingScreen() {
-    const loadingScreen = document.getElementById('loading-screen');
-    if (loadingScreen) {
-        loadingScreen.classList.add('hidden');
-    }
-}
-
-function showAuthPage() {
-    const authView = document.getElementById('auth-view');
-    const homeView = document.getElementById('home-view');
-    const playlistView = document.getElementById('playlist-view');
-    const navbar = document.getElementById('navbar');
-    
-    if (authView) authView.classList.remove('hidden');
-    if (homeView) homeView.classList.add('hidden');
-    if (playlistView) playlistView.classList.add('hidden');
-    if (navbar) navbar.classList.add('hidden');
-}
-
-// Hide auth page (for logged in users)
-function hideAuthPage() {
-    const authView = document.getElementById('auth-view');
-    const navbar = document.getElementById('navbar');
-    
-    if (authView) authView.classList.add('hidden');
-    if (navbar) navbar.classList.remove('hidden');
 }

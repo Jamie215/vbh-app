@@ -1,3 +1,6 @@
+// ==================== Authentication Controller ====================
+// Handles sign up, sign in, sign out, and auth state changes
+
 // Sign up new user
 async function signUp() {
     const name = document.getElementById('signup-name').value.trim();
@@ -15,33 +18,36 @@ async function signUp() {
         return;
     }
 
-    // Email validation
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {
         showMessage('signup-message', 'Please enter a valid email address', true);
         return;
     }
 
-    // Sign up with Supabase
-    const { data, error } = await window.supabaseClient.auth.signUp({
-        email: email,
-        password: password,
-        options: {
-            data: {
-                full_name: name
+    try {
+        const { data, error } = await window.supabaseClient.auth.signUp({
+            email: email,
+            password: password,
+            options: {
+                data: {
+                    full_name: name
+                }
             }
-        }
-    });
+        });
 
-    if (error) {
-        showMessage('signup-message', error.message, true);
-    } else {
-        showMessage('signup-message', 'Account created successfully!', false);
-        
-        // Clear form
-        document.getElementById('signup-name').value = '';
-        document.getElementById('signup-email').value = '';
-        document.getElementById('signup-password').value = '';
+        if (error) {
+            showMessage('signup-message', error.message, true);
+        } else {
+            showMessage('signup-message', 'Account created successfully!', false);
+            
+            // Clear form
+            document.getElementById('signup-name').value = '';
+            document.getElementById('signup-email').value = '';
+            document.getElementById('signup-password').value = '';
+        }
+    } catch (error) {
+        console.error('Sign up error:', error);
+        showMessage('signup-message', 'An error occurred. Please try again.', true);
     }
 }
 
@@ -56,25 +62,30 @@ async function signIn() {
         return;
     }
 
-    // Sign in with Supabase
-    const { data, error } = await window.supabaseClient.auth.signInWithPassword({
-        email: email,
-        password: password
-    });
+    try {
+        const { data, error } = await window.supabaseClient.auth.signInWithPassword({
+            email: email,
+            password: password
+        });
 
-    if (error) {
-        if (error.message.includes('Invalid login credentials')) {
-            showMessage('signin-message', 'Invalid email or password', true);
-        } else if (error.message.includes('Email not confirmed')) {
-            showMessage('signin-message', 'Please verify your email before signing in', true);
+        if (error) {
+            if (error.message.includes('Invalid login credentials')) {
+                showMessage('signin-message', 'Invalid email or password', true);
+            } else if (error.message.includes('Email not confirmed')) {
+                showMessage('signin-message', 'Please verify your email before signing in', true);
+            } else {
+                showMessage('signin-message', error.message, true);
+            }
         } else {
-            showMessage('signin-message', error.message, true);
+            showMessage('signin-message', 'Signing in...', false);
+            // Clear form
+            document.getElementById('login-email').value = '';
+            document.getElementById('login-password').value = '';
+            // Auth state change listener will handle the rest
         }
-    } else {
-        showMessage('signin-message', 'Signing in...', false);
-        // Clear form
-        document.getElementById('login-email').value = '';
-        document.getElementById('login-password').value = '';
+    } catch (error) {
+        console.error('Sign in error:', error);
+        showMessage('signin-message', 'An error occurred. Please try again.', true);
     }
 }
 
@@ -83,125 +94,76 @@ async function signOut() {
     const confirmed = confirm('Are you sure you want to sign out?');
     if (!confirmed) return;
 
-    const { error } = await window.supabaseClient.auth.signOut();
-    
-    if (error) {
-        alert('Error signing out: ' + error.message);
-    } else {
-        // Will be handled by auth state change listener
-        alert('Successfully signed out!');
+    try {
+        const { error } = await window.supabaseClient.auth.signOut();
+        
+        if (error) {
+            alert('Error signing out: ' + error.message);
+        }
+        // Auth state change listener will handle the rest
+    } catch (error) {
+        console.error('Sign out error:', error);
+        alert('An error occurred while signing out.');
     }
 }
 
-function showSignInView()  {
-    document.getElementById('signin-view').classList.remove('hidden');
-    document.getElementById('signup-view').classList.add('hidden');
-    clearAuthMessages();
-}
-
-function showSignUpView()  {
-    document.getElementById('signup-view').classList.remove('hidden');
-    document.getElementById('signin-view').classList.add('hidden');
-    clearAuthMessages();
-}
-
-function hideLoadingScreen() {
-    const loadingScreen = document.getElementById('loading-screen');
-    if (loadingScreen) {
-        loadingScreen.classList.add('hidden');
-    }
-}
-
-function showAuthPage() {
-    document.getElementById('auth-view').classList.remove('hidden');
-    document.getElementById('home-view').classList.add('hidden');
-    document.getElementById('playlist-view').classList.add('hidden');
-    document.getElementById('navbar').classList.add('hidden');
-}
-
-function hideAuthPage() {
-    document.getElementById('auth-view').classList.add('hidden');
-    document.getElementById('navbar').classList.remove('hidden');
-}
-
-function showHome() {
-    if (!currentUser) {
-        showAuthPage();
-        return;
-    }
-
-    document.getElementById('home-view').classList.remove('hidden');
-    document.getElementById('playlist-view').classList.add('hidden');
-    document.getElementById('loading-screen').classList.add('hidden');
-    document.getElementById('auth-view').classList.add('hidden');
-    
-    document.querySelectorAll('.nav-link').forEach(link => link.classList.remove('active'));
-    document.querySelector('.nav-link')?.classList.add('active');
-
-    loadPlaylists();
-}
-
+// Toggle password visibility
 function togglePasswordVisibility(inputId, toggleId) {
     const passwordInput = document.getElementById(inputId);
     const toggleBtn = document.getElementById(toggleId);
 
-    if (passwordInput.type === 'password') {
-        passwordInput.type = 'text';
-        toggleBtn.textContent = 'Hide';
-    } else {
-        passwordInput.type = 'password';
-        toggleBtn.textContent = 'Show';
+    if (passwordInput && toggleBtn) {
+        if (passwordInput.type === 'password') {
+            passwordInput.type = 'text';
+            toggleBtn.textContent = 'Hide';
+        } else {
+            passwordInput.type = 'password';
+            toggleBtn.textContent = 'Show';
+        }
     }
 }
 
+// Forgot password placeholder
 function showForgotPassword() {
-    alert("TODO: This feature will be implemented soon.");
+    alert('Forgot password feature coming soon!');
 }
 
 // Listen to auth state changes
-window.supabaseClient.auth.onAuthStateChange(async (event, session) => {
-    console.log('Auth event:', event, 'Session:', !!session); // For debugging
-    
-    if (event === 'SIGNED_IN') {
-        currentUser = session.user;
-        await updateUIForAuthenticatedUser(session.user);
-        await loadTodaySession();
-        await loadCompletionHistory();
-        hideLoadingScreen();
-        hideAuthPage();
-        showHome();
-    } else if (event === 'SIGNED_OUT') {
-        currentUser = null;
-        todaySession = null;
-        sessionProgress = {};
-        completionHistory = {};
-        currentPlaylist = null;
-        updateUIForGuestUser();
-        hideLoadingScreen();
-        showAuthPage();
-    } else if (event === 'USER_UPDATED') {
-        // Handle user profile updates
-        if (session?.user) {
+function initAuthListener() {
+    if (!window.supabaseClient) {
+        console.error('Supabase client not available');
+        return;
+    }
+
+    window.supabaseClient.auth.onAuthStateChange(async (event, session) => {
+        console.log('Auth event:', event, 'Session:', !!session);
+        
+        if (event === 'SIGNED_IN' && session) {
+            currentUser = session.user;
+            await updateUIForAuthenticatedUser(session.user);
+            await loadTodaySession();
+            await loadCompletionHistory();
+            hideLoadingScreen();
+            showHome();
+        } else if (event === 'SIGNED_OUT') {
+            currentUser = null;
+            userProfile = null;
+            todaySession = null;
+            sessionProgress = {};
+            completionHistory = {};
+            currentPlaylist = null;
+            updateUIForGuestUser();
+            hideLoadingScreen();
+            showAuthPage();
+        } else if (event === 'USER_UPDATED' && session?.user) {
             currentUser = session.user;
             await updateUIForAuthenticatedUser(session.user);
         }
-    }
-});
-
-function clearAuthMessages() {
-    document.getElementById('signin-message').textContent = '';
-    document.getElementById('signup-message').textContent = '';
-}
-
-function showMessage(elementId, message, isError = false) {
-    const messageElem = document.getElementById(elementId);
-    messageElem.textContent = message;
-    messageElem.className = `form-message ${isError ? 'error' : 'success'}`;
+    });
 }
 
 // Handle Enter key press in auth forms
-document.addEventListener('DOMContentLoaded', () => {
-    // Sign in form
+function initAuthFormListeners() {
     const loginEmail = document.getElementById('login-email');
     const loginPassword = document.getElementById('login-password');
     
@@ -217,7 +179,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
     
-    // Sign up form
     const signupName = document.getElementById('signup-name');
     const signupEmail = document.getElementById('signup-email');
     const signupPassword = document.getElementById('signup-password');
@@ -239,4 +200,4 @@ document.addEventListener('DOMContentLoaded', () => {
             if (e.key === 'Enter') signUp();
         });
     }
-});
+}
