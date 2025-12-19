@@ -20,7 +20,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         const { data: { session } } = await window.supabaseClient.auth.getSession();
             
         if (session) {
-            console.log("session loaded")
+            console.log("session loaded");
             currentUser = session.user;
             await updateUIForAuthenticatedUser(session.user);
             await loadTodaySession();
@@ -35,6 +35,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         console.error('Initialization error:', error);
         showAuthPage();
     } finally {
+        console.log("hiding loading screen");
         hideLoadingScreen();
     }
 });
