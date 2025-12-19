@@ -28,10 +28,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         console.error('Initialization error:', error);
         showAuthPage();
     } finally {
-        // Hide loading screen after auth check completes
-        if (loadingScreen) {
-            loadingScreen.style.display = 'none';
-        }
+        hideLoadingScreen();
     }
 });
 
@@ -626,6 +623,13 @@ function updateUIForGuestUser() {
     
     const userInfo = document.getElementById('user-info');
     if (userInfo) userInfo.classList.add('hidden');
+}
+
+function hideLoadingScreen() {
+    const loadingScreen = document.getElementById('loading-screen');
+    if (loadingScreen) {
+        loadingScreen.classList.add('hidden');
+    }
 }
 
 function showAuthPage() {
