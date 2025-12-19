@@ -9,15 +9,22 @@ let completionHistory = {};
 
 // Initialize app
 document.addEventListener('DOMContentLoaded', async () => {
+    if (!window.supabaseClient) {
+        console.error('Supabase client not initialized');
+        showAuthPage();
+        hideLoadingScreen();
+        return;
+    }
+    
     try {
         const { data: { session } } = await window.supabaseClient.auth.getSession();
             
         if (session) {
+            console.log("session loaded")
             currentUser = session.user;
             await updateUIForAuthenticatedUser(session.user);
             await loadTodaySession();
             await loadCompletionHistory();
-            hideLoadingScreen();
             hideAuthPage();
             showHome();
         } else {
