@@ -124,6 +124,23 @@ function hideAuthPage() {
     document.getElementById('navbar').classList.remove('hidden');
 }
 
+function showHome() {
+    if (!currentUser) {
+        showAuthPage();
+        return;
+    }
+
+    document.getElementById('home-view').classList.remove('hidden');
+    document.getElementById('playlist-view').classList.add('hidden');
+    document.getElementById('loading-screen').classList.add('hidden');
+    document.getElementById('auth-view').classList.add('hidden');
+    
+    document.querySelectorAll('.nav-link').forEach(link => link.classList.remove('active'));
+    document.querySelector('.nav-link')?.classList.add('active');
+
+    loadPlaylists();
+}
+
 function togglePasswordVisibility(inputId, toggleId) {
     const passwordInput = document.getElementById(inputId);
     const toggleBtn = document.getElementById(toggleId);
