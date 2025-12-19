@@ -54,6 +54,7 @@ button {
 
 .logo-icon {
     font-size: 0.7rem;
+    object-fit: contain;
     color: #7c3aed;
     font-weight: 600;
 }
@@ -782,6 +783,7 @@ button {
 .auth-logo-icon {
     width: 32px;
     height: 32px;
+    object-fit: contain;
     color: #7c3aed;
 }
 
