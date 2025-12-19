@@ -34,8 +34,13 @@
             </div>
         </nav>
 
+        <!-- Loading overlay that shows first -->
+        <div id="loading-screen" style="position: fixed; inset: 0; background: #f8f9fa; display: flex; align-items: center; justify-content: center; z-index: 9999;">
+            <p>Loading...</p>
+        </div>
+
         <!-- Authentication Page View (shown for guests) -->
-        <main id="auth-view">
+        <main id="auth-view" class="hidden">
             <div class="auth-container">
                 <div class="auth-header">
                     <img src="icon.png" alt="HandsUP" class="auth-logo-icon">

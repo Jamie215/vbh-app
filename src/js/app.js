@@ -9,6 +9,7 @@ let completionHistory = {};
 
 // Initialize app
 document.addEventListener('DOMContentLoaded', async () => {
+    const loadingScreen = document.getElementById('loading-screen');
     try {
         const { data: { session } } = await window.supabaseClient.auth.getSession();
             
@@ -26,6 +27,11 @@ document.addEventListener('DOMContentLoaded', async () => {
     } catch(error) {
         console.error('Initialization error:', error);
         showAuthPage();
+    } finally {
+        // Hide loading screen after auth check completes
+        if (loadingScreen) {
+            loadingScreen.style.display = 'none';
+        }
     }
 });
 
