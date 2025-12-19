@@ -41,6 +41,7 @@ function showHome() {
 
     document.getElementById('home-view').classList.remove('hidden');
     document.getElementById('playlist-view').classList.add('hidden');
+    document.getElementById('loading-screen').classList.add('hidden');
     document.getElementById('auth-view').classList.add('hidden');
     
     document.querySelectorAll('.nav-link').forEach(link => link.classList.remove('active'));
