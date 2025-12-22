@@ -1,5 +1,12 @@
 // Handles sign up, sign in, sign out, and auth state changes
 
+// Flag to track if initial session has been handled by app.js
+let initialSessionHandled = false;
+
+function markInitialSessionHandled() {
+    initialSessionHandled = true;
+}
+
 // Sign up new user
 async function signUp() {
     const name = document.getElementById('signup-name').value.trim();
@@ -80,7 +87,7 @@ async function signIn() {
             // Clear form
             document.getElementById('login-email').value = '';
             document.getElementById('login-password').value = '';
-            // Auth state change listener will handle the rest
+            // onAuthStateChange will fire SIGNED_IN, which will call handleSignIn
         }
     } catch (error) {
         console.error('Sign in error:', error);
@@ -127,50 +134,36 @@ function showForgotPassword() {
     alert('Forgot password feature coming soon!');
 }
 
-// Helper function to handle authenticated user setup
-async function handleAuthenticatedUser(user) {
-    console.log('handleAuthenticatedUser: Starting...');
+// Handle explicit sign-in (not page refresh)
+async function handleSignIn(user) {
+    console.log('handleSignIn: User signed in explicitly');
     currentUser = user;
-    console.log('handleAuthenticatedUser: currentUser set');
     
     try {
-        console.log('handleAuthenticatedUser: Calling updateUIForAuthenticatedUser...');
         await updateUIForAuthenticatedUser(user);
-        console.log('handleAuthenticatedUser: updateUIForAuthenticatedUser completed');
     } catch (e) {
-        console.error('handleAuthenticatedUser: Error in updateUIForAuthenticatedUser:', e);
+        console.error('handleSignIn: Error updating UI:', e);
     }
     
     try {
-        console.log('handleAuthenticatedUser: Calling loadTodaySession...');
         await loadTodaySession();
-        console.log('handleAuthenticatedUser: loadTodaySession completed');
     } catch (e) {
-        console.error('handleAuthenticatedUser: Error in loadTodaySession:', e);
+        console.error('handleSignIn: Error loading today session:', e);
     }
     
     try {
-        console.log('handleAuthenticatedUser: Calling loadCompletionHistory...');
         await loadCompletionHistory();
-        console.log('handleAuthenticatedUser: loadCompletionHistory completed');
     } catch (e) {
-        console.error('handleAuthenticatedUser: Error in loadCompletionHistory:', e);
+        console.error('handleSignIn: Error loading completion history:', e);
     }
     
-    console.log('handleAuthenticatedUser: Calling hideLoadingScreen...');
     hideLoadingScreen();
-    console.log('handleAuthenticatedUser: hideLoadingScreen completed');
-    
-    console.log('handleAuthenticatedUser: Calling showHome...');
     showHome();
-    console.log('handleAuthenticatedUser: showHome completed');
-    
-    console.log('handleAuthenticatedUser: All done!');
 }
 
 // Listen to auth state changes
-// NOTE: We don't use onAuthStateChange for initial load because it can fire
-// before the session is fully ready. Instead, app.js uses getSession() for initial load.
+// IMPORTANT: We don't make DB queries here for INITIAL_SESSION because 
+// the Supabase client isn't fully ready yet. Initial load is handled by app.js
 function initAuthListener() {
     if (!window.supabaseClient) {
         console.error('Supabase client not available');
@@ -180,25 +173,24 @@ function initAuthListener() {
     }
 
     window.supabaseClient.auth.onAuthStateChange(async (event, session) => {
-        console.log('Auth event:', event, 'Session:', !!session);
-        
-        // Cancel safety timeout as soon as any auth event fires
-        cancelAuthTimeout();
-        
-        // Skip INITIAL_SESSION - we handle initial load via getSession() in app.js
-        // This prevents the race condition where onAuthStateChange fires before
-        // the session is fully restored from localStorage
-        if (event === 'INITIAL_SESSION') {
-            console.log('Skipping INITIAL_SESSION - handled by getSession()');
-            return;
-        }
+        console.log('Auth event:', event, 'Session:', !!session, 'InitialHandled:', initialSessionHandled);
         
         switch (event) {
+            case 'INITIAL_SESSION':
+                // Skip - this is handled by app.js using getSession()
+                // The Supabase client isn't ready for DB queries at this point
+                console.log('Skipping INITIAL_SESSION - handled by app.js');
+                break;
+                
             case 'SIGNED_IN':
-                if (session) {
-                    console.log('Calling handleAuthenticatedUser...');
-                    await handleAuthenticatedUser(session.user);
-                    console.log('handleAuthenticatedUser returned');
+                // Only handle if this is an explicit sign-in (not page refresh)
+                // On page refresh, SIGNED_IN fires but initialSessionHandled will be true
+                if (!initialSessionHandled && session) {
+                    await handleSignIn(session.user);
+                } else if (initialSessionHandled) {
+                    console.log('SIGNED_IN after initial load - explicit sign in');
+                    // This is an explicit sign-in after page load
+                    await handleSignIn(session.user);
                 }
                 break;
                 

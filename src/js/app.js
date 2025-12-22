@@ -17,16 +17,24 @@ document.addEventListener('DOMContentLoaded', async () => {
         return;
     }
 
-    // Initialize auth state listener for future auth events (sign in, sign out, etc.)
-    // Note: We skip INITIAL_SESSION in the listener and handle initial load here instead
+    // Set up auth listener for future events (sign-in, sign-out, etc.)
     if (typeof initAuthListener === 'function') {
         initAuthListener();
     }
     
-    // Handle initial session check using getSession()
-    // This is more reliable than onAuthStateChange for page refresh
+    // Wait a moment for Supabase to fully initialize, then check session
+    // This delay allows the Supabase client to properly restore the session from localStorage
+    console.log('Waiting for Supabase to initialize...');
+    await delay(100); // Small delay to let Supabase initialize
+    
+    // Now initialize the session
     await initializeSession();
 });
+
+// Simple delay helper
+function delay(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
 
 // Initialize session on page load
 async function initializeSession() {
@@ -44,10 +52,17 @@ async function initializeSession() {
             return;
         }
         
+        // Mark that we've handled the initial session
+        // This prevents onAuthStateChange from double-handling
+        if (typeof markInitialSessionHandled === 'function') {
+            markInitialSessionHandled();
+        }
+        
         if (session) {
-            console.log('initializeSession: User is authenticated, setting up...');
+            console.log('initializeSession: User is authenticated, loading data...');
             currentUser = session.user;
             
+            // Now the client should be ready for DB queries
             try {
                 console.log('initializeSession: Calling updateUIForAuthenticatedUser...');
                 await updateUIForAuthenticatedUser(session.user);

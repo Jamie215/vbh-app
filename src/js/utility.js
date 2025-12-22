@@ -9,7 +9,7 @@ let todaySession = null;
 let sessionProgress = {};
 let completionHistory = {};
 
-// Auth timeout reference
+// Auth timeout reference (kept for compatibility but not used anymore)
 let authTimeoutId = null;
 
 // ==================== Auth Timeout Management ====================
@@ -21,16 +21,7 @@ function cancelAuthTimeout() {
     if (authTimeoutId) {
         clearTimeout(authTimeoutId);
         authTimeoutId = null;
-        console.log('Auth timeout cancelled');
     }
-}
-
-// ==================== Helper: Promise with timeout ====================
-function withTimeout(promise, ms, errorMessage = 'Operation timed out') {
-    const timeout = new Promise((_, reject) => {
-        setTimeout(() => reject(new Error(errorMessage)), ms);
-    });
-    return Promise.race([promise, timeout]);
 }
 
 // ==================== Data Loading Functions ====================
@@ -38,15 +29,11 @@ async function loadCompletionHistory() {
     if (!currentUser) return;
     
     try {
-        console.log('loadCompletionHistory: Starting...');
-        
-        const queryPromise = window.supabaseClient
+        const { data, error } = await window.supabaseClient
             .from('workout_sessions')
             .select('session_date, progress')
             .eq('user_id', currentUser.id)
             .order('session_date', { ascending: true });
-        
-        const { data, error } = await withTimeout(queryPromise, 5000, 'loadCompletionHistory timed out');
 
         if (error) {
             console.error('Error loading completion history:', error);
@@ -59,10 +46,8 @@ async function loadCompletionHistory() {
                 completionHistory[session.session_date] = session.progress;
             }
         });
-        
-        console.log('loadCompletionHistory: Completed');
     } catch (error) {
-        console.error('Exception in loadCompletionHistory:', error.message);
+        console.error('Exception in loadCompletionHistory:', error);
     }   
 }
 
@@ -70,19 +55,14 @@ async function loadTodaySession() {
     if (!currentUser) return;
 
     try {
-        console.log('loadTodaySession: Starting...');
-        
         const today = new Date().toISOString().split('T')[0];
-        
-        const queryPromise = window.supabaseClient
+        const { data, error } = await window.supabaseClient
             .from('workout_sessions')
             .select('*')
             .eq('user_id', currentUser.id)
             .eq('session_date', today)
             .order('updated_at', { ascending: false })
             .maybeSingle();
-        
-        const { data, error } = await withTimeout(queryPromise, 5000, 'loadTodaySession timed out');
 
         if (error) {
             console.error('Error loading session:', error);
@@ -101,44 +81,32 @@ async function loadTodaySession() {
                 });
             });
         }
-        
-        console.log('loadTodaySession: Completed');
     } catch (error) {
-        console.error('Exception in loadTodaySession:', error.message);
+        console.error('Exception in loadTodaySession:', error);
     }   
 }
 
 // ==================== UI Update Functions ====================
 async function updateUIForAuthenticatedUser(user) {
-    console.log('updateUIForAuthenticatedUser: Starting with user:', user?.id);
-    
     const signoutBtn = document.getElementById('signout-button');
     if (signoutBtn) signoutBtn.classList.remove('hidden');
     
     let profile = null;
     
     try {
-        console.log('updateUIForAuthenticatedUser: Attempting profile fetch...');
-        
-        // Wrap in timeout to prevent hanging forever
-        const profilePromise = window.supabaseClient
+        const { data, error } = await window.supabaseClient
             .from('profiles')
             .select('*')
             .eq('id', user.id)
             .maybeSingle();
         
-        const result = await withTimeout(profilePromise, 5000, 'Profile fetch timed out after 5 seconds');
-        
-        console.log('updateUIForAuthenticatedUser: Profile query result:', result);
-        
-        if (result.error) {
-            console.error('updateUIForAuthenticatedUser: Profile fetch error:', result.error);
+        if (error) {
+            console.error('Error fetching profile:', error);
         } else {
-            profile = result.data;
+            profile = data;
         }
     } catch (error) {
-        console.error('updateUIForAuthenticatedUser: Exception during profile fetch:', error.message);
-        // Continue without profile - don't block the app
+        console.error('Exception fetching profile:', error);
     }
 
     userProfile = profile;
@@ -157,8 +125,6 @@ async function updateUIForAuthenticatedUser(user) {
         if (nameDisplay) nameDisplay.textContent = firstName;
         if (initialDisplay) initialDisplay.textContent = firstName.charAt(0).toUpperCase();
     }
-    
-    console.log('updateUIForAuthenticatedUser: Completed');
 }
 
 function updateUIForGuestUser() {
