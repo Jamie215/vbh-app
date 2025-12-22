@@ -138,13 +138,18 @@ function initAuthListener() {
     window.supabaseClient.auth.onAuthStateChange(async (event, session) => {
         console.log('Auth event:', event, 'Session:', !!session);
         
-        if (event === 'SIGNED_IN' && session) {
+        if ((event === 'INITIAL_SESSION' || event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') && session) {
             currentUser = session.user;
             await updateUIForAuthenticatedUser(session.user);
             await loadTodaySession();
             await loadCompletionHistory();
             hideLoadingScreen();
             showHome();
+        } else if (event === 'INITIAL_SESSION' && !session) {
+            // No existing session on page load - show auth page
+            updateUIForGuestUser();
+            hideLoadingScreen();
+            showAuthPage();
         } else if (event === 'SIGNED_OUT') {
             currentUser = null;
             userProfile = null;

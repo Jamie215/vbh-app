@@ -9,6 +9,8 @@ let completionHistory = {};
 
 // ==================== App Initialization ====================
 document.addEventListener('DOMContentLoaded', async () => {
+    console.log('DOM loaded, initializing app...');
+    
     // Initialize auth form listeners
     if (typeof initAuthFormListeners === 'function') {
         initAuthFormListeners();
@@ -26,35 +28,38 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (typeof initAuthListener === 'function') {
         initAuthListener();
     }
+    
+    // Add a safety timeout in case onAuthStateChange never fires
+    // This should rarely happen, but prevents infinite loading
+    setTimeout(() => {
+        const loadingScreen = document.getElementById('loading-screen');
+        if (loadingScreen && !loadingScreen.classList.contains('hidden')) {
+            console.warn('Auth state change did not fire within timeout, checking session manually...');
+            checkSessionManually();
+        }
+    }, 5000);
+});
 
-    // Add a timeout to prevent infinite loading
-    const initTimeout = setTimeout(() => {
-        console.warn('Initialization timed out, showing auth page');
-        hideLoadingScreen();
-        showAuthPage();
-    }, 10000); // 10 second timeout
-
-    // Check for existing session
+// Fallback function if onAuthStateChange doesn't fire
+async function checkSessionManually() {
     try {
-        const { data: { session }, error: sessionError } = await window.supabaseClient.auth.getSession();
+        const { data: { session }, error } = await window.supabaseClient.auth.getSession();
         
-        // Clear timeout since we got a response
-        clearTimeout(initTimeout);
-        
-        if (sessionError) {
-            console.error('Session error:', sessionError);
+        if (error) {
+            console.error('Manual session check error:', error);
             hideLoadingScreen();
             showAuthPage();
             return;
         }
-            
+        
         if (session) {
+            console.log('Manual check found session, user is authenticated');
             currentUser = session.user;
-            // Wrap these in try-catch individually so one failure doesn't break everything
+            
             try {
                 await updateUIForAuthenticatedUser(session.user);
             } catch (e) {
-                console.error('Error updating UI for authenticated user:', e);
+                console.error('Error updating UI:', e);
             }
             
             try {
@@ -72,17 +77,17 @@ document.addEventListener('DOMContentLoaded', async () => {
             hideLoadingScreen();
             showHome();
         } else {
+            console.log('Manual check found no session');
             updateUIForGuestUser();
             hideLoadingScreen();
             showAuthPage();
         }
     } catch (error) {
-        clearTimeout(initTimeout);
-        console.error('Initialization error:', error);
+        console.error('Exception in manual session check:', error);
         hideLoadingScreen();
         showAuthPage();
     }
-});
+}
 
 // ==================== Week Calculation ====================
 function calculateUserWeek() {
