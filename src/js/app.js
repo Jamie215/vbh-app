@@ -22,12 +22,9 @@ document.addEventListener('DOMContentLoaded', async () => {
         initAuthListener();
     }
     
-    // Wait a moment for Supabase to fully initialize, then check session
-    // This delay allows the Supabase client to properly restore the session from localStorage
     console.log('Waiting for Supabase to initialize...');
-    await delay(100); // Small delay to let Supabase initialize
+    await delay(200);
     
-    // Now initialize the session
     await initializeSession();
 });
 
@@ -37,9 +34,7 @@ function delay(ms) {
 }
 
 // Initialize session on page load
-async function initializeSession() {
-    console.log('initializeSession: Starting...');
-    
+async function initializeSession() {    
     try {
         console.log('initializeSession: Calling getSession...');
         const { data: { session }, error } = await window.supabaseClient.auth.getSession();
@@ -64,33 +59,25 @@ async function initializeSession() {
             
             // Now the client should be ready for DB queries
             try {
-                console.log('initializeSession: Calling updateUIForAuthenticatedUser...');
                 await updateUIForAuthenticatedUser(session.user);
-                console.log('initializeSession: updateUIForAuthenticatedUser completed');
             } catch (e) {
                 console.error('initializeSession: Error in updateUIForAuthenticatedUser:', e);
             }
             
             try {
-                console.log('initializeSession: Calling loadTodaySession...');
                 await loadTodaySession();
-                console.log('initializeSession: loadTodaySession completed');
             } catch (e) {
                 console.error('initializeSession: Error in loadTodaySession:', e);
             }
             
             try {
-                console.log('initializeSession: Calling loadCompletionHistory...');
                 await loadCompletionHistory();
-                console.log('initializeSession: loadCompletionHistory completed');
             } catch (e) {
                 console.error('initializeSession: Error in loadCompletionHistory:', e);
             }
             
-            console.log('initializeSession: Showing home...');
             hideLoadingScreen();
             showHome();
-            console.log('initializeSession: Done!');
         } else {
             console.log('initializeSession: No session, showing auth page');
             updateUIForGuestUser();
