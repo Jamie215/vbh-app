@@ -132,24 +132,43 @@ function showForgotPassword() {
 function initAuthListener() {
     if (!window.supabaseClient) {
         console.error('Supabase client not available');
+        hideLoadingScreen();
+        showAuthPage();
         return;
     }
 
     window.supabaseClient.auth.onAuthStateChange(async (event, session) => {
         console.log('Auth event:', event, 'Session:', !!session);
         
-        if ((event === 'INITIAL_SESSION' || event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') && session) {
+        // IMPORTANT: Cancel the safety timeout as soon as any auth event fires
+        if (typeof cancelAuthTimeout === 'function') {
+            cancelAuthTimeout();
+        }
+        
+        if (event === 'SIGNED_IN' && session) {
             currentUser = session.user;
-            await updateUIForAuthenticatedUser(session.user);
-            await loadTodaySession();
-            await loadCompletionHistory();
+            
+            try {
+                await updateUIForAuthenticatedUser(session.user);
+            } catch (e) {
+                console.error('Error updating UI:', e);
+            }
+            
+            try {
+                await loadTodaySession();
+            } catch (e) {
+                console.error('Error loading today session:', e);
+            }
+            
+            try {
+                await loadCompletionHistory();
+            } catch (e) {
+                console.error('Error loading completion history:', e);
+            }
+            
             hideLoadingScreen();
             showHome();
-        } else if (event === 'INITIAL_SESSION' && !session) {
-            // No existing session on page load - show auth page
-            updateUIForGuestUser();
-            hideLoadingScreen();
-            showAuthPage();
+            
         } else if (event === 'SIGNED_OUT') {
             currentUser = null;
             userProfile = null;
@@ -160,9 +179,50 @@ function initAuthListener() {
             updateUIForGuestUser();
             hideLoadingScreen();
             showAuthPage();
+            
+        } else if (event === 'INITIAL_SESSION') {
+            // Handle page refresh - session may or may not exist
+            if (session) {
+                currentUser = session.user;
+                
+                try {
+                    await updateUIForAuthenticatedUser(session.user);
+                } catch (e) {
+                    console.error('Error updating UI:', e);
+                }
+                
+                try {
+                    await loadTodaySession();
+                } catch (e) {
+                    console.error('Error loading today session:', e);
+                }
+                
+                try {
+                    await loadCompletionHistory();
+                } catch (e) {
+                    console.error('Error loading completion history:', e);
+                }
+                
+                hideLoadingScreen();
+                showHome();
+            } else {
+                // No session - show auth page
+                updateUIForGuestUser();
+                hideLoadingScreen();
+                showAuthPage();
+            }
+            
+        } else if (event === 'TOKEN_REFRESHED' && session) {
+            // Just update the user reference, don't change views
+            currentUser = session.user;
+            
         } else if (event === 'USER_UPDATED' && session?.user) {
             currentUser = session.user;
-            await updateUIForAuthenticatedUser(session.user);
+            try {
+                await updateUIForAuthenticatedUser(session.user);
+            } catch (e) {
+                console.error('Error updating UI:', e);
+            }
         }
     });
 }

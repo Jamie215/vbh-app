@@ -7,6 +7,9 @@ let todaySession = null;
 let sessionProgress = {};
 let completionHistory = {};
 
+// Timeout reference so we can cancel it
+let authTimeoutId = null;
+
 // ==================== App Initialization ====================
 document.addEventListener('DOMContentLoaded', async () => {
     console.log('DOM loaded, initializing app...');
@@ -24,21 +27,26 @@ document.addEventListener('DOMContentLoaded', async () => {
         return;
     }
 
-    // Initialize auth state listener
+    // Initialize auth state listener - this handles everything
     if (typeof initAuthListener === 'function') {
         initAuthListener();
     }
     
-    // Add a safety timeout in case onAuthStateChange never fires
-    // This should rarely happen, but prevents infinite loading
-    setTimeout(() => {
-        const loadingScreen = document.getElementById('loading-screen');
-        if (loadingScreen && !loadingScreen.classList.contains('hidden')) {
-            console.warn('Auth state change did not fire within timeout, checking session manually...');
-            checkSessionManually();
-        }
-    }, 5000);
+    // Safety timeout in case onAuthStateChange never fires (rare edge case)
+    // This will be cancelled by the auth listener when it fires
+    authTimeoutId = setTimeout(() => {
+        console.warn('Auth state change did not fire within timeout, checking session manually...');
+        checkSessionManually();
+    }, 10000); // 10 seconds - plenty of time for normal auth flow
 });
+
+// Cancel the safety timeout - called by auth listener
+function cancelAuthTimeout() {
+    if (authTimeoutId) {
+        clearTimeout(authTimeoutId);
+        authTimeoutId = null;
+    }
+}
 
 // Fallback function if onAuthStateChange doesn't fire
 async function checkSessionManually() {
