@@ -1,7 +1,7 @@
 // Main application logic - playlist display, exercise tracking, etc.
 
 // ==================== App Initialization ====================
-document.addEventListener('DOMContentLoaded', async () => {
+document.addEventListener('DOMContentLoaded', () => {
     console.log('DOM loaded, initializing app...');
     
     // Initialize auth form listeners
@@ -17,26 +17,20 @@ document.addEventListener('DOMContentLoaded', async () => {
         return;
     }
 
-    // Set up auth listener for future events (sign-in, sign-out, etc.)
+    // Set up auth listener for sign-out events (synchronous only)
     if (typeof initAuthListener === 'function') {
         initAuthListener();
     }
     
-    console.log('Waiting for Supabase to initialize...');
-    await delay(200);
-    
-    await initializeSession();
+    // Initialize session - this handles the initial page load
+    initializeSession();
 });
 
-// Simple delay helper
-function delay(ms) {
-    return new Promise(resolve => setTimeout(resolve, ms));
-}
-
 // Initialize session on page load
-async function initializeSession() {    
+async function initializeSession() {
+    console.log('initializeSession: Starting...');
+    
     try {
-        console.log('initializeSession: Calling getSession...');
         const { data: { session }, error } = await window.supabaseClient.auth.getSession();
         console.log('initializeSession: getSession completed', { hasSession: !!session, error });
         
@@ -47,17 +41,10 @@ async function initializeSession() {
             return;
         }
         
-        // Mark that we've handled the initial session
-        // This prevents onAuthStateChange from double-handling
-        if (typeof markInitialSessionHandled === 'function') {
-            markInitialSessionHandled();
-        }
-        
         if (session) {
             console.log('initializeSession: User is authenticated, loading data...');
             currentUser = session.user;
             
-            // Now the client should be ready for DB queries
             try {
                 await updateUIForAuthenticatedUser(session.user);
             } catch (e) {
@@ -78,6 +65,7 @@ async function initializeSession() {
             
             hideLoadingScreen();
             showHome();
+            console.log('initializeSession: Done!');
         } else {
             console.log('initializeSession: No session, showing auth page');
             updateUIForGuestUser();

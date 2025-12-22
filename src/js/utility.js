@@ -9,21 +9,6 @@ let todaySession = null;
 let sessionProgress = {};
 let completionHistory = {};
 
-// Auth timeout reference (kept for compatibility but not used anymore)
-let authTimeoutId = null;
-
-// ==================== Auth Timeout Management ====================
-function setAuthTimeout(callback, delay) {
-    authTimeoutId = setTimeout(callback, delay);
-}
-
-function cancelAuthTimeout() {
-    if (authTimeoutId) {
-        clearTimeout(authTimeoutId);
-        authTimeoutId = null;
-    }
-}
-
 // ==================== Data Loading Functions ====================
 async function loadCompletionHistory() {
     if (!currentUser) return;

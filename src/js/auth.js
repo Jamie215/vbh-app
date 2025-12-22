@@ -87,12 +87,42 @@ async function signIn() {
             // Clear form
             document.getElementById('login-email').value = '';
             document.getElementById('login-password').value = '';
-            // onAuthStateChange will fire SIGNED_IN, which will call handleSignIn
+            // We handle the rest here directly, not in onAuthStateChange
+            // because onAuthStateChange can't have async operations
+            handlePostSignIn(data.user);
         }
     } catch (error) {
         console.error('Sign in error:', error);
         showMessage('signin-message', 'An error occurred. Please try again.', true);
     }
+}
+
+// Handle post sign-in setup (called directly from signIn, not from onAuthStateChange)
+async function handlePostSignIn(user) {
+    console.log('handlePostSignIn: Setting up user session...');
+    currentUser = user;
+    
+    try {
+        await updateUIForAuthenticatedUser(user);
+    } catch (e) {
+        console.error('handlePostSignIn: Error updating UI:', e);
+    }
+    
+    try {
+        await loadTodaySession();
+    } catch (e) {
+        console.error('handlePostSignIn: Error loading today session:', e);
+    }
+    
+    try {
+        await loadCompletionHistory();
+    } catch (e) {
+        console.error('handlePostSignIn: Error loading completion history:', e);
+    }
+    
+    hideLoadingScreen();
+    showHome();
+    console.log('handlePostSignIn: Complete');
 }
 
 // Sign out
@@ -106,7 +136,7 @@ async function signOut() {
         if (error) {
             alert('Error signing out: ' + error.message);
         }
-        // Auth state change listener will handle the rest
+        // onAuthStateChange will fire SIGNED_OUT synchronously
     } catch (error) {
         console.error('Sign out error:', error);
         alert('An error occurred while signing out.');
@@ -134,36 +164,10 @@ function showForgotPassword() {
     alert('Forgot password feature coming soon!');
 }
 
-// Handle explicit sign-in (not page refresh)
-async function handleSignIn(user) {
-    console.log('handleSignIn: User signed in explicitly');
-    currentUser = user;
-    
-    try {
-        await updateUIForAuthenticatedUser(user);
-    } catch (e) {
-        console.error('handleSignIn: Error updating UI:', e);
-    }
-    
-    try {
-        await loadTodaySession();
-    } catch (e) {
-        console.error('handleSignIn: Error loading today session:', e);
-    }
-    
-    try {
-        await loadCompletionHistory();
-    } catch (e) {
-        console.error('handleSignIn: Error loading completion history:', e);
-    }
-    
-    hideLoadingScreen();
-    showHome();
-}
-
 // Listen to auth state changes
-// IMPORTANT: We don't make DB queries here for INITIAL_SESSION because 
-// the Supabase client isn't fully ready yet. Initial load is handled by app.js
+// IMPORTANT: This callback must be SYNCHRONOUS - no async/await!
+// We only use this for sign-out detection. Sign-in and initial load
+// are handled elsewhere (signIn() and app.js respectively)
 function initAuthListener() {
     if (!window.supabaseClient) {
         console.error('Supabase client not available');
@@ -172,29 +176,24 @@ function initAuthListener() {
         return;
     }
 
-    window.supabaseClient.auth.onAuthStateChange(async (event, session) => {
-        console.log('Auth event:', event, 'Session:', !!session, 'InitialHandled:', initialSessionHandled);
+    // Note: NO async keyword here - callback must be synchronous
+    window.supabaseClient.auth.onAuthStateChange((event, session) => {
+        console.log('Auth event:', event, 'Session:', !!session);
         
         switch (event) {
             case 'INITIAL_SESSION':
-                // Skip - this is handled by app.js using getSession()
-                // The Supabase client isn't ready for DB queries at this point
-                console.log('Skipping INITIAL_SESSION - handled by app.js');
+                // Handled by app.js - do nothing here
+                console.log('INITIAL_SESSION - handled by app.js');
                 break;
                 
             case 'SIGNED_IN':
-                // Only handle if this is an explicit sign-in (not page refresh)
-                // On page refresh, SIGNED_IN fires but initialSessionHandled will be true
-                if (!initialSessionHandled && session) {
-                    await handleSignIn(session.user);
-                } else if (initialSessionHandled) {
-                    console.log('SIGNED_IN after initial load - explicit sign in');
-                    // This is an explicit sign-in after page load
-                    await handleSignIn(session.user);
-                }
+                // Handled by signIn() function directly - do nothing here
+                console.log('SIGNED_IN - handled by signIn()');
                 break;
                 
             case 'SIGNED_OUT':
+                // This is synchronous - safe to handle here
+                console.log('SIGNED_OUT - resetting app state');
                 resetAppState();
                 updateUIForGuestUser();
                 hideLoadingScreen();
@@ -202,19 +201,17 @@ function initAuthListener() {
                 break;
                 
             case 'TOKEN_REFRESHED':
+                // Just update the user reference (synchronous)
                 if (session) {
                     currentUser = session.user;
                 }
                 break;
                 
             case 'USER_UPDATED':
+                // Update user reference (synchronous)
+                // Don't do async DB calls here
                 if (session?.user) {
                     currentUser = session.user;
-                    try {
-                        await updateUIForAuthenticatedUser(session.user);
-                    } catch (e) {
-                        console.error('Error updating UI:', e);
-                    }
                 }
                 break;
                 
@@ -223,7 +220,7 @@ function initAuthListener() {
         }
     });
     
-    console.log('Auth listener initialized');
+    console.log('Auth listener initialized (synchronous)');
 }
 
 // Handle Enter key press in auth forms
