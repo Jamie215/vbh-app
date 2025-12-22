@@ -91,7 +91,7 @@ async function loadTodaySession() {
 async function updateUIForAuthenticatedUser(user) {
     const signoutBtn = document.getElementById('signout-button');
     if (signoutBtn) signoutBtn.classList.remove('hidden');
-    if (!user) console.error('updateUIForAuthenticatedUser called with null user');
+    console.log("user: ", user);
     
     try {
         const { data: profile, error } = await window.supabaseClient
