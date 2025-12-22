@@ -133,7 +133,7 @@ async function handleAuthenticatedUser(user) {
     currentUser = user;
     console.log('handleAuthenticatedUser: currentUser set');
     
-     try {
+    try {
         console.log('handleAuthenticatedUser: Calling updateUIForAuthenticatedUser...');
         await updateUIForAuthenticatedUser(user);
         console.log('handleAuthenticatedUser: updateUIForAuthenticatedUser completed');
@@ -164,9 +164,13 @@ async function handleAuthenticatedUser(user) {
     console.log('handleAuthenticatedUser: Calling showHome...');
     showHome();
     console.log('handleAuthenticatedUser: showHome completed');
+    
+    console.log('handleAuthenticatedUser: All done!');
 }
 
 // Listen to auth state changes
+// NOTE: We don't use onAuthStateChange for initial load because it can fire
+// before the session is fully ready. Instead, app.js uses getSession() for initial load.
 function initAuthListener() {
     if (!window.supabaseClient) {
         console.error('Supabase client not available');
@@ -181,18 +185,20 @@ function initAuthListener() {
         // Cancel safety timeout as soon as any auth event fires
         cancelAuthTimeout();
         
+        // Skip INITIAL_SESSION - we handle initial load via getSession() in app.js
+        // This prevents the race condition where onAuthStateChange fires before
+        // the session is fully restored from localStorage
+        if (event === 'INITIAL_SESSION') {
+            console.log('Skipping INITIAL_SESSION - handled by getSession()');
+            return;
+        }
+        
         switch (event) {
             case 'SIGNED_IN':
-            case 'INITIAL_SESSION':
                 if (session) {
                     console.log('Calling handleAuthenticatedUser...');
                     await handleAuthenticatedUser(session.user);
                     console.log('handleAuthenticatedUser returned');
-                } else {
-                    // INITIAL_SESSION with no session = not logged in
-                    updateUIForGuestUser();
-                    hideLoadingScreen();
-                    showAuthPage();
                 }
                 break;
                 

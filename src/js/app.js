@@ -1,6 +1,4 @@
-// ==================== App Controller ====================
 // Main application logic - playlist display, exercise tracking, etc.
-// Depends on: shared.js, navigation.js, auth.js
 
 // ==================== App Initialization ====================
 document.addEventListener('DOMContentLoaded', async () => {
@@ -19,47 +17,73 @@ document.addEventListener('DOMContentLoaded', async () => {
         return;
     }
 
-    // Initialize auth state listener - this handles all auth state
+    // Initialize auth state listener for future auth events (sign in, sign out, etc.)
+    // Note: We skip INITIAL_SESSION in the listener and handle initial load here instead
     if (typeof initAuthListener === 'function') {
         initAuthListener();
     }
     
-    // Safety timeout in case onAuthStateChange never fires (rare edge case)
-    setAuthTimeout(() => {
-        console.warn('Auth state change did not fire within timeout, checking session manually...');
-        checkSessionManually();
-    }, 10000);
+    // Handle initial session check using getSession()
+    // This is more reliable than onAuthStateChange for page refresh
+    await initializeSession();
 });
 
-// Fallback function if onAuthStateChange doesn't fire
-async function checkSessionManually() {
+// Initialize session on page load
+async function initializeSession() {
+    console.log('initializeSession: Starting...');
+    
     try {
+        console.log('initializeSession: Calling getSession...');
         const { data: { session }, error } = await window.supabaseClient.auth.getSession();
+        console.log('initializeSession: getSession completed', { hasSession: !!session, error });
         
         if (error) {
-            console.error('Manual session check error:', error);
+            console.error('initializeSession: Session error:', error);
             hideLoadingScreen();
             showAuthPage();
             return;
         }
         
         if (session) {
-            console.log('Manual check found session');
+            console.log('initializeSession: User is authenticated, setting up...');
             currentUser = session.user;
             
-            try { await updateUIForAuthenticatedUser(session.user); } catch (e) { console.error(e); }
-            try { await loadTodaySession(); } catch (e) { console.error(e); }
-            try { await loadCompletionHistory(); } catch (e) { console.error(e); }
+            try {
+                console.log('initializeSession: Calling updateUIForAuthenticatedUser...');
+                await updateUIForAuthenticatedUser(session.user);
+                console.log('initializeSession: updateUIForAuthenticatedUser completed');
+            } catch (e) {
+                console.error('initializeSession: Error in updateUIForAuthenticatedUser:', e);
+            }
             
+            try {
+                console.log('initializeSession: Calling loadTodaySession...');
+                await loadTodaySession();
+                console.log('initializeSession: loadTodaySession completed');
+            } catch (e) {
+                console.error('initializeSession: Error in loadTodaySession:', e);
+            }
+            
+            try {
+                console.log('initializeSession: Calling loadCompletionHistory...');
+                await loadCompletionHistory();
+                console.log('initializeSession: loadCompletionHistory completed');
+            } catch (e) {
+                console.error('initializeSession: Error in loadCompletionHistory:', e);
+            }
+            
+            console.log('initializeSession: Showing home...');
             hideLoadingScreen();
             showHome();
+            console.log('initializeSession: Done!');
         } else {
+            console.log('initializeSession: No session, showing auth page');
             updateUIForGuestUser();
             hideLoadingScreen();
             showAuthPage();
         }
     } catch (error) {
-        console.error('Exception in manual session check:', error);
+        console.error('initializeSession: Exception:', error);
         hideLoadingScreen();
         showAuthPage();
     }
