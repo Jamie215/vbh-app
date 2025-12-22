@@ -147,6 +147,7 @@ function initAuthListener() {
         
         if (event === 'SIGNED_IN' && session) {
             currentUser = session.user;
+            console.log('User signed in:', currentUser);
             
             try {
                 await updateUIForAuthenticatedUser(session.user);
