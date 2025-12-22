@@ -129,28 +129,41 @@ function showForgotPassword() {
 
 // Helper function to handle authenticated user setup
 async function handleAuthenticatedUser(user) {
+    console.log('handleAuthenticatedUser: Starting...');
     currentUser = user;
+    console.log('handleAuthenticatedUser: currentUser set');
     
-    try {
+     try {
+        console.log('handleAuthenticatedUser: Calling updateUIForAuthenticatedUser...');
         await updateUIForAuthenticatedUser(user);
+        console.log('handleAuthenticatedUser: updateUIForAuthenticatedUser completed');
     } catch (e) {
-        console.error('Error updating UI:', e);
+        console.error('handleAuthenticatedUser: Error in updateUIForAuthenticatedUser:', e);
     }
     
     try {
+        console.log('handleAuthenticatedUser: Calling loadTodaySession...');
         await loadTodaySession();
+        console.log('handleAuthenticatedUser: loadTodaySession completed');
     } catch (e) {
-        console.error('Error loading today session:', e);
+        console.error('handleAuthenticatedUser: Error in loadTodaySession:', e);
     }
     
     try {
+        console.log('handleAuthenticatedUser: Calling loadCompletionHistory...');
         await loadCompletionHistory();
+        console.log('handleAuthenticatedUser: loadCompletionHistory completed');
     } catch (e) {
-        console.error('Error loading completion history:', e);
+        console.error('handleAuthenticatedUser: Error in loadCompletionHistory:', e);
     }
     
+    console.log('handleAuthenticatedUser: Calling hideLoadingScreen...');
     hideLoadingScreen();
+    console.log('handleAuthenticatedUser: hideLoadingScreen completed');
+    
+    console.log('handleAuthenticatedUser: Calling showHome...');
     showHome();
+    console.log('handleAuthenticatedUser: showHome completed');
 }
 
 // Listen to auth state changes
@@ -172,7 +185,9 @@ function initAuthListener() {
             case 'SIGNED_IN':
             case 'INITIAL_SESSION':
                 if (session) {
+                    console.log('Calling handleAuthenticatedUser...');
                     await handleAuthenticatedUser(session.user);
+                    console.log('handleAuthenticatedUser returned');
                 } else {
                     // INITIAL_SESSION with no session = not logged in
                     updateUIForGuestUser();
