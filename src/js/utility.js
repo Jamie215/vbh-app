@@ -100,6 +100,7 @@ async function updateUIForAuthenticatedUser(user) {
             .single();
 
         userProfile = profile;
+        console.log('User profile loaded:', userProfile);
 
         const userInfo = document.getElementById('user-info');
         if (userInfo) {
