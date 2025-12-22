@@ -1,4 +1,3 @@
-// ==================== Authentication Controller ====================
 // Handles sign up, sign in, sign out, and auth state changes
 
 // Sign up new user
@@ -128,6 +127,32 @@ function showForgotPassword() {
     alert('Forgot password feature coming soon!');
 }
 
+// Helper function to handle authenticated user setup
+async function handleAuthenticatedUser(user) {
+    currentUser = user;
+    
+    try {
+        await updateUIForAuthenticatedUser(user);
+    } catch (e) {
+        console.error('Error updating UI:', e);
+    }
+    
+    try {
+        await loadTodaySession();
+    } catch (e) {
+        console.error('Error loading today session:', e);
+    }
+    
+    try {
+        await loadCompletionHistory();
+    } catch (e) {
+        console.error('Error loading completion history:', e);
+    }
+    
+    hideLoadingScreen();
+    showHome();
+}
+
 // Listen to auth state changes
 function initAuthListener() {
     if (!window.supabaseClient) {
@@ -140,92 +165,52 @@ function initAuthListener() {
     window.supabaseClient.auth.onAuthStateChange(async (event, session) => {
         console.log('Auth event:', event, 'Session:', !!session);
         
-        // IMPORTANT: Cancel the safety timeout as soon as any auth event fires
-        if (typeof cancelAuthTimeout === 'function') {
-            cancelAuthTimeout();
-        }
+        // Cancel safety timeout as soon as any auth event fires
+        cancelAuthTimeout();
         
-        if (event === 'SIGNED_IN' && session) {
-            currentUser = session.user;
-            console.log('User signed in:', currentUser);
-            
-            try {
-                await updateUIForAuthenticatedUser(session.user);
-            } catch (e) {
-                console.error('Error updating UI:', e);
-            }
-            
-            try {
-                await loadTodaySession();
-            } catch (e) {
-                console.error('Error loading today session:', e);
-            }
-            
-            try {
-                await loadCompletionHistory();
-            } catch (e) {
-                console.error('Error loading completion history:', e);
-            }
-            
-            hideLoadingScreen();
-            showHome();
-            
-        } else if (event === 'SIGNED_OUT') {
-            currentUser = null;
-            userProfile = null;
-            todaySession = null;
-            sessionProgress = {};
-            completionHistory = {};
-            currentPlaylist = null;
-            updateUIForGuestUser();
-            hideLoadingScreen();
-            showAuthPage();
-            
-        } else if (event === 'INITIAL_SESSION') {
-            // Handle page refresh - session may or may not exist
-            if (session) {
-                currentUser = session.user;
-                
-                try {
-                    await updateUIForAuthenticatedUser(session.user);
-                } catch (e) {
-                    console.error('Error updating UI:', e);
+        switch (event) {
+            case 'SIGNED_IN':
+            case 'INITIAL_SESSION':
+                if (session) {
+                    await handleAuthenticatedUser(session.user);
+                } else {
+                    // INITIAL_SESSION with no session = not logged in
+                    updateUIForGuestUser();
+                    hideLoadingScreen();
+                    showAuthPage();
                 }
+                break;
                 
-                try {
-                    await loadTodaySession();
-                } catch (e) {
-                    console.error('Error loading today session:', e);
-                }
-                
-                try {
-                    await loadCompletionHistory();
-                } catch (e) {
-                    console.error('Error loading completion history:', e);
-                }
-                
-                hideLoadingScreen();
-                showHome();
-            } else {
-                // No session - show auth page
+            case 'SIGNED_OUT':
+                resetAppState();
                 updateUIForGuestUser();
                 hideLoadingScreen();
                 showAuthPage();
-            }
-            
-        } else if (event === 'TOKEN_REFRESHED' && session) {
-            // Just update the user reference, don't change views
-            currentUser = session.user;
-            
-        } else if (event === 'USER_UPDATED' && session?.user) {
-            currentUser = session.user;
-            try {
-                await updateUIForAuthenticatedUser(session.user);
-            } catch (e) {
-                console.error('Error updating UI:', e);
-            }
+                break;
+                
+            case 'TOKEN_REFRESHED':
+                if (session) {
+                    currentUser = session.user;
+                }
+                break;
+                
+            case 'USER_UPDATED':
+                if (session?.user) {
+                    currentUser = session.user;
+                    try {
+                        await updateUIForAuthenticatedUser(session.user);
+                    } catch (e) {
+                        console.error('Error updating UI:', e);
+                    }
+                }
+                break;
+                
+            default:
+                console.log('Unhandled auth event:', event);
         }
     });
+    
+    console.log('Auth listener initialized');
 }
 
 // Handle Enter key press in auth forms
@@ -267,3 +252,5 @@ function initAuthFormListeners() {
         });
     }
 }
+
+console.log('Auth module loaded');

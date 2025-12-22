@@ -151,5 +151,3 @@ function showMessage(elementId, message, isError = false) {
 function showHowToUse() {
     alert('How to Use page coming soon!');
 }
-
-console.log('Navigation module loaded');

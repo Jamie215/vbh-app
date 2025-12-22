@@ -1,14 +1,6 @@
-// ==================== App State ====================
-let currentUser = null;
-let userProfile = null;
-let currentPlaylist = null;
-let currentVideo = null;
-let todaySession = null;
-let sessionProgress = {};
-let completionHistory = {};
-
-// Timeout reference so we can cancel it
-let authTimeoutId = null;
+// ==================== App Controller ====================
+// Main application logic - playlist display, exercise tracking, etc.
+// Depends on: shared.js, navigation.js, auth.js
 
 // ==================== App Initialization ====================
 document.addEventListener('DOMContentLoaded', async () => {
@@ -27,26 +19,17 @@ document.addEventListener('DOMContentLoaded', async () => {
         return;
     }
 
-    // Initialize auth state listener - this handles everything
+    // Initialize auth state listener - this handles all auth state
     if (typeof initAuthListener === 'function') {
         initAuthListener();
     }
     
     // Safety timeout in case onAuthStateChange never fires (rare edge case)
-    // This will be cancelled by the auth listener when it fires
-    authTimeoutId = setTimeout(() => {
+    setAuthTimeout(() => {
         console.warn('Auth state change did not fire within timeout, checking session manually...');
         checkSessionManually();
-    }, 10000); // 10 seconds - plenty of time for normal auth flow
+    }, 10000);
 });
-
-// Cancel the safety timeout - called by auth listener
-function cancelAuthTimeout() {
-    if (authTimeoutId) {
-        clearTimeout(authTimeoutId);
-        authTimeoutId = null;
-    }
-}
 
 // Fallback function if onAuthStateChange doesn't fire
 async function checkSessionManually() {
@@ -61,31 +44,16 @@ async function checkSessionManually() {
         }
         
         if (session) {
-            console.log('Manual check found session, user is authenticated');
+            console.log('Manual check found session');
             currentUser = session.user;
             
-            try {
-                await updateUIForAuthenticatedUser(session.user);
-            } catch (e) {
-                console.error('Error updating UI:', e);
-            }
-            
-            try {
-                await loadTodaySession();
-            } catch (e) {
-                console.error('Error loading today session:', e);
-            }
-            
-            try {
-                await loadCompletionHistory();
-            } catch (e) {
-                console.error('Error loading completion history:', e);
-            }
+            try { await updateUIForAuthenticatedUser(session.user); } catch (e) { console.error(e); }
+            try { await loadTodaySession(); } catch (e) { console.error(e); }
+            try { await loadCompletionHistory(); } catch (e) { console.error(e); }
             
             hideLoadingScreen();
             showHome();
         } else {
-            console.log('Manual check found no session');
             updateUIForGuestUser();
             hideLoadingScreen();
             showAuthPage();
@@ -132,68 +100,6 @@ function getSuggestedWorkout() {
     } else {
         return PLAYLISTS.find(p => p.id === 'advanced-4-6');
     }
-}
-
-// ==================== Data Loading ====================
-async function loadCompletionHistory() {
-    if (!currentUser) return;
-    
-    try {
-        const { data, error } = await window.supabaseClient
-            .from('workout_sessions')
-            .select('session_date, progress')
-            .eq('user_id', currentUser.id)
-            .order('session_date', { ascending: true });
-
-        if (error) {
-            console.error('Error loading completion history:', error);
-            return;
-        }
-
-        completionHistory = {};
-        data?.forEach(session => {
-            if (!completionHistory[session.session_date]) {
-                completionHistory[session.session_date] = session.progress;
-            }
-        });
-    } catch (error) {
-        console.error('Exception in loadCompletionHistory:', error);
-    }   
-}
-
-async function loadTodaySession() {
-    if (!currentUser) return;
-
-    try {
-        const today = new Date().toISOString().split('T')[0];
-        const { data, error } = await window.supabaseClient
-            .from('workout_sessions')
-            .select('*')
-            .eq('user_id', currentUser.id)
-            .eq('session_date', today)
-            .order('updated_at', { ascending: false })
-            .maybeSingle();
-
-        if (error) {
-            console.error('Error loading session:', error);
-            return;
-        }
-
-        todaySession = data;
-
-        if (data?.progress) {
-            Object.keys(data.progress).forEach(playlistId => {
-                if (!sessionProgress[playlistId]) {
-                    sessionProgress[playlistId] = {};
-                }
-                Object.keys(data.progress[playlistId]).forEach(videoId => {
-                    sessionProgress[playlistId][videoId] = data.progress[playlistId][videoId] || 0;
-                });
-            });
-        }
-    } catch (error) {
-        console.error('Exception in loadTodaySession:', error);
-    }   
 }
 
 // ==================== Playlist Completion Helpers ====================
@@ -603,42 +509,4 @@ async function saveProgress() {
     }
 }
 
-// ==================== UI Update Functions ====================
-async function updateUIForAuthenticatedUser(user) {
-    const signoutBtn = document.getElementById('signout-button');
-    if (signoutBtn) signoutBtn.classList.remove('hidden');
-    
-    try {
-        const { data: profile } = await window.supabaseClient
-            .from('profiles')
-            .select('*')
-            .eq('id', user.id)
-            .single();
-
-        userProfile = profile;
-
-        const userInfo = document.getElementById('user-info');
-        if (userInfo) {
-            userInfo.classList.remove('hidden');
-            
-            const fullName = profile?.full_name || user.email;
-            const firstName = fullName.split(' ')[0];
-            
-            const nameDisplay = document.getElementById('user-name-display');
-            const initialDisplay = document.getElementById('user-initial');
-            
-            if (nameDisplay) nameDisplay.textContent = firstName;
-            if (initialDisplay) initialDisplay.textContent = firstName.charAt(0).toUpperCase();
-        }
-    } catch (error) {
-        console.error('Error loading user profile:', error);
-    }
-}
-
-function updateUIForGuestUser() {
-    const signoutBtn = document.getElementById('signout-button');
-    if (signoutBtn) signoutBtn.classList.add('hidden');
-    
-    const userInfo = document.getElementById('user-info');
-    if (userInfo) userInfo.classList.add('hidden');
-}
+console.log('App module loaded');
