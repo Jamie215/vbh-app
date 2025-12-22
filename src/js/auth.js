@@ -87,8 +87,7 @@ async function signIn() {
             // Clear form
             document.getElementById('login-email').value = '';
             document.getElementById('login-password').value = '';
-            // We handle the rest here directly, not in onAuthStateChange
-            // because onAuthStateChange can't have async operations
+            
             handlePostSignIn(data.user);
         }
     } catch (error) {
@@ -165,9 +164,6 @@ function showForgotPassword() {
 }
 
 // Listen to auth state changes
-// IMPORTANT: This callback must be SYNCHRONOUS - no async/await!
-// We only use this for sign-out detection. Sign-in and initial load
-// are handled elsewhere (signIn() and app.js respectively)
 function initAuthListener() {
     if (!window.supabaseClient) {
         console.error('Supabase client not available');
@@ -176,23 +172,20 @@ function initAuthListener() {
         return;
     }
 
-    // Note: NO async keyword here - callback must be synchronous
+    // Callback must be synchronous
     window.supabaseClient.auth.onAuthStateChange((event, session) => {
         console.log('Auth event:', event, 'Session:', !!session);
         
         switch (event) {
             case 'INITIAL_SESSION':
-                // Handled by app.js - do nothing here
                 console.log('INITIAL_SESSION - handled by app.js');
                 break;
                 
             case 'SIGNED_IN':
-                // Handled by signIn() function directly - do nothing here
                 console.log('SIGNED_IN - handled by signIn()');
                 break;
                 
             case 'SIGNED_OUT':
-                // This is synchronous - safe to handle here
                 console.log('SIGNED_OUT - resetting app state');
                 resetAppState();
                 updateUIForGuestUser();
@@ -209,7 +202,6 @@ function initAuthListener() {
                 
             case 'USER_UPDATED':
                 // Update user reference (synchronous)
-                // Don't do async DB calls here
                 if (session?.user) {
                     currentUser = session.user;
                 }

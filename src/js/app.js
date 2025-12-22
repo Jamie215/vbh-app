@@ -239,7 +239,6 @@ function createPlaylistCard(playlist) {
     
     card.innerHTML = `
         <div class="playlist-thumbnail-wrapper">
-            <img src="${playlist.thumbnail}" alt="${playlist.title}">
             <div class="playlist-overlay ${overlayClass}">
                 <span class="week-label">${weekText}</span>
             </div>
@@ -273,7 +272,6 @@ function loadTodaysWorkout() {
     
     container.innerHTML = `
         <div class="todays-workout-thumbnail">
-            <img src="${suggested.thumbnail}" alt="${suggested.title}">
             <div class="playlist-overlay ${overlayClass}">
                 <span class="week-label">${weekText}</span>
             </div>
