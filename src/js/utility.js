@@ -25,16 +25,28 @@ function cancelAuthTimeout() {
     }
 }
 
+// ==================== Helper: Promise with timeout ====================
+function withTimeout(promise, ms, errorMessage = 'Operation timed out') {
+    const timeout = new Promise((_, reject) => {
+        setTimeout(() => reject(new Error(errorMessage)), ms);
+    });
+    return Promise.race([promise, timeout]);
+}
+
 // ==================== Data Loading Functions ====================
 async function loadCompletionHistory() {
     if (!currentUser) return;
     
     try {
-        const { data, error } = await window.supabaseClient
+        console.log('loadCompletionHistory: Starting...');
+        
+        const queryPromise = window.supabaseClient
             .from('workout_sessions')
             .select('session_date, progress')
             .eq('user_id', currentUser.id)
             .order('session_date', { ascending: true });
+        
+        const { data, error } = await withTimeout(queryPromise, 5000, 'loadCompletionHistory timed out');
 
         if (error) {
             console.error('Error loading completion history:', error);
@@ -47,8 +59,10 @@ async function loadCompletionHistory() {
                 completionHistory[session.session_date] = session.progress;
             }
         });
+        
+        console.log('loadCompletionHistory: Completed');
     } catch (error) {
-        console.error('Exception in loadCompletionHistory:', error);
+        console.error('Exception in loadCompletionHistory:', error.message);
     }   
 }
 
@@ -56,14 +70,19 @@ async function loadTodaySession() {
     if (!currentUser) return;
 
     try {
+        console.log('loadTodaySession: Starting...');
+        
         const today = new Date().toISOString().split('T')[0];
-        const { data, error } = await window.supabaseClient
+        
+        const queryPromise = window.supabaseClient
             .from('workout_sessions')
             .select('*')
             .eq('user_id', currentUser.id)
             .eq('session_date', today)
             .order('updated_at', { ascending: false })
             .maybeSingle();
+        
+        const { data, error } = await withTimeout(queryPromise, 5000, 'loadTodaySession timed out');
 
         if (error) {
             console.error('Error loading session:', error);
@@ -82,48 +101,64 @@ async function loadTodaySession() {
                 });
             });
         }
+        
+        console.log('loadTodaySession: Completed');
     } catch (error) {
-        console.error('Exception in loadTodaySession:', error);
+        console.error('Exception in loadTodaySession:', error.message);
     }   
 }
 
 // ==================== UI Update Functions ====================
 async function updateUIForAuthenticatedUser(user) {
+    console.log('updateUIForAuthenticatedUser: Starting with user:', user?.id);
+    
     const signoutBtn = document.getElementById('signout-button');
     if (signoutBtn) signoutBtn.classList.remove('hidden');
-    console.log("user: ", user);
+    
+    let profile = null;
     
     try {
-        const { data: profile, error } = await window.supabaseClient
+        console.log('updateUIForAuthenticatedUser: Attempting profile fetch...');
+        
+        // Wrap in timeout to prevent hanging forever
+        const profilePromise = window.supabaseClient
             .from('profiles')
             .select('*')
             .eq('id', user.id)
-            .single();
-
-        userProfile = profile;
-        console.log('User profile loaded:', userProfile);
-
-        if (error) {
-            console.error('Error fetching profile:', error);
-            // Continue without profile - use email as fallback
-        }
-
-        const userInfo = document.getElementById('user-info');
-        if (userInfo) {
-            userInfo.classList.remove('hidden');
-            
-            const fullName = profile?.full_name || user.user_metadata?.full_name || user.email;
-            const firstName = fullName ? fullName.split(' ')[0] : 'User';
-            
-            const nameDisplay = document.getElementById('user-name-display');
-            const initialDisplay = document.getElementById('user-initial');
-            
-            if (nameDisplay) nameDisplay.textContent = firstName;
-            if (initialDisplay) initialDisplay.textContent = firstName.charAt(0).toUpperCase();
+            .maybeSingle();
+        
+        const result = await withTimeout(profilePromise, 5000, 'Profile fetch timed out after 5 seconds');
+        
+        console.log('updateUIForAuthenticatedUser: Profile query result:', result);
+        
+        if (result.error) {
+            console.error('updateUIForAuthenticatedUser: Profile fetch error:', result.error);
+        } else {
+            profile = result.data;
         }
     } catch (error) {
-        console.error('Exception in updateUIForAuthenticatedUser:', error);
+        console.error('updateUIForAuthenticatedUser: Exception during profile fetch:', error.message);
+        // Continue without profile - don't block the app
     }
+
+    userProfile = profile;
+
+    const userInfo = document.getElementById('user-info');
+    if (userInfo) {
+        userInfo.classList.remove('hidden');
+        
+        // Use profile name, user metadata, or email as fallback
+        const fullName = profile?.full_name || user.user_metadata?.full_name || user.email || 'User';
+        const firstName = fullName.split(' ')[0];
+        
+        const nameDisplay = document.getElementById('user-name-display');
+        const initialDisplay = document.getElementById('user-initial');
+        
+        if (nameDisplay) nameDisplay.textContent = firstName;
+        if (initialDisplay) initialDisplay.textContent = firstName.charAt(0).toUpperCase();
+    }
+    
+    console.log('updateUIForAuthenticatedUser: Completed');
 }
 
 function updateUIForGuestUser() {
