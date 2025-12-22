@@ -20,7 +20,6 @@ function playExerciseVideo(videoId) {
 // Open video player modal
 function openVideoPlayer() {
     document.getElementById('video-player-modal').classList.remove('hidden');
-    
     document.getElementById('current-video-title').textContent = currentVideo.title;
     document.getElementById('current-video-description').textContent = 
         `${currentVideo.sets} sets of ${currentVideo.reps} reps${currentVideo.equipment ? ' • ' + currentVideo.equipment : ''}`;

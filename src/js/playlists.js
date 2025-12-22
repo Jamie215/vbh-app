@@ -20,20 +20,20 @@ const PLAYLISTS = [
                 title: 'Reverse Lunge',
                 sets: 3,
                 reps: 8,
+                needsEachSide: true,
                 seconds: 0,
                 equipment: ["Chair (Easier)", "No Chair (More Challenging)"],
                 thumbnail: 'https://img.youtube.com/vi/hq60J8wfNZY/hqdefault.jpg',
-                order: 1
             },
             {
                 id: 'bcEDTtncUD0',
                 title: 'Squat',
                 sets: 3,
                 reps: 8,
+                needsEachSide: false,
                 seconds: 0,
                 equipment:["Chair (Easier)", "No Chair (More Challenging)", "Weight (Challenging)"],
                 thumbnail: 'https://img.youtube.com/vi/bcEDTtncUD0/hqdefault.jpg',
-                order: 2
             }
         ]
     },
@@ -48,30 +48,30 @@ const PLAYLISTS = [
                 title: 'Single Leg Deadlift',
                 sets: 3,
                 reps: 8,
+                needsEachSide: true,
                 seconds: 0,
                 equipment: ["Chair (Easier)", "No Chair (More Challenging)"],
                 thumbnail: 'https://img.youtube.com/vi/6a3qaXho5Q4/hqdefault.jpg',
-                order: 1
             },
             {
                 id: '2bRnmaLAS7o',
                 title: 'Hip Hinge',
                 sets: 3,
                 reps: 8,
+                needsEachSide: true,
                 seconds: 0,
                 equipment: ["Dowel (Easier)", "Weights (More Challenging)"],
                 thumbnail: 'https://img.youtube.com/vi/2bRnmaLAS7o/hqdefault.jpg',
-                order: 2
             },
             {
                 id: 'gqzZ0ExlyMc',
                 title: 'Band External Rotation',
                 sets: 3,
                 reps: 8,
+                needsEachSide: false,
                 seconds: 0,
                 equipment: ["Resistance Band"],
                 thumbnail: 'https://img.youtube.com/vi/gqzZ0ExlyMc/hqdefault.jpg',
-                order: 1
             }
         ]
     }

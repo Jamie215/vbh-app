@@ -384,25 +384,12 @@ button {
 }
 
 /* ==================== Playlist View ==================== */
-.playlist-header {
-    background: white;
-    padding: 1.5rem 2rem;
-    border-radius: 12px;
-    margin-bottom: 1.5rem;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.08);
-    border: 1px solid #e9ecef;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 2rem;
-}
-
 .back-button {
     display: inline-flex;
     align-items: center;
     gap: 0.5rem;
     background: transparent;
-    color: #7c3aed;
+    color: #475569;
     border: none;
     font-size: 0.95rem;
     font-weight: 500;
@@ -413,53 +400,43 @@ button {
 }
 
 .back-button:hover {
-    color: #6d28d9;
+    color: #1a1a2e;
+}
+
+.back-button svg {
+    width: 18px;
+    height: 18px;
+}
+
+.playlist-info {
+    margin-bottom: 1.5rem;
 }
 
 .playlist-info h1 {
-    font-size: 1.5rem;
+    font-size: 1.75rem;
+    font-weight: 700;
     color: #1a1a2e;
-    margin-bottom: 0.25rem;
+    margin-bottom: 0.75rem;
 }
 
 .playlist-info p {
-    color: #64748b;
+    color: #475569;
     font-size: 0.95rem;
+    line-height: 1.6;
 }
 
-.save-progress-btn {
-    background: #0d9488;
-    color: white;
-    padding: 0.75rem 1.5rem;
-    font-size: 1rem;
-    font-weight: 600;
-    white-space: nowrap;
-    border: none;
-    border-radius: 6px;
-    cursor: pointer;
-    transition: background 0.2s ease;
+.playlist-info p strong {
+    color: #1a1a2e;
 }
 
-.save-progress-btn:hover {
-    background: #0f766e;
-}
-
-.save-progress-btn:disabled {
-    background: #94a3b8;
-    cursor: not-allowed;
-}
-
-.save-progress-btn.saved {
-    background: #10b981;
-}
-
-/* ==================== Exercise Table ==================== */
+/* ==================== Exercise Table - Updated Layout ==================== */
 .exercise-table-container {
     background: white;
     border-radius: 12px;
     overflow: hidden;
     box-shadow: 0 1px 3px rgba(0,0,0,0.08);
     border: 1px solid #e9ecef;
+    margin-bottom: 1.5rem;
 }
 
 .exercise-table {
@@ -477,7 +454,26 @@ button {
     text-align: left;
     font-weight: 600;
     color: #475569;
-    font-size: 0.9rem;
+    font-size: 0.875rem;
+    white-space: nowrap;
+}
+
+.exercise-table th.col-order {
+    width: 100px;
+    text-align: center;
+}
+
+.exercise-table th.col-name {
+    width: 30%;
+}
+
+.exercise-table th.col-sets-reps {
+    width: 180px;
+    text-align: center;
+}
+
+.exercise-table th.col-equipment {
+    width: auto;
 }
 
 .exercise-table td {
@@ -485,6 +481,17 @@ button {
     border-bottom: 1px solid #f1f5f9;
     color: #1a1a2e;
     vertical-align: middle;
+}
+
+.exercise-table td.col-order {
+    text-align: center;
+    font-weight: 500;
+    color: #64748b;
+    font-size: 1rem;
+}
+
+.exercise-table td.col-sets-reps {
+    text-align: center;
 }
 
 .exercise-table tbody tr:last-child td {
@@ -495,6 +502,7 @@ button {
     background: #fafbfc;
 }
 
+/* Exercise name cell with thumbnail */
 .exercise-video-cell {
     display: flex;
     align-items: center;
@@ -503,12 +511,13 @@ button {
 
 .video-thumbnail-wrapper {
     position: relative;
-    width: 140px;
-    height: 80px;
+    width: 120px;
+    height: 70px;
     flex-shrink: 0;
     cursor: pointer;
-    border-radius: 8px;
+    border-radius: 6px;
     overflow: hidden;
+    background: #e2e8f0;
 }
 
 .video-thumbnail {
@@ -528,16 +537,16 @@ button {
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    background: rgba(0, 0, 0, 0.7);
+    background: rgba(0, 0, 0, 0.6);
     color: white;
-    width: 40px;
-    height: 40px;
+    width: 32px;
+    height: 32px;
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 1rem;
-    padding-left: 3px;
+    font-size: 0.75rem;
+    padding-left: 2px;
     transition: background 0.2s ease;
 }
 
@@ -547,48 +556,92 @@ button {
 
 .exercise-name {
     font-weight: 600;
-    font-size: 1rem;
+    font-size: 0.95rem;
     color: #1a1a2e;
 }
 
+/* Sets/Reps text */
 .sets-reps-text {
     color: #475569;
-    font-size: 0.95rem;
+    font-size: 0.9rem;
+    line-height: 1.4;
 }
 
-/* ==================== Equipment Badges ==================== */
-.equipment-badge {
-    display: inline-block;
-    padding: 0.35rem 0.75rem;
-    border-radius: 20px;
+.sets-reps-text .each-side {
+    display: block;
     font-size: 0.85rem;
-    margin-right: 0.5rem;
-    margin-bottom: 0.25rem;
-    font-weight: 500;
+    color: #64748b;
 }
 
+/* ==================== Equipment Badges - New Design ==================== */
+.equipment-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.4rem 0.75rem;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 500;
+    white-space: nowrap;
+}
+
+/* Equipment colored dots */
+.equipment-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+.dot-easier {
+    background-color: #22c55e;
+}
+
+.dot-more-challenging {
+    background-color: #f59e0b;
+}
+
+.dot-challenging {
+    background-color: #ef4444;
+}
+
+.dot-neutral {
+    background-color: #3b82f6;
+}
+
+/* Badge backgrounds */
 .equipment-badge.badge-easier {
-    background: #d1fae5;
-    color: #065f46;
-    border: 1px solid #a7f3d0;
+    background: #dcfce7;
+    color: #166534;
 }
 
 .equipment-badge.badge-more-challenging {
     background: #fef3c7;
     color: #92400e;
-    border: 1px solid #fde68a;
 }
 
 .equipment-badge.badge-challenging {
     background: #fee2e2;
     color: #991b1b;
-    border: 1px solid #fecaca;
 }
 
 .equipment-badge.badge-neutral {
+    background: #dbeafe;
+    color: #1e40af;
+}
+
+.equipment-badge.badge-none {
     background: #f1f5f9;
-    color: #475569;
-    border: 1px solid #e2e8f0;
+    color: #64748b;
+}
+
+/* "or" separator between equipment options */
+.equipment-separator {
+    display: inline-block;
+    margin: 0 0.5rem;
+    color: #94a3b8;
+    font-size: 0.85rem;
+    font-weight: 400;
 }
 
 .no-equipment {
@@ -596,7 +649,52 @@ button {
     font-style: italic;
 }
 
-/* ==================== Set Counter ==================== */
+/* ==================== Save Progress Button - Bottom Right ==================== */
+.save-progress-container {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 1.5rem;
+}
+
+.save-progress-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: #0d9488;
+    color: white;
+    padding: 0.75rem 1.5rem;
+    font-size: 0.95rem;
+    font-weight: 600;
+    white-space: nowrap;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    position: -webkit-sticky;
+    position: sticky;
+    z-index: 9999;
+}
+
+.save-progress-btn:hover {
+    background: #0f766e;
+    transform: translateY(-1px);
+}
+
+.save-progress-btn:disabled {
+    background: #94a3b8;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.save-progress-btn.saved {
+    background: #10b981;
+}
+
+.save-progress-btn .save-icon {
+    font-size: 1rem;
+}
+
+/* ==================== Set Counter (kept for potential future use) ==================== */
 .sets-counter {
     display: flex;
     align-items: center;
@@ -1000,15 +1098,6 @@ button {
         display: none;
     }
 
-    .playlist-header {
-        flex-direction: column;
-        align-items: stretch;
-    }
-
-    .save-progress-btn {
-        width: 100%;
-    }
-
     #todays-workout-card {
         flex-direction: column;
         max-width: 100%;
@@ -1017,6 +1106,11 @@ button {
     .todays-workout-thumbnail {
         width: 100%;
         height: 180px;
+    }
+    
+    .exercise-table th,
+    .exercise-table td {
+        padding: 1rem;
     }
 }
 
@@ -1036,27 +1130,34 @@ button {
 
     .exercise-table th,
     .exercise-table td {
-        padding: 1rem 0.75rem;
+        padding: 0.75rem;
     }
 
     .exercise-video-cell {
         flex-direction: column;
         align-items: flex-start;
+        gap: 0.5rem;
     }
 
     .video-thumbnail-wrapper {
         width: 100%;
-        max-width: 200px;
-        height: 110px;
+        max-width: 160px;
+        height: 90px;
     }
 
-    .col-equipment,
-    .col-sets-reps {
+    /* Hide equipment on mobile, show order and name */
+    .exercise-table th.col-equipment,
+    .exercise-table td.col-equipment {
         display: none;
     }
 
     .playlist-info h1 {
         font-size: 1.25rem;
+    }
+    
+    .equipment-badge {
+        font-size: 0.75rem;
+        padding: 0.3rem 0.6rem;
     }
 }
 
@@ -1077,5 +1178,11 @@ button {
     .signup-footer .primary-button {
         width: 100%;
         order: 1;
+    }
+    
+    /* On very small screens, simplify table further */
+    .exercise-table th.col-sets-reps,
+    .exercise-table td.col-sets-reps {
+        display: none;
     }
 }

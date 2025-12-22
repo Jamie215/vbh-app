@@ -306,8 +306,13 @@ function showPlaylist(playlistId) {
     // Update playlist info
     const titleEl = document.getElementById('playlist-title');
     const descEl = document.getElementById('playlist-description');
-    if (titleEl) titleEl.textContent = currentPlaylist.title;
-    if (descEl) descEl.textContent = currentPlaylist.description;
+
+    // Create formatted title like "Beginner 3-6 Exercises"
+    const isAdvanced = currentPlaylist.id.includes('advanced');
+    const formattedTitle = isAdvanced ? 'Advanced 4-6 Exercises' : 'Beginner 0-3 Exercises';
+    
+    if (titleEl) titleEl.textContent = formattedTitle;
+    if (descEl) descEl.innerHTML = `<strong><u>Instructions</u></strong>: Go through the below exercises at your own pace. Click to watch the videos to see how each exercise is done. Tap 'Save Progress' to keep your place in the workout.`;
 
     // Show save button
     const saveBtn = document.getElementById('save-progress-btn');
@@ -325,14 +330,14 @@ function getEquipmentBadgeClass(equipmentText) {
     const lowerText = equipmentText.toLowerCase();
     
     if (lowerText.includes('easier')) {
-        return 'badge-easier';
+        return 'easier';
     } else if (lowerText.includes('more challenging')) {
-        return 'badge-more-challenging';
+        return 'more-challenging';
     } else if (lowerText.includes('challenging')) {
-        return 'badge-challenging';
+        return 'challenging';
     }
     
-    return 'badge-neutral';
+    return 'neutral';
 }
 
 function loadExerciseTable() {
@@ -341,12 +346,19 @@ function loadExerciseTable() {
     
     tbody.innerHTML = '';
 
-    currentPlaylist.videos.forEach((video) => {
+    currentPlaylist.videos.forEach((video, index) => {
         const row = document.createElement('tr');
-        
-        // Video cell
-        const videoCell = document.createElement('td');
-        videoCell.innerHTML = `
+
+        // Order column
+        const orderCell = document.createElement('td');
+        orderCell.className = 'col-order';
+        orderCell.textContent = index + 1;
+        row.appendChild(orderCell);
+
+        // Name column
+        const nameCell = document.createElement('td');
+        nameCell.className = 'col-name';
+        nameCell.innerHTML = `
           <div class="exercise-video-cell">
             <div class="video-thumbnail-wrapper" onclick="playExerciseVideo('${video.id}')">
                 <img src="${video.thumbnail}" alt="${video.title}" class="video-thumbnail">
@@ -354,63 +366,36 @@ function loadExerciseTable() {
             <span class="exercise-name">${video.title}</span>
           </div>  
         `;
-        row.appendChild(videoCell);
+        row.appendChild(nameCell);
 
-        // Sets/reps cell
+        // Sets/reps column
         const setsRepsCell = document.createElement('td');
-        setsRepsCell.innerHTML = `<span class="sets-reps-text">${video.sets} sets of ${video.reps} reps</span>`;
+        setsRepsCell.className = 'col-sets-reps';
+        const setsRepsText = `${video.sets} sets of ${video.reps} reps${video.needsEachSide ? ' (each side)' : ''}`;
+        setsRepsCell.innerHTML = `<span class="sets-reps-text">${setsRepsText}</span>`;
         row.appendChild(setsRepsCell);
 
-        // Equipment cell
+        // Equipment column
         const equipmentCell = document.createElement('td');
+        equipmentCell.className = 'col-equipment';
+
         if (video.equipment && Array.isArray(video.equipment) && video.equipment.length > 0) {
-            const badges = video.equipment.map(item => {
-                const badgeClass = getEquipmentBadgeClass(item);
-                return `<span class="equipment-badge ${badgeClass}">${item}</span>`;
-            }).join(' ');
-            equipmentCell.innerHTML = badges;
+            const badges = video.equipment.map((item, i) => {
+                const difficulty = getEquipmentDifficulty(item);
+                const displayName = getEquipmentDisplayName(item);
+                const dotClass = `dot-${difficulty}`;
+                return `<span class="equipment-badge ${dotClass}">${displayName}</span>`;
+            });
+
+            equipmentCell.innerHTML = badges.join('<span class="equipment-separator">or</span>');
         } else if (video.equipment && typeof video.equipment === 'string') {
-            equipmentCell.innerHTML = `<span class="equipment-badge">${video.equipment}</span>`;
+            const difficulty = getEquipmentDifficulty(video.equipment);
+            const displayName = getEquipmentDisplayName(video.equipment);
+            equipmentCell.innerHTML = `<span class="equipment-badge badge-${difficulty}"><span class="equipment-dot dot-${difficulty}"></span>${displayName}</span>`;
         } else {
-            equipmentCell.innerHTML = `<span class="no-equipment">—</span>`;
+            equipmentCell.innerHTML = `<span class="equipment-badge badge-none">None Needed</span>`;
         }
         row.appendChild(equipmentCell);
-
-        // Completion cell
-        const completionCell = document.createElement('td');
-        
-        let completedSets = 0;
-        if (todaySession?.progress?.[currentPlaylist.id]?.[video.id]) {
-            completedSets = todaySession.progress[currentPlaylist.id][video.id] || 0;
-        } else if (sessionProgress[currentPlaylist.id]?.[video.id]) {
-            completedSets = sessionProgress[currentPlaylist.id][video.id] || 0;
-        }
-        
-        completionCell.innerHTML = `
-            <div class="sets-counter">
-                <button type="button" 
-                        class="counter-btn minus-btn" 
-                        onclick="decrementSets('${video.id}', ${video.sets})"
-                        ${completedSets <= 0 ? 'disabled' : ''}>
-                    −
-                </button>
-                <input type="number" 
-                       id="sets_${video.id}"
-                       class="sets-input" 
-                       value="${completedSets}" 
-                       min="0" 
-                       max="${video.sets}"
-                       onchange="updateSetsCount('${video.id}', ${video.sets})"
-                       readonly>
-                <button type="button" 
-                        class="counter-btn plus-btn" 
-                        onclick="incrementSets('${video.id}', ${video.sets})">
-                    +
-                </button>
-                <span class="sets-label">/ ${video.sets} sets</span>
-            </div>
-        `;
-        row.appendChild(completionCell);
 
         tbody.appendChild(row);
     });
@@ -498,7 +483,7 @@ async function saveProgress() {
             console.error('Error saving progress:', error);
             alert('Error saving progress. Please try again.');
             saveBtn.disabled = false;
-            saveBtn.textContent = 'Save My Progress For This Session';
+            saveBtn.textContent = 'Save Progress';
             return;
         }
 
@@ -510,14 +495,14 @@ async function saveProgress() {
 
         setTimeout(() => {
             saveBtn.classList.remove('saved');
-            saveBtn.textContent = 'Save My Progress For This Session';
+            saveBtn.textContent = 'Save Progress';
             saveBtn.disabled = false;
         }, 2000);
     } catch (error) {
         console.error('Exception saving progress:', error);
         alert('Error saving progress. Please try again.');
         saveBtn.disabled = false;
-        saveBtn.textContent = 'Save My Progress For This Session';
+        saveBtn.textContent = 'Save Progress';
     }
 }
 

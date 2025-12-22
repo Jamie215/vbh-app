@@ -123,32 +123,37 @@
 
         <!-- Playlist View (hidden by default) -->
         <main id="playlist-view" class="hidden">
-            <button class="back-button" onclick="showHome()">← Back to Playlists</button>
-            <div class="playlist-header">
-                <div class="playlist-info">
-                    <h1 id="playlist-title"></h1>
-                    <p id="playlist-description"></p>
-                </div>
-                <div id="save-progress-section">
-                    <button id="save-progress-btn" class="save-progress-btn hidden" onclick="saveProgress()">
-                        Save My Progress For This Session
-                    </button>
-                </div>
+            <button class="back-button" onclick="showHome()">← Go Back</button>
+            <!-- Playlist Info with Instructions -->
+            <div class="playlist-info">
+                <h1 id="playlist-title">Beginner 3-6 Exercises</h1>
+                <p id="playlist-description">
+                    <strong><u>Instructions</u></strong>: Go through the below exercises at your own pace. 
+                    Click to watch the videos to see how each exercise is done. 
+                    Tap 'Save Progress' to keep your place in the workout.
+                </p>
             </div>
 
             <div class="exercise-table-container">
                 <table class="exercise-table">
                     <thead>
                         <tr>
-                            <th class="col-video">Name</th>
-                            <th class="col-sets-reps">Recommended Number of Sets/Reps</th>
+                            <th class="col-order">Order of <br>Exercises</th>
+                            <th class="col-name">Name</th>
+                            <th class="col-sets-reps">Recommended <br>Number of Sets/Reps</th>
                             <th class="col-equipment">Recommended Equipment(s)</th>
-                            <th class="col-completion">Number of Sets Completed</th>
                         </tr>
                     </thead>
                     <tbody id="exercise-table-body">
                     </tbody>
                 </table>
+            </div>
+
+            <!-- Save Progress Button - Bottom Right -->
+            <div class="save-progress-container">
+                <button id="save-progress-btn" class="save-progress-btn hidden" onclick="saveProgress()">
+                    Save Progress
+                </button>
             </div>
         </main>
 
