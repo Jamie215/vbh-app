@@ -93,21 +93,26 @@ async function updateUIForAuthenticatedUser(user) {
     if (signoutBtn) signoutBtn.classList.remove('hidden');
     
     try {
-        const { data: profile } = await window.supabaseClient
+        const { data: profile, error } = await window.supabaseClient
             .from('profiles')
             .select('*')
             .eq('id', user.id)
-            .single();
+            .maybeSingle();
 
         userProfile = profile;
         console.log('User profile loaded:', userProfile);
+
+        if (error) {
+            console.error('Error fetching profile:', error);
+            // Continue without profile - use email as fallback
+        }
 
         const userInfo = document.getElementById('user-info');
         if (userInfo) {
             userInfo.classList.remove('hidden');
             
-            const fullName = profile?.full_name || user.email;
-            const firstName = fullName.split(' ')[0];
+            const fullName = profile?.full_name || user.user_metadata?.full_name || user.email;
+            const firstName = fullName ? fullName.split(' ')[0] : 'User';
             
             const nameDisplay = document.getElementById('user-name-display');
             const initialDisplay = document.getElementById('user-initial');
@@ -116,7 +121,7 @@ async function updateUIForAuthenticatedUser(user) {
             if (initialDisplay) initialDisplay.textContent = firstName.charAt(0).toUpperCase();
         }
     } catch (error) {
-        console.error('Error loading user profile:', error);
+        console.error('Exception in updateUIForAuthenticatedUser:', error);
     }
 }
 
