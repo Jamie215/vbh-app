@@ -27,15 +27,48 @@ document.addEventListener('DOMContentLoaded', async () => {
         initAuthListener();
     }
 
+    // Add a timeout to prevent infinite loading
+    const initTimeout = setTimeout(() => {
+        console.warn('Initialization timed out, showing auth page');
+        hideLoadingScreen();
+        showAuthPage();
+    }, 10000); // 10 second timeout
+
     // Check for existing session
     try {
-        const { data: { session } } = await window.supabaseClient.auth.getSession();
+        const { data: { session }, error: sessionError } = await window.supabaseClient.auth.getSession();
+        
+        // Clear timeout since we got a response
+        clearTimeout(initTimeout);
+        
+        if (sessionError) {
+            console.error('Session error:', sessionError);
+            hideLoadingScreen();
+            showAuthPage();
+            return;
+        }
             
         if (session) {
             currentUser = session.user;
-            await updateUIForAuthenticatedUser(session.user);
-            await loadTodaySession();
-            await loadCompletionHistory();
+            // Wrap these in try-catch individually so one failure doesn't break everything
+            try {
+                await updateUIForAuthenticatedUser(session.user);
+            } catch (e) {
+                console.error('Error updating UI for authenticated user:', e);
+            }
+            
+            try {
+                await loadTodaySession();
+            } catch (e) {
+                console.error('Error loading today session:', e);
+            }
+            
+            try {
+                await loadCompletionHistory();
+            } catch (e) {
+                console.error('Error loading completion history:', e);
+            }
+            
             hideLoadingScreen();
             showHome();
         } else {
@@ -44,6 +77,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             showAuthPage();
         }
     } catch (error) {
+        clearTimeout(initTimeout);
         console.error('Initialization error:', error);
         hideLoadingScreen();
         showAuthPage();
