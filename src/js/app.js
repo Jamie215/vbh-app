@@ -326,7 +326,14 @@ function showPlaylist(playlistId) {
     loadExerciseTable();
 }
 
-function getEquipmentBadgeClass(equipmentText) {
+// Get equipment display name (strip difficulty hints for cleaner display)
+function getEquipmentDisplayName(equipmentText) {
+    // Remove parenthetical hints like "(Easier)" or "(More Challenging)"
+    return equipmentText.replace(/\s*\([^)]*\)\s*/g, '').trim();
+}
+
+// Get equipment difficulty level
+function getEquipmentDifficulty(equipmentText) {
     const lowerText = equipmentText.toLowerCase();
     
     if (lowerText.includes('easier')) {
@@ -380,7 +387,7 @@ function loadExerciseTable() {
         equipmentCell.className = 'col-equipment';
 
         if (video.equipment && Array.isArray(video.equipment) && video.equipment.length > 0) {
-            const badges = video.equipment.map((item, i) => {
+            const badges = video.equipment.map(item => {
                 const difficulty = getEquipmentDifficulty(item);
                 const displayName = getEquipmentDisplayName(item);
                 const dotClass = `dot-${difficulty}`;
