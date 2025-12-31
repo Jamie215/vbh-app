@@ -871,7 +871,7 @@ button {
 }
 
 /* Right side - set tracking panel (30%) */
-#set-tracking-panel {
+.set-tracking-panel {
     flex: 3;
     min-width: 240px;
 }
