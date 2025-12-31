@@ -161,11 +161,18 @@
         <div id="video-player-modal" class="modal hidden">
             <div class="modal-content video-modal">
                 <button class="close-button" onclick="closeVideo()">✕</button>
-                <div id="player"></div>
-                <div class="video-details">
-                    <h2 id="current-video-title"></h2>
-                    <p id="current-video-description"></p>
+                <!-- Video header with title and recommendation -->
+                <div class="video-header">
+                    <h2 id="current-video-title">Exercise col-name</h2>
+                    <p id="current-video-description">Recommended: 3 sets of 8 reps</p>
                 </div>
+                <!-- Two-column layout: video + tracking panel -->
+                 <div class="video-modal-body">
+                    <div class="video-modal-body">
+                        <div id="player"></div>
+                    </div>
+                    <div id="set-tracking-panel"></div>
+                 </div>
             </div>
         </div>
     </div>
