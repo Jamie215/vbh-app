@@ -468,7 +468,7 @@ button {
 }
 
 .exercise-table th.col-sets-reps {
-    width: 180px;
+    width: 260px;
     text-align: center;
 }
 
@@ -577,15 +577,15 @@ button {
 .equipment-badge {
     display: inline-flex;
     align-items: center;
-    gap: 0.4rem;
-    padding: 0.4rem 0.75rem;
+    gap: 0.5rem;
+    padding: 0.4rem 0.85rem;
     border-radius: 20px;
     font-size: 0.8rem;
     font-weight: 500;
     white-space: nowrap;
 }
 
-/* Equipment colored dots */
+/* Equipment colored dots - strong colors */
 .equipment-dot {
     width: 8px;
     height: 8px;
@@ -598,7 +598,7 @@ button {
 }
 
 .dot-more-challenging {
-    background-color: #f59e0b;
+    background-color: #f97316;
 }
 
 .dot-challenging {
@@ -609,30 +609,34 @@ button {
     background-color: #3b82f6;
 }
 
-/* Badge backgrounds */
+.dot-none {
+    background-color: #9ca3af;
+}
+
+/* Badge backgrounds - lighter/softer colors */
 .equipment-badge.badge-easier {
-    background: #dcfce7;
+    background: #f0fdf4;
     color: #166534;
 }
 
 .equipment-badge.badge-more-challenging {
-    background: #fef3c7;
-    color: #92400e;
+    background: #fffbeb;
+    color: #b45309;
 }
 
 .equipment-badge.badge-challenging {
-    background: #fee2e2;
-    color: #991b1b;
+    background: #fef2f2;
+    color: #b91c1c;
 }
 
 .equipment-badge.badge-neutral {
-    background: #dbeafe;
-    color: #1e40af;
+    background: #eff6ff;
+    color: #1d4ed8;
 }
 
 .equipment-badge.badge-none {
-    background: #f1f5f9;
-    color: #64748b;
+    background: #f9fafb;
+    color: #6b7280;
 }
 
 /* "or" separator between equipment options */
@@ -670,9 +674,6 @@ button {
     border-radius: 8px;
     cursor: pointer;
     transition: all 0.2s ease;
-    position: -webkit-sticky;
-    position: sticky;
-    z-index: 9999;
 }
 
 .save-progress-btn:hover {

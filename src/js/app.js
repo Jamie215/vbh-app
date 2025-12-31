@@ -303,10 +303,10 @@ function showPlaylist(playlistId) {
     if (playlistView) playlistView.classList.remove('hidden');
     if (authView) authView.classList.add('hidden');
 
-    // Update playlist info
+    // Update playlist info with new title format
     const titleEl = document.getElementById('playlist-title');
     const descEl = document.getElementById('playlist-description');
-
+    
     // Create formatted title like "Beginner 3-6 Exercises"
     const isAdvanced = currentPlaylist.id.includes('advanced');
     const formattedTitle = isAdvanced ? 'Advanced 4-6 Exercises' : 'Beginner 0-3 Exercises';
@@ -355,14 +355,14 @@ function loadExerciseTable() {
 
     currentPlaylist.videos.forEach((video, index) => {
         const row = document.createElement('tr');
-
+        
         // Order column
         const orderCell = document.createElement('td');
         orderCell.className = 'col-order';
         orderCell.textContent = index + 1;
         row.appendChild(orderCell);
-
-        // Name column
+        
+        // Name column (thumbnail + title)
         const nameCell = document.createElement('td');
         nameCell.className = 'col-name';
         nameCell.innerHTML = `
@@ -378,29 +378,47 @@ function loadExerciseTable() {
         // Sets/reps column
         const setsRepsCell = document.createElement('td');
         setsRepsCell.className = 'col-sets-reps';
-        const setsRepsText = `${video.sets} sets of ${video.reps} reps${video.needsEachSide ? ' (each side)' : ''}`;
+        
+        // Handle "each side" notation for single-leg exercises
+        const needsEachSide = video.title.toLowerCase().includes('single leg') || 
+                             video.title.toLowerCase().includes('hand squeeze');
+        const setsRepsText = needsEachSide 
+            ? `${video.sets} sets of ${video.reps} reps<br><span class="each-side">(each side)</span>`
+            : `${video.sets} sets of ${video.reps} reps`;
+        
         setsRepsCell.innerHTML = `<span class="sets-reps-text">${setsRepsText}</span>`;
         row.appendChild(setsRepsCell);
 
-        // Equipment column
+        // Equipment column with colored dots and "or" separators
         const equipmentCell = document.createElement('td');
         equipmentCell.className = 'col-equipment';
-
+        
         if (video.equipment && Array.isArray(video.equipment) && video.equipment.length > 0) {
-            const badges = video.equipment.map(item => {
+            const badges = video.equipment.map((item, i) => {
                 const difficulty = getEquipmentDifficulty(item);
                 const displayName = getEquipmentDisplayName(item);
                 const dotClass = `dot-${difficulty}`;
-                return `<span class="equipment-badge ${dotClass}">${displayName}</span>`;
+                
+                return `<span class="equipment-badge badge-${difficulty}">
+                    <span class="equipment-dot ${dotClass}"></span>
+                    ${displayName}
+                </span>`;
             });
-
+            
+            // Join with "or" separator
             equipmentCell.innerHTML = badges.join('<span class="equipment-separator">or</span>');
         } else if (video.equipment && typeof video.equipment === 'string') {
             const difficulty = getEquipmentDifficulty(video.equipment);
             const displayName = getEquipmentDisplayName(video.equipment);
-            equipmentCell.innerHTML = `<span class="equipment-badge badge-${difficulty}"><span class="equipment-dot dot-${difficulty}"></span>${displayName}</span>`;
+            equipmentCell.innerHTML = `<span class="equipment-badge badge-${difficulty}">
+                <span class="equipment-dot dot-${difficulty}"></span>
+                ${displayName}
+            </span>`;
         } else {
-            equipmentCell.innerHTML = `<span class="equipment-badge badge-none">None Needed</span>`;
+            equipmentCell.innerHTML = `<span class="equipment-badge badge-none">
+                <span class="equipment-dot dot-none"></span>
+                None Needed
+            </span>`;
         }
         row.appendChild(equipmentCell);
 
@@ -466,7 +484,7 @@ async function saveProgress() {
     if (!saveBtn) return;
     
     saveBtn.disabled = true;
-    saveBtn.textContent = 'Saving...';
+    saveBtn.innerHTML = '<span class="save-icon">⏳</span> Saving...';
 
     const today = new Date().toISOString().split('T')[0];
 
@@ -490,7 +508,7 @@ async function saveProgress() {
             console.error('Error saving progress:', error);
             alert('Error saving progress. Please try again.');
             saveBtn.disabled = false;
-            saveBtn.textContent = 'Save Progress';
+            saveBtn.innerHTML = '<span class="save-icon">💾</span> Save Progress';
             return;
         }
 
@@ -498,18 +516,18 @@ async function saveProgress() {
         await loadCompletionHistory();
 
         saveBtn.classList.add('saved');
-        saveBtn.textContent = '✓ Progress Saved!';
+        saveBtn.innerHTML = '<span class="save-icon">✓</span> Progress Saved!';
 
         setTimeout(() => {
             saveBtn.classList.remove('saved');
-            saveBtn.textContent = 'Save Progress';
+            saveBtn.innerHTML = '<span class="save-icon">💾</span> Save Progress';
             saveBtn.disabled = false;
         }, 2000);
     } catch (error) {
         console.error('Exception saving progress:', error);
         alert('Error saving progress. Please try again.');
         saveBtn.disabled = false;
-        saveBtn.textContent = 'Save Progress';
+        saveBtn.innerHTML = '<span class="save-icon">💾</span> Save Progress';
     }
 }
 
