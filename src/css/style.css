@@ -856,9 +856,9 @@ button {
     align-items: flex-start;
 }
 
-/* Left side - video player */
+/* Left side - video player (70%) */
 .video-player-section {
-    flex: 1;
+    flex: 7;
     min-width: 0;
 }
 
@@ -870,10 +870,10 @@ button {
     overflow: hidden;
 }
 
-/* Right side - set tracking panel */
+/* Right side - set tracking panel (30%) */
 #set-tracking-panel {
-    width: 280px;
-    flex-shrink: 0;
+    flex: 3;
+    min-width: 240px;
 }
 
 .tracking-header {
