@@ -859,7 +859,7 @@ button {
 /* Left side - video player (70%) */
 .video-player-section {
     flex: 7;
-    min-width: 0;
+    min-width: 480px;
 }
 
 #player {
@@ -871,7 +871,7 @@ button {
 }
 
 /* Right side - set tracking panel (30%) */
-.set-tracking-panel {
+#set-tracking-panel {
     flex: 3;
     min-width: 240px;
 }
