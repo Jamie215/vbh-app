@@ -74,7 +74,7 @@ function openVideoPlayer() {
 
 // Render the set tracking panel on the right side
 function renderSetTrackingPanel() {
-    const panel = document.getElementsByClassName('set-tracking-panel');
+    const panel = document.getElementById('set-tracking-panel');
     if (!panel) return;
     
     let setsHTML = '';
