@@ -130,8 +130,22 @@ function getPlaylistLastCompletion(playlistId) {
             const totalExercises = playlist.videos.length;
 
             playlist.videos.forEach(video => {
-                const completedSets = progress[playlistId][video.id] || 0;
-                if (completedSets > 0) completedCount++;
+                const videoProgress = progress[playlistId][video.id];
+                
+                if (videoProgress) {
+                    // Check if it's the new structure (object with set1, set2, etc.)
+                    if (typeof videoProgress === 'object' && !Array.isArray(videoProgress)) {
+                        // Count if any set is completed
+                        const hasCompletedSet = Object.keys(videoProgress).some(key => {
+                            return key.startsWith('set') && videoProgress[key]?.completed === true;
+                        });
+                        if (hasCompletedSet) completedCount++;
+                    } 
+                    // Backward compatibility: old structure where videoProgress is a number
+                    else if (typeof videoProgress === 'number' && videoProgress > 0) {
+                        completedCount++;
+                    }
+                }
             });
 
             if (completedCount > 0) {
