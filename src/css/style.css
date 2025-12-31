@@ -676,6 +676,10 @@ button {
     transition: all 0.2s ease;
 }
 
+.save-progress-btn i {
+    font-size: 0.9rem;
+}
+
 .save-progress-btn:hover {
     background: #0f766e;
     transform: translateY(-1px);
@@ -689,10 +693,6 @@ button {
 
 .save-progress-btn.saved {
     background: #10b981;
-}
-
-.save-progress-btn .save-icon {
-    font-size: 1rem;
 }
 
 /* ==================== Set Counter (kept for potential future use) ==================== */
@@ -811,8 +811,8 @@ button {
     top: 1rem;
     right: 1rem;
     background: transparent;
-    color: #1a1a2e;
-    font-size: 1.75rem;
+    color: #64748b;
+    font-size: 1.25rem;
     padding: 0.5rem;
     width: 40px;
     height: 40px;
@@ -929,13 +929,17 @@ button {
     height: 32px;
     background: #f8fafc;
     border: none;
-    font-size: 1rem;
+    font-size: 0.75rem;
     color: #64748b;
     cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
     transition: all 0.15s ease;
+}
+
+.rep-btn i {
+    font-size: 0.7rem;
 }
 
 .rep-btn:hover {
@@ -1005,24 +1009,20 @@ button {
     transition: all 0.15s ease;
 }
 
+.checkmark-box i {
+    color: white;
+    font-size: 0.7rem;
+    opacity: 0;
+    transition: opacity 0.15s ease;
+}
+
 .set-checkbox:checked + .checkmark-box {
     background: #7c3aed;
     border-color: #7c3aed;
 }
 
-.checkmark-box::after {
-    content: '';
-    display: none;
-    width: 5px;
-    height: 10px;
-    border: solid white;
-    border-width: 0 2px 2px 0;
-    transform: rotate(45deg);
-    margin-bottom: 2px;
-}
-
-.set-checkbox:checked + .checkmark-box::after {
-    display: block;
+.set-checkbox:checked + .checkmark-box i {
+    opacity: 1;
 }
 
 .set-checkbox-wrapper:hover .checkmark-box {

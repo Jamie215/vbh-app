@@ -484,7 +484,7 @@ async function saveProgress() {
     if (!saveBtn) return;
     
     saveBtn.disabled = true;
-    saveBtn.innerHTML = '<span class="save-icon">⏳</span> Saving...';
+    saveBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Saving...';
 
     const today = new Date().toISOString().split('T')[0];
 
@@ -508,7 +508,7 @@ async function saveProgress() {
             console.error('Error saving progress:', error);
             alert('Error saving progress. Please try again.');
             saveBtn.disabled = false;
-            saveBtn.innerHTML = '<span class="save-icon">💾</span> Save Progress';
+            saveBtn.innerHTML = '<i class="fa-solid fa-floppy-disk"></i> Save Progress';
             return;
         }
 
@@ -516,18 +516,18 @@ async function saveProgress() {
         await loadCompletionHistory();
 
         saveBtn.classList.add('saved');
-        saveBtn.innerHTML = '<span class="save-icon">✓</span> Progress Saved!';
+        saveBtn.innerHTML = '<i class="fa-solid fa-check"></i> Progress Saved!';
 
         setTimeout(() => {
             saveBtn.classList.remove('saved');
-            saveBtn.innerHTML = '<span class="save-icon">💾</span> Save Progress';
+            saveBtn.innerHTML = '<i class="fa-solid fa-floppy-disk"></i> Save Progress';
             saveBtn.disabled = false;
         }, 2000);
     } catch (error) {
         console.error('Exception saving progress:', error);
         alert('Error saving progress. Please try again.');
         saveBtn.disabled = false;
-        saveBtn.innerHTML = '<span class="save-icon">💾</span> Save Progress';
+        saveBtn.innerHTML = '<i class="fa-solid fa-floppy-disk"></i> Save Progress';
     }
 }
 

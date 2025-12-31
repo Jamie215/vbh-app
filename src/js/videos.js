@@ -85,7 +85,9 @@ function renderSetTrackingPanel() {
             <div class="set-row">
                 <span class="set-label">Set ${i}</span>
                 <div class="rep-counter">
-                    <button type="button" class="rep-btn minus" onclick="decrementReps(${i})">−</button>
+                    <button type="button" class="rep-btn minus" onclick="decrementReps(${i})">
+                        <i class="fa-solid fa-minus"></i>
+                    </button>
                     <input type="number" 
                            id="reps_set${i}" 
                            class="rep-input" 
@@ -93,7 +95,9 @@ function renderSetTrackingPanel() {
                            min="0" 
                            max="99"
                            onchange="updateReps(${i})">
-                    <button type="button" class="rep-btn plus" onclick="incrementReps(${i})">+</button>
+                    <button type="button" class="rep-btn plus" onclick="incrementReps(${i})">
+                        <i class="fa-solid fa-plus"></i>
+                    </button>
                 </div>
                 <span class="reps-label">reps</span>
                 <label class="set-checkbox-wrapper">
@@ -102,7 +106,9 @@ function renderSetTrackingPanel() {
                            class="set-checkbox" 
                            ${setData.completed ? 'checked' : ''}
                            onchange="toggleSetCompleted(${i})">
-                    <span class="checkmark-box"></span>
+                    <span class="checkmark-box">
+                        <i class="fa-solid fa-check"></i>
+                    </span>
                 </label>
             </div>
         `;
