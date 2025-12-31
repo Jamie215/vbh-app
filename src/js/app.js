@@ -239,16 +239,29 @@ function createPlaylistCard(playlist) {
     
     if (completion) {
         const dateStr = formatCompletionDate(completion.date);
-        completionHTML = `
+        if (dateStr === 'today') {
+            completionHTML = `
             <div class="completion-status">
                 <div class="checkmark">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
                         <path d="M20 6L9 17l-5-5"/>
                     </svg>
                 </div>
-                <span>You completed ${completion.completedExercises}/${completion.totalExercises} exercises on ${dateStr}</span>
+                <span>You completed ${completion.completedExercises}/${completion.totalExercises} exercises ${dateStr}</span>
             </div>
         `;
+        } else {
+            completionHTML = `
+                <div class="completion-status">
+                    <div class="checkmark">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                            <path d="M20 6L9 17l-5-5"/>
+                        </svg>
+                    </div>
+                    <span>You completed ${completion.completedExercises}/${completion.totalExercises} exercises on ${dateStr}</span>
+                </div>
+            `;
+        }
     }
     
     card.innerHTML = `
