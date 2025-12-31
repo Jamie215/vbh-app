@@ -124,7 +124,7 @@
 
         <!-- Playlist View (hidden by default) -->
         <main id="playlist-view" class="hidden">
-            <button class="back-button" onclick="showHome()">← Go Back</button>
+            <button class="back-button" onclick="showHome()"><i class="fa-solid fa-arrow-left"></i> Go Back</button>
             <!-- Playlist Info with Instructions -->
             <div class="playlist-info">
                 <h1 id="playlist-title">Beginner 3-6 Exercises</h1>
@@ -152,8 +152,7 @@
 
             <!-- Save Progress Button - Bottom Right -->
             <div class="save-progress-container">
-                <button id="save-progress-btn" class="save-progress-btn hidden" onclick="saveProgress()">
-                    Save Progress
+                <button id="save-progress-btn" class="save-progress-btn hidden" onclick="saveProgress()"><i class="fa-solid fa-floppy-disk"></i>Save Progress
                 </button>
             </div>
         </main>
@@ -161,7 +160,7 @@
         <!-- Video Player Modal -->
         <div id="video-player-modal" class="modal hidden">
             <div class="modal-content video-modal">
-                <button class="close-button" onclick="closeVideo()">✕</button>
+                <button class="close-button" onclick="closeVideo()"><i class="fa-solid fa-xmark"></i></button>
                 <!-- Video header with title and recommendation -->
                 <div class="video-header">
                     <h2 id="current-video-title">Exercise col-name</h2>
