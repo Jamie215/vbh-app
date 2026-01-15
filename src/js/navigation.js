@@ -1,153 +1,118 @@
-// ==================== Navigation Controller ====================
-// Single source of truth for all view transitions
+// Navigation controller - handles view switching
 
-// View elements
-const views = {
-    loading: () => document.getElementById('loading-screen'),
-    auth: () => document.getElementById('auth-view'),
-    home: () => document.getElementById('home-view'),
-    playlist: () => document.getElementById('playlist-view'),
-    navbar: () => document.getElementById('navbar'),
-    signinForm: () => document.getElementById('signin-view'),
-    signupForm: () => document.getElementById('signup-view')
-};
-
-// Hide all main views
-function hideAllViews() {
-    const loading = views.loading();
-    const auth = views.auth();
-    const home = views.home();
-    const playlist = views.playlist();
-    
-    if (loading) loading.classList.add('hidden');
-    if (auth) auth.classList.add('hidden');
-    if (home) home.classList.add('hidden');
-    if (playlist) playlist.classList.add('hidden');
-}
-
-// Show loading screen
-function showLoadingScreen() {
-    hideAllViews();
-    const loading = views.loading();
-    if (loading) loading.classList.remove('hidden');
-    
-    const navbar = views.navbar();
-    if (navbar) navbar.classList.add('hidden');
-}
-
-// Hide loading screen
+// ==================== Loading Screen ====================
 function hideLoadingScreen() {
-    const loading = views.loading();
-    if (loading) loading.classList.add('hidden');
+    const loadingScreen = document.getElementById('loading-screen');
+    if (loadingScreen) {
+        loadingScreen.classList.add('hidden');
+    }
 }
 
-// Show auth page (for guests)
+function showLoadingScreen() {
+    const loadingScreen = document.getElementById('loading-screen');
+    if (loadingScreen) {
+        loadingScreen.classList.remove('hidden');
+    }
+}
+
+// ==================== Auth Page ====================
 function showAuthPage() {
-    hideAllViews();
-    const auth = views.auth();
-    if (auth) auth.classList.remove('hidden');
+    const authView = document.getElementById('auth-view');
+    const homeView = document.getElementById('home-view');
+    const playlistView = document.getElementById('playlist-view');
+    const progressView = document.getElementById('progress-view');
+    const navbar = document.getElementById('navbar');
     
-    const navbar = views.navbar();
+    if (authView) authView.classList.remove('hidden');
+    if (homeView) homeView.classList.add('hidden');
+    if (playlistView) playlistView.classList.add('hidden');
+    if (progressView) progressView.classList.add('hidden');
     if (navbar) navbar.classList.add('hidden');
+}
+
+function showSignInView() {
+    const signinView = document.getElementById('signin-view');
+    const signupView = document.getElementById('signup-view');
     
-    // Default to sign in view
-    showSignInView();
+    if (signinView) signinView.classList.remove('hidden');
+    if (signupView) signupView.classList.add('hidden');
+    
+    // Clear any messages
+    const signinMessage = document.getElementById('signin-message');
+    const signupMessage = document.getElementById('signup-message');
+    if (signinMessage) signinMessage.textContent = '';
+    if (signupMessage) signupMessage.textContent = '';
 }
 
-// Hide auth page
-function hideAuthPage() {
-    const auth = views.auth();
-    if (auth) auth.classList.add('hidden');
+function showSignUpView() {
+    const signinView = document.getElementById('signin-view');
+    const signupView = document.getElementById('signup-view');
+    
+    if (signinView) signinView.classList.add('hidden');
+    if (signupView) signupView.classList.remove('hidden');
+    
+    // Clear any messages
+    const signinMessage = document.getElementById('signin-message');
+    const signupMessage = document.getElementById('signup-message');
+    if (signinMessage) signinMessage.textContent = '';
+    if (signupMessage) signupMessage.textContent = '';
 }
 
-// Show home view
+// ==================== Home View ====================
 function showHome() {
-    // Check if user is logged in
     if (!currentUser) {
         showAuthPage();
         return;
     }
+
+    const authView = document.getElementById('auth-view');
+    const homeView = document.getElementById('home-view');
+    const playlistView = document.getElementById('playlist-view');
+    const progressView = document.getElementById('progress-view');
+    const navbar = document.getElementById('navbar');
     
-    hideAllViews();
-    const home = views.home();
-    if (home) home.classList.remove('hidden');
-    
-    const navbar = views.navbar();
+    if (authView) authView.classList.add('hidden');
+    if (homeView) homeView.classList.remove('hidden');
+    if (playlistView) playlistView.classList.add('hidden');
+    if (progressView) progressView.classList.add('hidden');
     if (navbar) navbar.classList.remove('hidden');
-    
-    // Update nav link active state
-    document.querySelectorAll('.nav-link').forEach(link => link.classList.remove('active'));
-    const firstNavLink = document.querySelector('.nav-link');
-    if (firstNavLink) firstNavLink.classList.add('active');
-    
+
+    // Update nav link active states
+    updateNavActiveState('home');
+
     // Load playlists data
     if (typeof loadPlaylists === 'function') {
         loadPlaylists();
     }
 }
 
-// Show playlist view
-function showPlaylistView(playlistId) {
-    if (!currentUser) {
-        showAuthPage();
-        return;
-    }
-    
-    hideAllViews();
-    const playlist = views.playlist();
-    if (playlist) playlist.classList.remove('hidden');
-    
-    const navbar = views.navbar();
-    if (navbar) navbar.classList.remove('hidden');
-}
-
-// Show sign in form
-function showSignInView() {
-    const signin = views.signinForm();
-    const signup = views.signupForm();
-    
-    if (signin) signin.classList.remove('hidden');
-    if (signup) signup.classList.add('hidden');
-    
-    clearAuthMessages();
-}
-
-// Show sign up form
-function showSignUpView() {
-    const signin = views.signinForm();
-    const signup = views.signupForm();
-    
-    if (signin) signin.classList.add('hidden');
-    if (signup) signup.classList.remove('hidden');
-    
-    clearAuthMessages();
-}
-
-// Clear auth form messages
-function clearAuthMessages() {
-    const signinMsg = document.getElementById('signin-message');
-    const signupMsg = document.getElementById('signup-message');
-    
-    if (signinMsg) {
-        signinMsg.textContent = '';
-        signinMsg.className = 'form-message';
-    }
-    if (signupMsg) {
-        signupMsg.textContent = '';
-        signupMsg.className = 'form-message';
-    }
-}
-
-// Show form message
-function showMessage(elementId, message, isError = false) {
-    const element = document.getElementById(elementId);
-    if (element) {
-        element.textContent = message;
-        element.className = `form-message ${isError ? 'error' : 'success'}`;
-    }
-}
-
-// Placeholder for How to Use page
+// ==================== How to Use ====================
 function showHowToUse() {
-    alert('How to Use page coming soon!');
+    // Update nav active state
+    updateNavActiveState('how-to-use');
+    
+    // For now, show an alert - you can replace with actual view
+    alert('How to Use the Program page coming soon!');
+    
+    // Reset to home active state since we're not actually navigating
+    updateNavActiveState('home');
 }
+
+// ==================== Navigation Helper ====================
+function updateNavActiveState(activeView) {
+    const navLinks = document.querySelectorAll('.nav-link');
+    navLinks.forEach(link => {
+        link.classList.remove('active');
+        
+        const linkText = link.textContent.trim().toLowerCase();
+        if (activeView === 'home' && linkText === 'exercises') {
+            link.classList.add('active');
+        } else if (activeView === 'progress' && linkText === 'my progress') {
+            link.classList.add('active');
+        } else if (activeView === 'how-to-use' && linkText === 'how to use the program') {
+            link.classList.add('active');
+        }
+    });
+}
+
+console.log('Navigation module loaded');
