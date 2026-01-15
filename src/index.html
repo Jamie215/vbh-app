@@ -202,49 +202,23 @@
                     <div class="streak-card current-streak">
                         <span class="streak-value" id="current-streak">0</span>
                         <span class="streak-label">Current Streak</span>
-                        <span class="streak-unit">days</span>
+                        <span class="streak-unit">weeks</span>
                     </div>
                     <div class="streak-card longest-streak">
                         <span class="streak-value" id="longest-streak">0</span>
                         <span class="streak-label">Longest Streak</span>
-                        <span class="streak-unit">days</span>
+                        <span class="streak-unit">weeks</span>
                     </div>
                 </div>
             </section>
 
-            <!-- Activity Calendar -->
-            <section class="calendar-section">
+            <!-- Workout History Chart -->
+            <section class="chart-section">
                 <div class="section-header">
-                    <h2><i class="fa-solid fa-calendar"></i> Activity Calendar</h2>
+                    <h2><i class="fa-solid fa-chart-bar"></i> Workout History</h2>
                 </div>
-                <div class="calendar-container">
-                    <div class="calendar-nav">
-                        <button class="calendar-nav-btn" onclick="previousMonth()">
-                            <i class="fa-solid fa-chevron-left"></i>
-                        </button>
-                        <span class="calendar-month-year" id="calendar-month-year">January 2025</span>
-                        <button class="calendar-nav-btn" onclick="nextMonth()">
-                            <i class="fa-solid fa-chevron-right"></i>
-                        </button>
-                    </div>
-                    <div class="calendar-grid">
-                        <div class="calendar-header">
-                            <span>Sun</span>
-                            <span>Mon</span>
-                            <span>Tue</span>
-                            <span>Wed</span>
-                            <span>Thu</span>
-                            <span>Fri</span>
-                            <span>Sat</span>
-                        </div>
-                        <div class="calendar-days" id="calendar-days">
-                            <!-- Days will be populated by JavaScript -->
-                        </div>
-                    </div>
-                    <div class="calendar-legend">
-                        <span class="legend-item"><span class="legend-dot has-workout"></span> Workout completed</span>
-                        <span class="legend-item"><span class="legend-dot today"></span> Today</span>
-                    </div>
+                <div class="chart-container">
+                    <canvas id="workout-history-chart"></canvas>
                 </div>
             </section>
 
