@@ -116,6 +116,83 @@ function getSuggestedWorkout() {
     }
 }
 
+// ==================== Progress Ring Calculation ====================
+function calculatePlaylistProgress(playlistId) {
+    const playlist = PLAYLISTS.find(p => p.id === playlistId);
+    if (!playlist) return { completed:0 , total: 0, percentage: 0};
+
+    const totalExercises = playlist.videos.length;
+    let completedExercises = 0;
+
+    // Fetch recently saved data for completionHistory
+    let savedProgress = null;
+    if (completionHistory) {
+        const dates = Object.keys(completionHistory).sort().reverse();
+        for (const date of dates) {
+            if (completionHistory[date] && completionHistory[date][playlistId] {
+                savedProgress = completionHistory[date][playlistId];
+                break;
+            }
+    }
+
+    // Count completed exercises
+    playlist.videos.forEach(video => {
+        const videoProgress = savedProgress ? savedProgress[video.id] : null;
+
+        if (videoProgress) {
+            if (typeof videoProgress === 'object' && !Array.isArray(videoProgress)) {
+                const hasCompletedSet = Object.keys(videoProgress).some(key => {
+                    return key.startsWith('set') && videoProgress[key]?.completed === true;
+                });
+                if (hasCompletedSet) completedExercises++;
+            }
+        }
+    });
+
+    const percentage = totalExercises > 0 ? Math.round((completedExercises / totalExercises)*100) : 0;
+
+    return {
+        completed: completedExercises,
+        total: totalExercises,
+        percentage: percentage
+    };
+}
+
+// Generate SVG progress ring HTML
+function generateProgressRing(percentage, size = 80, strokeWidth = 6) {
+    const radius = (size - strokeWidth) / 2;
+    const circumference = 2 * Math.PI * radius;
+    const offset = circumference - (percentage / 100) * circumference;
+    const center = size / 2;
+
+    return `
+        <div class="progress-ring-container" style="width: ${size}px; height: ${size}px;">
+            <svg class="progress-ring" width="${size}" height="${size}">
+                <circle
+                    class="progress-ring-bg"
+                    cx="${center}"
+                    cy="${center}"
+                    r="${radius}"
+                    stroke-width="${strokeWidth}"
+                />
+                <circle
+                    class="progress-ring-fill"
+                    cx="${center}"
+                    cy="${center}"
+                    r="${radius}"
+                    stroke-width="${strokeWidth}"
+                    stroke-dasharray="${circumference}"
+                    stroke-dashoffset="${offset}"
+                    transform="rotate(-90 ${center} ${center})"
+                />
+            </svg>
+            <div class="progress-ring-text">
+                <span class="progress-percentage">${percentage}%</span>
+            </div>
+        </div>
+    `;
+}
+
 // ==================== Playlist Completion Helpers ====================
 function getPlaylistLastCompletion(playlistId) {
     const playlist = PLAYLISTS.find(p => p.id === playlistId);
@@ -297,6 +374,10 @@ function loadTodaysWorkout() {
     const overlayClass = isAdvanced ? 'advanced' : 'beginner';
     const weekText = isAdvanced ? 'Advanced<br>Weeks 4-6 Workout' : 'Beginner<br>Weeks 0-3 Workout';
     
+    // Calculate progress for the suggested workout
+    const progress = calculatePlaylistProgress(suggested.id);
+    const progressRing = generateProgressRing(progress.eprcentage, 70, 5);
+    
     container.innerHTML = `
         <div class="todays-workout-thumbnail">
             <div class="playlist-overlay ${overlayClass}">
@@ -306,6 +387,10 @@ function loadTodaysWorkout() {
         <div class="todays-workout-info">
             <h3>${suggested.title}</h3>
             <p>Your suggested workout for today</p>
+            <div class="todays-workout-progress">
+                ${progressRing}
+                <span class="progress-label">${progress.completed}/${progress.total} exercises done</span>
+            </div>
             <button class="start-workout-btn" onclick="showPlaylist('${suggested.id}')">Start Workout</button>
         </div>
     `;
@@ -350,7 +435,24 @@ function showPlaylist(playlistId) {
         sessionProgress[playlistId] = {};
     }
 
+    updatePlaylistProgressRing();
+
     loadExerciseTable();
+}
+
+// Update progress ring in playlist view
+function updatePlaylistProgressRing() {
+    if (!currentPlaylist) return;
+
+    const progressContainer = document.getElementById('playlist-progress-ring');
+    if (!progressContainer) return;
+
+    const progress = calculatePlaylistProgress(currentPlaylist.id);
+
+    progressContainer.innerHTML = `
+        ${generateProgressRing(progress.percentage, 60, 5)}
+        <span class="progress-label">${progress.completed}/${progress.total} exercises</span>
+    `;
 }
 
 // Get equipment display name (strip difficulty hints for cleaner display)
