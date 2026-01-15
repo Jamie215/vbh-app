@@ -119,12 +119,12 @@ function getSuggestedWorkout() {
 // ==================== Progress Ring Calculation ====================
 function calculatePlaylistProgress(playlistId) {
     const playlist = PLAYLISTS.find(p => p.id === playlistId);
-    if (!playlist) return { completed:0 , total: 0, percentage: 0};
+    if (!playlist) return { completed: 0, total: 0, percentage: 0 };
 
     const totalExercises = playlist.videos.length;
     let completedExercises = 0;
 
-    // Fetch recently saved data for completionHistory
+    // Use saved progress from completionHistory only
     let savedProgress = null;
     if (completionHistory) {
         const dates = Object.keys(completionHistory).sort().reverse();
@@ -136,21 +136,30 @@ function calculatePlaylistProgress(playlistId) {
         }
     }
 
+    if (!savedProgress) {
+        return { completed: 0, total: totalExercises, percentage: 0 };
+    }
+
     // Count completed exercises
     playlist.videos.forEach(video => {
-        const videoProgress = savedProgress ? savedProgress[video.id] : null;
-
+        const videoProgress = savedProgress[video.id];
+        
         if (videoProgress) {
+            // Check if it's the new structure (object with set1, set2, etc.)
             if (typeof videoProgress === 'object' && !Array.isArray(videoProgress)) {
                 const hasCompletedSet = Object.keys(videoProgress).some(key => {
                     return key.startsWith('set') && videoProgress[key]?.completed === true;
                 });
                 if (hasCompletedSet) completedExercises++;
+            } 
+            // Backward compatibility: old structure where videoProgress is a number
+            else if (typeof videoProgress === 'number' && videoProgress > 0) {
+                completedExercises++;
             }
         }
     });
 
-    const percentage = totalExercises > 0 ? Math.round((completedExercises / totalExercises)*100) : 0;
+    const percentage = totalExercises > 0 ? Math.round((completedExercises / totalExercises) * 100) : 0;
 
     return {
         completed: completedExercises,
@@ -159,39 +168,65 @@ function calculatePlaylistProgress(playlistId) {
     };
 }
 
-// Generate SVG progress ring HTML
-function generateProgressRing(percentage, size = 80, strokeWidth = 6) {
-    const radius = (size - strokeWidth) / 2;
-    const circumference = 2 * Math.PI * radius;
-    const offset = circumference - (percentage / 100) * circumference;
-    const center = size / 2;
+// Store chart instances to destroy before re-creating
+let todaysWorkoutChart = null;
+let playlistViewChart = null;
 
-    return `
-        <div class="progress-ring-container" style="width: ${size}px; height: ${size}px;">
-            <svg class="progress-ring" width="${size}" height="${size}">
-                <circle
-                    class="progress-ring-bg"
-                    cx="${center}"
-                    cy="${center}"
-                    r="${radius}"
-                    stroke-width="${strokeWidth}"
-                />
-                <circle
-                    class="progress-ring-fill"
-                    cx="${center}"
-                    cy="${center}"
-                    r="${radius}"
-                    stroke-width="${strokeWidth}"
-                    stroke-dasharray="${circumference}"
-                    stroke-dashoffset="${offset}"
-                    transform="rotate(-90 ${center} ${center})"
-                />
-            </svg>
-            <div class="progress-ring-text">
-                <span class="progress-percentage">${percentage}%</span>
-            </div>
-        </div>
-    `;
+// Create a Chart.js doughnut progress ring
+function createProgressRing(canvasId, percentage, size = 70) {
+    const canvas = document.getElementById(canvasId);
+    if (!canvas) return null;
+
+    // Set canvas size
+    canvas.width = size;
+    canvas.height = size;
+
+    const ctx = canvas.getContext('2d');
+
+    const chart = new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+            datasets: [{
+                data: [percentage, 100 - percentage],
+                backgroundColor: [
+                    '#10b981', // Completed - green
+                    '#e5e7eb'  // Remaining - light gray
+                ],
+                borderWidth: 0,
+                cutout: '75%'
+            }]
+        },
+        options: {
+            responsive: false,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { display: false },
+                tooltip: { enabled: false }
+            },
+            animation: {
+                animateRotate: true,
+                duration: 800
+            }
+        },
+        plugins: [{
+            id: 'centerText',
+            beforeDraw: function(chart) {
+                const ctx = chart.ctx;
+                const centerX = chart.width / 2;
+                const centerY = chart.height / 2;
+
+                ctx.save();
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.font = 'bold 14px -apple-system, BlinkMacSystemFont, sans-serif';
+                ctx.fillStyle = '#1a1a2e';
+                ctx.fillText(`${percentage}%`, centerX, centerY);
+                ctx.restore();
+            }
+        }]
+    });
+
+    return chart;
 }
 
 // ==================== Playlist Completion Helpers ====================
@@ -377,7 +412,6 @@ function loadTodaysWorkout() {
     
     // Calculate progress for the suggested workout
     const progress = calculatePlaylistProgress(suggested.id);
-    const progressRing = generateProgressRing(progress.eprcentage, 70, 5);
     
     container.innerHTML = `
         <div class="todays-workout-thumbnail">
@@ -389,12 +423,23 @@ function loadTodaysWorkout() {
             <h3>${suggested.title}</h3>
             <p>Your suggested workout for today</p>
             <div class="todays-workout-progress">
-                ${progressRing}
+                <canvas id="todays-progress-ring"></canvas>
                 <span class="progress-label">${progress.completed}/${progress.total} exercises done</span>
             </div>
             <button class="start-workout-btn" onclick="showPlaylist('${suggested.id}')">Start Workout</button>
         </div>
     `;
+
+    // Destroy existing chart if it exists
+    if (todaysWorkoutChart) {
+        todaysWorkoutChart.destroy();
+        todaysWorkoutChart = null;
+    }
+
+    // Create progress ring after DOM is updated
+    setTimeout(() => {
+        todaysWorkoutChart = createProgressRing('todays-progress-ring', progress.percentage, 70);
+    }, 0);
 }
 
 // ==================== Playlist View ====================
@@ -436,6 +481,7 @@ function showPlaylist(playlistId) {
         sessionProgress[playlistId] = {};
     }
 
+    // Update progress ring in playlist view
     updatePlaylistProgressRing();
 
     loadExerciseTable();
@@ -444,16 +490,28 @@ function showPlaylist(playlistId) {
 // Update progress ring in playlist view
 function updatePlaylistProgressRing() {
     if (!currentPlaylist) return;
-
+    
     const progressContainer = document.getElementById('playlist-progress-ring');
     if (!progressContainer) return;
 
     const progress = calculatePlaylistProgress(currentPlaylist.id);
-
+    
+    // Update the container HTML with canvas and label
     progressContainer.innerHTML = `
-        ${generateProgressRing(progress.percentage, 60, 5)}
+        <canvas id="playlist-view-progress-ring"></canvas>
         <span class="progress-label">${progress.completed}/${progress.total} exercises</span>
     `;
+
+    // Destroy existing chart if it exists
+    if (playlistViewChart) {
+        playlistViewChart.destroy();
+        playlistViewChart = null;
+    }
+
+    // Create progress ring after DOM is updated
+    setTimeout(() => {
+        playlistViewChart = createProgressRing('playlist-view-progress-ring', progress.percentage, 60);
+    }, 0);
 }
 
 // Get equipment display name (strip difficulty hints for cleaner display)
@@ -644,6 +702,9 @@ async function saveProgress() {
 
         await loadTodaySession();
         await loadCompletionHistory();
+
+        // Update the progress ring after saving
+        updatePlaylistProgressRing();
 
         saveBtn.classList.add('saved');
         saveBtn.innerHTML = '<i class="fa-solid fa-check"></i> Progress Saved!';
