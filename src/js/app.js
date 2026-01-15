@@ -133,6 +133,7 @@ function calculatePlaylistProgress(playlistId) {
                 savedProgress = completionHistory[date][playlistId];
                 break;
             }
+        }
     }
 
     // Count completed exercises
