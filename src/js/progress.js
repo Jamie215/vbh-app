@@ -1,7 +1,7 @@
 // Progress module - handles My Progress view functionality
 
-// Calendar state
-let currentCalendarDate = new Date();
+// Chart instance for cleanup
+let workoutHistoryChart = null;
 
 // ==================== Show My Progress View ====================
 function showMyProgress() {
@@ -31,7 +31,7 @@ function showMyProgress() {
     // Load all progress data
     loadProgressStats();
     loadStreakData();
-    renderCalendar();
+    renderWorkoutHistoryChart();
     loadRecentActivity();
 }
 
@@ -48,9 +48,9 @@ function loadProgressStats() {
     if (currentWeekEl) currentWeekEl.textContent = currentWeek;
 }
 
-// ==================== Streak Calculation ====================
+// ==================== Weekly Streak Calculation ====================
 function loadStreakData() {
-    const streaks = calculateStreaks();
+    const streaks = calculateWeeklyStreaks();
     
     const currentStreakEl = document.getElementById('current-streak');
     const longestStreakEl = document.getElementById('longest-streak');
@@ -59,25 +59,43 @@ function loadStreakData() {
     if (longestStreakEl) longestStreakEl.textContent = streaks.longest;
 }
 
-function calculateStreaks() {
+function getWeekNumber(date) {
+    // Get the week number (ISO week) for a given date
+    const d = new Date(date);
+    d.setHours(0, 0, 0, 0);
+    d.setDate(d.getDate() + 4 - (d.getDay() || 7));
+    const yearStart = new Date(d.getFullYear(), 0, 1);
+    const weekNo = Math.ceil((((d - yearStart) / 86400000) + 1) / 7);
+    return `${d.getFullYear()}-W${weekNo.toString().padStart(2, '0')}`;
+}
+
+function calculateWeeklyStreaks() {
     if (!completionHistory || Object.keys(completionHistory).length === 0) {
         return { current: 0, longest: 0 };
     }
 
-    // Get sorted dates
+    // Get all workout dates and convert to week identifiers
     const dates = Object.keys(completionHistory).sort();
+    const weeksWithWorkouts = new Set();
     
-    let currentStreak = 0;
-    let longestStreak = 0;
-    let tempStreak = 1;
+    dates.forEach(dateStr => {
+        const weekId = getWeekNumber(new Date(dateStr + 'T00:00:00'));
+        weeksWithWorkouts.add(weekId);
+    });
+
+    // Convert to sorted array of weeks
+    const sortedWeeks = Array.from(weeksWithWorkouts).sort();
+    
+    if (sortedWeeks.length === 0) {
+        return { current: 0, longest: 0 };
+    }
 
     // Calculate longest streak
-    for (let i = 1; i < dates.length; i++) {
-        const prevDate = new Date(dates[i - 1] + 'T00:00:00');
-        const currDate = new Date(dates[i] + 'T00:00:00');
-        const diffDays = Math.round((currDate - prevDate) / (1000 * 60 * 60 * 24));
+    let longestStreak = 1;
+    let tempStreak = 1;
 
-        if (diffDays === 1) {
+    for (let i = 1; i < sortedWeeks.length; i++) {
+        if (areConsecutiveWeeks(sortedWeeks[i - 1], sortedWeeks[i])) {
             tempStreak++;
         } else {
             longestStreak = Math.max(longestStreak, tempStreak);
@@ -86,128 +104,275 @@ function calculateStreaks() {
     }
     longestStreak = Math.max(longestStreak, tempStreak);
 
-    // Calculate current streak (counting back from today)
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
+    // Calculate current streak (from current week going backwards)
+    const currentWeekId = getWeekNumber(new Date());
+    const lastWeekId = getWeekNumber(new Date(Date.now() - 7 * 24 * 60 * 60 * 1000));
     
-    const sortedDatesDesc = [...dates].sort().reverse();
+    let currentStreak = 0;
     
-    for (let i = 0; i < sortedDatesDesc.length; i++) {
-        const workoutDate = new Date(sortedDatesDesc[i] + 'T00:00:00');
-        const expectedDate = new Date(today);
-        expectedDate.setDate(today.getDate() - i);
-        expectedDate.setHours(0, 0, 0, 0);
-
-        // Allow for today or yesterday to start the streak
-        if (i === 0) {
-            const diffFromToday = Math.round((today - workoutDate) / (1000 * 60 * 60 * 24));
-            if (diffFromToday > 1) {
-                // Last workout was more than 1 day ago, no current streak
-                currentStreak = 0;
-                break;
-            }
-        }
-
-        if (workoutDate.getTime() === expectedDate.getTime()) {
+    // Check if current week or last week has a workout (to start the streak)
+    const hasCurrentWeek = weeksWithWorkouts.has(currentWeekId);
+    const hasLastWeek = weeksWithWorkouts.has(lastWeekId);
+    
+    if (!hasCurrentWeek && !hasLastWeek) {
+        // No workout this week or last week - streak is broken
+        currentStreak = 0;
+    } else {
+        // Count backwards from the most recent active week
+        const startWeek = hasCurrentWeek ? currentWeekId : lastWeekId;
+        let checkWeek = startWeek;
+        
+        while (weeksWithWorkouts.has(checkWeek)) {
             currentStreak++;
-        } else if (i === 0 && Math.round((today - workoutDate) / (1000 * 60 * 60 * 24)) === 1) {
-            // Yesterday counts as starting point
-            currentStreak++;
-        } else {
-            break;
+            checkWeek = getPreviousWeek(checkWeek);
         }
     }
 
     return { current: currentStreak, longest: longestStreak };
 }
 
-// ==================== Activity Calendar ====================
-function renderCalendar() {
-    const calendarDays = document.getElementById('calendar-days');
-    const monthYearEl = document.getElementById('calendar-month-year');
+function areConsecutiveWeeks(week1, week2) {
+    // Parse week strings like "2025-W03"
+    const [year1, w1] = week1.split('-W').map((v, i) => i === 0 ? parseInt(v) : parseInt(v));
+    const [year2, w2] = week2.split('-W').map((v, i) => i === 0 ? parseInt(v) : parseInt(v));
     
-    if (!calendarDays || !monthYearEl) return;
-
-    const year = currentCalendarDate.getFullYear();
-    const month = currentCalendarDate.getMonth();
-
-    // Update month/year display
-    const monthNames = ['January', 'February', 'March', 'April', 'May', 'June',
-                        'July', 'August', 'September', 'October', 'November', 'December'];
-    monthYearEl.textContent = `${monthNames[month]} ${year}`;
-
-    // Get first day of month and total days
-    const firstDay = new Date(year, month, 1).getDay();
-    const daysInMonth = new Date(year, month + 1, 0).getDate();
-
-    // Get today's date for comparison
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-
-    // Get workout dates for this month
-    const workoutDates = getWorkoutDatesForMonth(year, month);
-
-    // Build calendar HTML
-    let calendarHTML = '';
-
-    // Empty cells for days before first of month
-    for (let i = 0; i < firstDay; i++) {
-        calendarHTML += '<div class="calendar-day empty"></div>';
-    }
-
-    // Days of the month
-    for (let day = 1; day <= daysInMonth; day++) {
-        const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
-        const currentDate = new Date(year, month, day);
-        currentDate.setHours(0, 0, 0, 0);
-
-        let classes = 'calendar-day';
-        
-        // Check if this day has a workout
-        if (workoutDates.includes(dateStr)) {
-            classes += ' has-workout';
-        }
-
-        // Check if this is today
-        if (currentDate.getTime() === today.getTime()) {
-            classes += ' today';
-        }
-
-        // Check if this is in the future
-        if (currentDate > today) {
-            classes += ' future';
-        }
-
-        calendarHTML += `<div class="${classes}" data-date="${dateStr}">${day}</div>`;
-    }
-
-    calendarDays.innerHTML = calendarHTML;
+    // Same year, consecutive weeks
+    if (year1 === year2 && w2 === w1 + 1) return true;
+    
+    // Year transition: last week of year1 to first week of year2
+    if (year2 === year1 + 1 && w1 >= 52 && w2 === 1) return true;
+    
+    return false;
 }
 
-function getWorkoutDatesForMonth(year, month) {
-    if (!completionHistory) return [];
+function getPreviousWeek(weekId) {
+    const [year, week] = weekId.split('-W').map((v, i) => i === 0 ? parseInt(v) : parseInt(v));
+    
+    if (week === 1) {
+        // Go to last week of previous year (52 or 53)
+        return `${year - 1}-W52`;
+    }
+    return `${year}-W${(week - 1).toString().padStart(2, '0')}`;
+}
 
-    const dates = [];
-    const monthStr = String(month + 1).padStart(2, '0');
-    const yearStr = String(year);
+// ==================== Workout History Stacked Bar Chart ====================
+function renderWorkoutHistoryChart() {
+    const canvas = document.getElementById('workout-history-chart');
+    if (!canvas) return;
 
-    Object.keys(completionHistory).forEach(dateStr => {
-        if (dateStr.startsWith(`${yearStr}-${monthStr}`)) {
-            dates.push(dateStr);
-        }
+    // Destroy existing chart
+    if (workoutHistoryChart) {
+        workoutHistoryChart.destroy();
+        workoutHistoryChart = null;
+    }
+
+    if (!completionHistory || Object.keys(completionHistory).length === 0) {
+        // Show empty state
+        const container = canvas.parentElement;
+        container.innerHTML = `
+            <div class="chart-empty">
+                <i class="fa-solid fa-chart-bar"></i>
+                <p>No workout data yet. Complete some exercises to see your progress chart!</p>
+            </div>
+        `;
+        return;
+    }
+
+    // Get sorted dates (last 14 sessions max for readability)
+    const sortedDates = Object.keys(completionHistory).sort().slice(-14);
+    
+    // Build a map of all unique videos across all sessions
+    const allVideos = new Map(); // videoId -> { title, playlistId }
+    
+    sortedDates.forEach(dateStr => {
+        const dayProgress = completionHistory[dateStr];
+        Object.keys(dayProgress).forEach(playlistId => {
+            const playlist = PLAYLISTS.find(p => p.id === playlistId);
+            if (!playlist) return;
+            
+            Object.keys(dayProgress[playlistId]).forEach(videoId => {
+                if (!allVideos.has(videoId)) {
+                    const video = playlist.videos.find(v => v.id === videoId);
+                    if (video) {
+                        allVideos.set(videoId, { 
+                            title: video.title, 
+                            playlistId: playlistId 
+                        });
+                    }
+                }
+            });
+        });
     });
 
-    return dates;
-}
+    // Generate colors for each video
+    const colorPalette = [
+        '#10b981', '#3b82f6', '#8b5cf6', '#f59e0b', '#ef4444',
+        '#06b6d4', '#ec4899', '#84cc16', '#f97316', '#6366f1'
+    ];
 
-function previousMonth() {
-    currentCalendarDate.setMonth(currentCalendarDate.getMonth() - 1);
-    renderCalendar();
-}
+    // Build datasets for each video
+    const datasets = [];
+    let colorIndex = 0;
+    
+    // Store detailed data for tooltips
+    const detailedData = {};
+    sortedDates.forEach(dateStr => {
+        detailedData[dateStr] = {};
+    });
 
-function nextMonth() {
-    currentCalendarDate.setMonth(currentCalendarDate.getMonth() + 1);
-    renderCalendar();
+    allVideos.forEach((videoInfo, videoId) => {
+        const data = sortedDates.map(dateStr => {
+            const dayProgress = completionHistory[dateStr];
+            let completedSets = 0;
+            let repsData = [];
+            
+            // Check each playlist for this video
+            Object.keys(dayProgress).forEach(playlistId => {
+                const videoProgress = dayProgress[playlistId]?.[videoId];
+                if (videoProgress && typeof videoProgress === 'object') {
+                    Object.keys(videoProgress).forEach(setKey => {
+                        if (setKey.startsWith('set') && videoProgress[setKey]?.completed) {
+                            completedSets++;
+                            repsData.push({
+                                set: setKey.replace('set', 'Set '),
+                                reps: videoProgress[setKey].reps || 0
+                            });
+                        }
+                    });
+                }
+            });
+            
+            // Store detailed info for tooltip
+            if (completedSets > 0) {
+                detailedData[dateStr][videoId] = {
+                    title: videoInfo.title,
+                    sets: completedSets,
+                    repsData: repsData
+                };
+            }
+            
+            return completedSets;
+        });
+
+        const color = colorPalette[colorIndex % colorPalette.length];
+        colorIndex++;
+
+        datasets.push({
+            label: videoInfo.title,
+            data: data,
+            backgroundColor: color,
+            borderColor: color,
+            borderWidth: 1,
+            videoId: videoId
+        });
+    });
+
+    // Format date labels
+    const labels = sortedDates.map(dateStr => {
+        const date = new Date(dateStr + 'T00:00:00');
+        return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+    });
+
+    // Create the chart
+    const ctx = canvas.getContext('2d');
+    workoutHistoryChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: labels,
+            datasets: datasets
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                x: {
+                    stacked: true,
+                    grid: {
+                        display: false
+                    },
+                    ticks: {
+                        font: {
+                            size: 11
+                        }
+                    }
+                },
+                y: {
+                    stacked: true,
+                    beginAtZero: true,
+                    title: {
+                        display: true,
+                        text: 'Sets Completed',
+                        font: {
+                            size: 12,
+                            weight: '500'
+                        }
+                    },
+                    ticks: {
+                        stepSize: 1,
+                        font: {
+                            size: 11
+                        }
+                    }
+                }
+            },
+            plugins: {
+                legend: {
+                    display: true,
+                    position: 'bottom',
+                    labels: {
+                        boxWidth: 12,
+                        padding: 15,
+                        font: {
+                            size: 11
+                        }
+                    }
+                },
+                tooltip: {
+                    mode: 'index',
+                    intersect: false,
+                    callbacks: {
+                        title: function(context) {
+                            const index = context[0].dataIndex;
+                            return sortedDates[index];
+                        },
+                        label: function(context) {
+                            const dateStr = sortedDates[context.dataIndex];
+                            const videoId = context.dataset.videoId;
+                            const detail = detailedData[dateStr]?.[videoId];
+                            
+                            if (!detail || detail.sets === 0) {
+                                return null; // Hide if no sets
+                            }
+                            
+                            // Build detailed label
+                            const repsBreakdown = detail.repsData
+                                .map(r => `${r.set}: ${r.reps} reps`)
+                                .join(', ');
+                            
+                            return `${detail.title}: ${detail.sets} sets (${repsBreakdown})`;
+                        },
+                        filter: function(tooltipItem) {
+                            return tooltipItem.raw > 0;
+                        }
+                    },
+                    backgroundColor: 'rgba(26, 26, 46, 0.95)',
+                    titleFont: {
+                        size: 13,
+                        weight: '600'
+                    },
+                    bodyFont: {
+                        size: 12
+                    },
+                    padding: 12,
+                    cornerRadius: 8
+                }
+            },
+            interaction: {
+                mode: 'index',
+                intersect: false
+            }
+        }
+    });
 }
 
 // ==================== Recent Activity Feed ====================
