@@ -470,11 +470,7 @@ function showPlaylist(playlistId) {
     const formattedTitle = isAdvanced ? 'Advanced 4-6 Exercises' : 'Beginner 0-3 Exercises';
     
     if (titleEl) titleEl.textContent = formattedTitle;
-    if (descEl) descEl.innerHTML = `<strong><u>Instructions</u></strong>: Go through the below exercises at your own pace. Click to watch the videos to see how each exercise is done. Tap 'Save Progress' to keep your place in the workout.`;
-
-    // Show save button
-    const saveBtn = document.getElementById('save-progress-btn');
-    if (saveBtn) saveBtn.classList.remove('hidden');
+    if (descEl) descEl.innerHTML = `<strong><u>Instructions</u></strong>: Go through the below exercises at your own pace. Click to watch the videos to see how each exercise is done. Your progress is saved automatically when you click 'Done' in the exercise modal.`;
 
     // Initialize session progress for this playlist
     if (!sessionProgress[playlistId]) {
@@ -664,62 +660,6 @@ function updateSetsUI(videoId, currentCount, maxSets) {
 
     input.value = currentCount;
     if (minusBtn) minusBtn.disabled = currentCount <= 0;
-}
-
-// ==================== Save Progress ====================
-async function saveProgress() {
-    const saveBtn = document.getElementById('save-progress-btn');
-    if (!saveBtn) return;
-    
-    saveBtn.disabled = true;
-    saveBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Saving...';
-
-    const today = new Date().toISOString().split('T')[0];
-
-    const progressData = {};
-    Object.keys(sessionProgress).forEach(playlistId => {
-        progressData[playlistId] = sessionProgress[playlistId];
-    });
-
-    try {
-        const { error } = await window.supabaseClient
-            .from('workout_sessions')
-            .upsert({
-                user_id: currentUser.id,
-                session_date: today,
-                progress: progressData
-            }, {
-                onConflict: 'user_id,session_date'
-            });
-
-        if (error) {
-            console.error('Error saving progress:', error);
-            alert('Error saving progress. Please try again.');
-            saveBtn.disabled = false;
-            saveBtn.innerHTML = '<i class="fa-solid fa-floppy-disk"></i> Save Progress';
-            return;
-        }
-
-        await loadTodaySession();
-        await loadCompletionHistory();
-
-        // Update the progress ring after saving
-        updatePlaylistProgressRing();
-
-        saveBtn.classList.add('saved');
-        saveBtn.innerHTML = '<i class="fa-solid fa-check"></i> Progress Saved!';
-
-        setTimeout(() => {
-            saveBtn.classList.remove('saved');
-            saveBtn.innerHTML = '<i class="fa-solid fa-floppy-disk"></i> Save Progress';
-            saveBtn.disabled = false;
-        }, 2000);
-    } catch (error) {
-        console.error('Exception saving progress:', error);
-        alert('Error saving progress. Please try again.');
-        saveBtn.disabled = false;
-        saveBtn.innerHTML = '<i class="fa-solid fa-floppy-disk"></i> Save Progress';
-    }
 }
 
 console.log('App module loaded');
