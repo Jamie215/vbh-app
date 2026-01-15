@@ -125,14 +125,19 @@
         <!-- Playlist View (hidden by default) -->
         <main id="playlist-view" class="hidden">
             <button class="back-button" onclick="showHome()"><i class="fa-solid fa-arrow-left"></i> Go Back</button>
-            <!-- Playlist Info with Instructions -->
-            <div class="playlist-info">
-                <h1 id="playlist-title">Beginner 3-6 Exercises</h1>
-                <p id="playlist-description">
-                    <strong><u>Instructions</u></strong>: Go through the below exercises at your own pace. 
-                    Click to watch the videos to see how each exercise is done. 
-                    Tap 'Save Progress' to keep your place in the workout.
-                </p>
+            <!-- Playlist Header with Progress Ring -->
+            <div class="playlist-header-row">
+                <div class="playlist-info">
+                    <h1 id="playlist-title">Beginner 3-6 Exercises</h1>
+                    <p id="playlist-description">
+                        <strong><u>Instructions</u></strong>: Go through the below exercises at your own pace. 
+                        Click to watch the videos to see how each exercise is done. 
+                        Tap 'Save Progress' to keep your place in the workout.
+                    </p>
+                </div>
+                <div id="playlist-progress-ring" class="playlist-progress-ring">
+                    <!-- Progress ring will be inserted here by JavaScript -->
+                </div>
             </div>
 
             <div class="exercise-table-container">
