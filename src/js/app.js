@@ -330,6 +330,10 @@ function loadPlaylists() {
         }
     }
 
+    if (typeof renderProgressAlert === 'function') {
+        renderProgressAlert();
+    }
+
     loadTodaysWorkout();
 
     PLAYLISTS.forEach(playlist => {
