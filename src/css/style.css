@@ -229,10 +229,24 @@ button {
     margin-bottom: 0.5rem;
 }
 
-.todays-workout-info p {
+.todays-workout-info > p {
     color: #64748b;
     font-size: 0.95rem;
     margin-bottom: 1rem;
+}
+
+/* Today's Workout Progress Ring Row */
+.todays-workout-progress {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+}
+
+.todays-workout-progress .progress-label {
+    font-size: 0.9rem;
+    color: #475569;
+    font-weight: 500;
 }
 
 .start-workout-btn {
@@ -249,6 +263,12 @@ button {
 
 .start-workout-btn:hover {
     background: #0f766e;
+}
+
+/* ==================== Progress Ring Styles (Chart.js) ==================== */
+#todays-progress-ring,
+#playlist-view-progress-ring {
+    display: block;
 }
 
 /* ==================== All Workouts Section ==================== */
@@ -408,8 +428,17 @@ button {
     height: 18px;
 }
 
-.playlist-info {
+/* Playlist Header Row with Progress Ring */
+.playlist-header-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 2rem;
     margin-bottom: 1.5rem;
+}
+
+.playlist-info {
+    flex: 1;
 }
 
 .playlist-info h1 {
@@ -427,6 +456,27 @@ button {
 
 .playlist-info p strong {
     color: #1a1a2e;
+}
+
+/* Playlist View Progress Ring */
+.playlist-progress-ring {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 1rem;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+    border: 1px solid #e9ecef;
+    min-width: 120px;
+}
+
+.playlist-progress-ring .progress-label {
+    font-size: 0.85rem;
+    color: #475569;
+    font-weight: 500;
+    text-align: center;
 }
 
 /* ==================== Exercise Table - Updated Layout ==================== */
@@ -1339,6 +1389,17 @@ button {
     .exercise-table td {
         padding: 1rem;
     }
+
+    /* Stack playlist header on tablet */
+    .playlist-header-row {
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    .playlist-progress-ring {
+        flex-direction: row;
+        width: fit-content;
+    }
 }
 
 @media (max-width: 768px) {
@@ -1385,6 +1446,12 @@ button {
     .equipment-badge {
         font-size: 0.75rem;
         padding: 0.3rem 0.6rem;
+    }
+
+    /* Adjust today's workout progress for mobile */
+    .todays-workout-progress {
+        flex-direction: column;
+        align-items: flex-start;
     }
 }
 
