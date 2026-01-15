@@ -129,7 +129,7 @@ function calculatePlaylistProgress(playlistId) {
     if (completionHistory) {
         const dates = Object.keys(completionHistory).sort().reverse();
         for (const date of dates) {
-            if (completionHistory[date] && completionHistory[date][playlistId] {
+            if (completionHistory[date] && completionHistory[date][playlistId]) {
                 savedProgress = completionHistory[date][playlistId];
                 break;
             }
