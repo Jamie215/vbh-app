@@ -1,3 +1,5 @@
+// Videos module - handles video playback and set/rep tracking
+
 let player;
 
 // Track reps for each set in the current video
@@ -34,7 +36,7 @@ function initializeVideoProgress() {
     } else if (todaySession?.progress?.[playlistId]?.[videoId]) {
         currentVideoProgress = { ...todaySession.progress[playlistId][videoId] };
     } else {
-        // Initialize fresh progress - each set tracks reps done and completion
+        // Initialize empty progress
         currentVideoProgress = {};
         for (let i = 1; i <= currentVideo.sets; i++) {
             currentVideoProgress[`set${i}`] = {
@@ -47,15 +49,19 @@ function initializeVideoProgress() {
 
 // Open video player modal
 function openVideoPlayer() {
-    document.getElementById('video-player-modal').classList.remove('hidden');
-    document.getElementById('current-video-title').textContent = currentVideo.title;
-    document.getElementById('current-video-description').textContent = 
-        `Recommended: ${currentVideo.sets} sets of ${currentVideo.reps} reps`;
-
+    const modal = document.getElementById('video-player-modal');
+    const titleEl = document.getElementById('current-video-title');
+    const descEl = document.getElementById('current-video-description');
+    
+    if (titleEl) titleEl.textContent = currentVideo.title;
+    if (descEl) descEl.textContent = `Recommended: ${currentVideo.sets} sets of ${currentVideo.reps} reps`;
+    
     // Render the set tracking panel
     renderSetTrackingPanel();
-
-    // Load video
+    
+    modal.classList.remove('hidden');
+    
+    // Create or update YouTube player
     if (player) {
         player.loadVideoById(currentVideo.id);
     } else {
@@ -65,19 +71,20 @@ function openVideoPlayer() {
             videoId: currentVideo.id,
             playerVars: {
                 'playsinline': 1,
-                'modestbranding': 1,
-                'rel': 0
+                'rel': 0,
+                'modestbranding': 1
             }
         });
     }
 }
 
-// Render the set tracking panel on the right side
+// Render the set tracking panel in the modal
 function renderSetTrackingPanel() {
     const panel = document.getElementById('set-tracking-panel');
     if (!panel) return;
     
     let setsHTML = '';
+    
     for (let i = 1; i <= currentVideo.sets; i++) {
         const setData = currentVideoProgress[`set${i}`] || { reps: currentVideo.reps, completed: false };
         
@@ -85,7 +92,7 @@ function renderSetTrackingPanel() {
             <div class="set-row">
                 <span class="set-label">Set ${i}</span>
                 <div class="rep-counter">
-                    <button type="button" class="rep-btn minus" onclick="decrementReps(${i})">
+                    <button type="button" class="rep-btn" onclick="decrementReps(${i})">
                         <i class="fa-solid fa-minus"></i>
                     </button>
                     <input type="number" 
@@ -95,20 +102,18 @@ function renderSetTrackingPanel() {
                            min="0" 
                            max="99"
                            onchange="updateReps(${i})">
-                    <button type="button" class="rep-btn plus" onclick="incrementReps(${i})">
+                    <button type="button" class="rep-btn" onclick="incrementReps(${i})">
                         <i class="fa-solid fa-plus"></i>
                     </button>
                 </div>
                 <span class="reps-label">reps</span>
                 <label class="set-checkbox-wrapper">
                     <input type="checkbox" 
-                           id="completed_set${i}" 
                            class="set-checkbox" 
+                           id="completed_set${i}"
                            ${setData.completed ? 'checked' : ''}
                            onchange="toggleSetCompleted(${i})">
-                    <span class="checkmark-box">
-                        <i class="fa-solid fa-check"></i>
-                    </span>
+                    <span class="checkmark-box"><i class="fa-solid fa-check"></i></span>
                 </label>
             </div>
         `;
@@ -122,7 +127,7 @@ function renderSetTrackingPanel() {
         <div class="sets-list">
             ${setsHTML}
         </div>
-        <button type="button" class="done-btn" onclick="saveVideoProgress()">Done</button>
+        <button type="button" class="done-btn" id="done-btn" onclick="saveVideoProgress()">Done</button>
     `;
 }
 
@@ -184,8 +189,8 @@ function toggleSetCompleted(setNumber) {
     };
 }
 
-// Save video progress and close modal
-function saveVideoProgress() {
+// Save video progress to database and close modal
+async function saveVideoProgress() {
     const videoId = currentVideo.id;
     const playlistId = currentPlaylist.id;
     
@@ -194,19 +199,71 @@ function saveVideoProgress() {
         sessionProgress[playlistId] = {};
     }
     
-    // Save the detailed progress
+    // Save the detailed progress to session
     sessionProgress[playlistId][videoId] = { ...currentVideoProgress };
     
-    // Also calculate and store completed sets count for backward compatibility
-    let completedSets = 0;
-    for (let i = 1; i <= currentVideo.sets; i++) {
-        if (currentVideoProgress[`set${i}`]?.completed) {
-            completedSets++;
+    // Update Done button to show saving state
+    const doneBtn = document.getElementById('done-btn');
+    if (doneBtn) {
+        doneBtn.disabled = true;
+        doneBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Saving...';
+    }
+
+    // Save to database
+    const today = new Date().toISOString().split('T')[0];
+
+    const progressData = {};
+    Object.keys(sessionProgress).forEach(pId => {
+        progressData[pId] = sessionProgress[pId];
+    });
+
+    try {
+        const { error } = await window.supabaseClient
+            .from('workout_sessions')
+            .upsert({
+                user_id: currentUser.id,
+                session_date: today,
+                progress: progressData
+            }, {
+                onConflict: 'user_id,session_date'
+            });
+
+        if (error) {
+            console.error('Error saving progress:', error);
+            alert('Error saving progress. Please try again.');
+            if (doneBtn) {
+                doneBtn.disabled = false;
+                doneBtn.innerHTML = 'Done';
+            }
+            return;
+        }
+
+        // Reload data to update UI
+        await loadTodaySession();
+        await loadCompletionHistory();
+
+        // Update progress ring in playlist view
+        if (typeof updatePlaylistProgressRing === 'function') {
+            updatePlaylistProgressRing();
+        }
+
+        // Show success state briefly then close
+        if (doneBtn) {
+            doneBtn.innerHTML = '<i class="fa-solid fa-check"></i> Saved!';
+        }
+
+        setTimeout(() => {
+            closeVideo();
+        }, 500);
+
+    } catch (error) {
+        console.error('Exception saving progress:', error);
+        alert('Error saving progress. Please try again.');
+        if (doneBtn) {
+            doneBtn.disabled = false;
+            doneBtn.innerHTML = 'Done';
         }
     }
-    
-    // Close the modal
-    closeVideo();
 }
 
 // Close video player
@@ -215,4 +272,13 @@ function closeVideo() {
     if (player) {
         player.stopVideo();
     }
+    
+    // Reset done button state for next time
+    const doneBtn = document.getElementById('done-btn');
+    if (doneBtn) {
+        doneBtn.disabled = false;
+        doneBtn.innerHTML = 'Done';
+    }
 }
+
+console.log('Videos module loaded');
