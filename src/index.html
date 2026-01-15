@@ -26,6 +26,7 @@
                     </div>
                     <div class="nav-links">
                         <a href="#" class="nav-link active" onclick="showHome(); return false;">Exercises</a>
+                        <a href="#" class="nav-link" onclick="showMyProgress(); return false;">My Progress</a>
                         <a href="#" class="nav-link" onclick="showHowToUse(); return false;">How to Use the Program</a>
                     </div>
                 </div>
@@ -125,6 +126,7 @@
         <!-- Playlist View (hidden by default) -->
         <main id="playlist-view" class="hidden">
             <button class="back-button" onclick="showHome()"><i class="fa-solid fa-arrow-left"></i> Go Back</button>
+            
             <!-- Playlist Header with Progress Ring -->
             <div class="playlist-header-row">
                 <div class="playlist-info">
@@ -160,6 +162,101 @@
                 <button id="save-progress-btn" class="save-progress-btn hidden" onclick="saveProgress()"><i class="fa-solid fa-floppy-disk"></i>Save Progress
                 </button>
             </div>
+        </main>
+
+        <!-- My Progress View (hidden by default) -->
+        <main id="progress-view" class="hidden">
+            <section class="progress-header">
+                <h1>My Progress</h1>
+                <p>Track your fitness journey and see how far you've come.</p>
+            </section>
+
+            <!-- Summary Stats Cards -->
+            <section class="stats-cards-section">
+                <div class="stats-card">
+                    <div class="stats-icon">
+                        <i class="fa-solid fa-calendar-check"></i>
+                    </div>
+                    <div class="stats-content">
+                        <span class="stats-value" id="total-workout-days">0</span>
+                        <span class="stats-label">Total Workout Days</span>
+                    </div>
+                </div>
+                <div class="stats-card">
+                    <div class="stats-icon">
+                        <i class="fa-solid fa-chart-line"></i>
+                    </div>
+                    <div class="stats-content">
+                        <span class="stats-value" id="current-week-stat">0</span>
+                        <span class="stats-label">Current Week</span>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Streak Tracker -->
+            <section class="streak-section">
+                <div class="section-header">
+                    <h2><i class="fa-solid fa-fire"></i> Workout Streak</h2>
+                </div>
+                <div class="streak-cards">
+                    <div class="streak-card current-streak">
+                        <span class="streak-value" id="current-streak">0</span>
+                        <span class="streak-label">Current Streak</span>
+                        <span class="streak-unit">days</span>
+                    </div>
+                    <div class="streak-card longest-streak">
+                        <span class="streak-value" id="longest-streak">0</span>
+                        <span class="streak-label">Longest Streak</span>
+                        <span class="streak-unit">days</span>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Activity Calendar -->
+            <section class="calendar-section">
+                <div class="section-header">
+                    <h2><i class="fa-solid fa-calendar"></i> Activity Calendar</h2>
+                </div>
+                <div class="calendar-container">
+                    <div class="calendar-nav">
+                        <button class="calendar-nav-btn" onclick="previousMonth()">
+                            <i class="fa-solid fa-chevron-left"></i>
+                        </button>
+                        <span class="calendar-month-year" id="calendar-month-year">January 2025</span>
+                        <button class="calendar-nav-btn" onclick="nextMonth()">
+                            <i class="fa-solid fa-chevron-right"></i>
+                        </button>
+                    </div>
+                    <div class="calendar-grid">
+                        <div class="calendar-header">
+                            <span>Sun</span>
+                            <span>Mon</span>
+                            <span>Tue</span>
+                            <span>Wed</span>
+                            <span>Thu</span>
+                            <span>Fri</span>
+                            <span>Sat</span>
+                        </div>
+                        <div class="calendar-days" id="calendar-days">
+                            <!-- Days will be populated by JavaScript -->
+                        </div>
+                    </div>
+                    <div class="calendar-legend">
+                        <span class="legend-item"><span class="legend-dot has-workout"></span> Workout completed</span>
+                        <span class="legend-item"><span class="legend-dot today"></span> Today</span>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Recent Activity Feed -->
+            <section class="activity-section">
+                <div class="section-header">
+                    <h2><i class="fa-solid fa-clock-rotate-left"></i> Recent Activity</h2>
+                </div>
+                <div class="activity-feed" id="activity-feed">
+                    <!-- Activity items will be populated by JavaScript -->
+                </div>
+            </section>
         </main>
 
         <!-- Video Player Modal -->
@@ -202,7 +299,10 @@
     <!-- 6. Videos module -->
     <script src="js/videos.js"></script>
     
-    <!-- 7. Main app -->
+    <!-- 7. Progress module -->
+    <script src="js/progress.js"></script>
+    
+    <!-- 8. Main app -->
     <script src="js/app.js"></script>
 </body>
 </html>
