@@ -93,34 +93,17 @@ function showPlaylistView(playlistId) {
         return;
     }
     
-    hideAllViews();
-    const playlist = views.playlist();
-    if (playlist) playlist.classList.remove('hidden');
+    const authView = document.getElementById('auth-view');
+    const homeView = document.getElementById('home-view');
+    const playlistView = document.getElementById('playlist-view');
+    const progressView = document.getElementById('progress-view');
+    const navbar = document.getElementById('navbar');
     
-    const navbar = views.navbar();
+    if (authView) authView.classList.add('hidden');
+    if (homeView) homeView.classList.add('hidden');
+    if (playlistView) playlistView.classList.remove('hidden');
+    if (progressView) progressView.classList.add('hidden');
     if (navbar) navbar.classList.remove('hidden');
-}
-
-// Show sign in form
-function showSignInView() {
-    const signin = views.signinForm();
-    const signup = views.signupForm();
-    
-    if (signin) signin.classList.remove('hidden');
-    if (signup) signup.classList.add('hidden');
-    
-    clearAuthMessages();
-}
-
-// Show sign up form
-function showSignUpView() {
-    const signin = views.signinForm();
-    const signup = views.signupForm();
-    
-    if (signin) signin.classList.add('hidden');
-    if (signup) signup.classList.remove('hidden');
-    
-    clearAuthMessages();
 }
 
 // Placeholder for How to Use page
