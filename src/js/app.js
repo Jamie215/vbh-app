@@ -116,6 +116,119 @@ function getSuggestedWorkout() {
     }
 }
 
+// ==================== Progress Ring Calculation ====================
+function calculatePlaylistProgress(playlistId) {
+    const playlist = PLAYLISTS.find(p => p.id === playlistId);
+    if (!playlist) return { completed: 0, total: 0, percentage: 0 };
+
+    const totalExercises = playlist.videos.length;
+    let completedExercises = 0;
+
+    // Use saved progress from completionHistory only
+    let savedProgress = null;
+    if (completionHistory) {
+        const dates = Object.keys(completionHistory).sort().reverse();
+        for (const date of dates) {
+            if (completionHistory[date] && completionHistory[date][playlistId]) {
+                savedProgress = completionHistory[date][playlistId];
+                break;
+            }
+        }
+    }
+
+    if (!savedProgress) {
+        return { completed: 0, total: totalExercises, percentage: 0 };
+    }
+
+    // Count completed exercises
+    playlist.videos.forEach(video => {
+        const videoProgress = savedProgress[video.id];
+        
+        if (videoProgress) {
+            // Check if it's the new structure (object with set1, set2, etc.)
+            if (typeof videoProgress === 'object' && !Array.isArray(videoProgress)) {
+                const hasCompletedSet = Object.keys(videoProgress).some(key => {
+                    return key.startsWith('set') && videoProgress[key]?.completed === true;
+                });
+                if (hasCompletedSet) completedExercises++;
+            } 
+            // Backward compatibility: old structure where videoProgress is a number
+            else if (typeof videoProgress === 'number' && videoProgress > 0) {
+                completedExercises++;
+            }
+        }
+    });
+
+    const percentage = totalExercises > 0 ? Math.round((completedExercises / totalExercises) * 100) : 0;
+
+    return {
+        completed: completedExercises,
+        total: totalExercises,
+        percentage: percentage
+    };
+}
+
+// Store chart instances to destroy before re-creating
+let todaysWorkoutChart = null;
+let playlistViewChart = null;
+
+// Create a Chart.js doughnut progress ring
+function createProgressRing(canvasId, percentage, size = 70) {
+    const canvas = document.getElementById(canvasId);
+    if (!canvas) return null;
+
+    // Set canvas size
+    canvas.width = size;
+    canvas.height = size;
+
+    const ctx = canvas.getContext('2d');
+
+    const chart = new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+            datasets: [{
+                data: [percentage, 100 - percentage],
+                backgroundColor: [
+                    '#10b981', // Completed - green
+                    '#e5e7eb'  // Remaining - light gray
+                ],
+                borderWidth: 0,
+                cutout: '75%'
+            }]
+        },
+        options: {
+            responsive: false,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { display: false },
+                tooltip: { enabled: false }
+            },
+            animation: {
+                animateRotate: true,
+                duration: 800
+            }
+        },
+        plugins: [{
+            id: 'centerText',
+            beforeDraw: function(chart) {
+                const ctx = chart.ctx;
+                const centerX = chart.width / 2;
+                const centerY = chart.height / 2;
+
+                ctx.save();
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.font = 'bold 14px -apple-system, BlinkMacSystemFont, sans-serif';
+                ctx.fillStyle = '#1a1a2e';
+                ctx.fillText(`${percentage}%`, centerX, centerY);
+                ctx.restore();
+            }
+        }]
+    });
+
+    return chart;
+}
+
 // ==================== Playlist Completion Helpers ====================
 function getPlaylistLastCompletion(playlistId) {
     const playlist = PLAYLISTS.find(p => p.id === playlistId);
@@ -217,6 +330,10 @@ function loadPlaylists() {
         }
     }
 
+    if (typeof renderProgressAlert === 'function') {
+        renderProgressAlert();
+    }
+
     loadTodaysWorkout();
 
     PLAYLISTS.forEach(playlist => {
@@ -297,6 +414,9 @@ function loadTodaysWorkout() {
     const overlayClass = isAdvanced ? 'advanced' : 'beginner';
     const weekText = isAdvanced ? 'Advanced<br>Weeks 4-6 Workout' : 'Beginner<br>Weeks 0-3 Workout';
     
+    // Calculate progress for the suggested workout
+    const progress = calculatePlaylistProgress(suggested.id);
+    
     container.innerHTML = `
         <div class="todays-workout-thumbnail">
             <div class="playlist-overlay ${overlayClass}">
@@ -306,9 +426,24 @@ function loadTodaysWorkout() {
         <div class="todays-workout-info">
             <h3>${suggested.title}</h3>
             <p>Your suggested workout for today</p>
+            <div class="todays-workout-progress">
+                <canvas id="todays-progress-ring"></canvas>
+                <span class="progress-label">${progress.completed}/${progress.total} exercises done</span>
+            </div>
             <button class="start-workout-btn" onclick="showPlaylist('${suggested.id}')">Start Workout</button>
         </div>
     `;
+
+    // Destroy existing chart if it exists
+    if (todaysWorkoutChart) {
+        todaysWorkoutChart.destroy();
+        todaysWorkoutChart = null;
+    }
+
+    // Create progress ring after DOM is updated
+    setTimeout(() => {
+        todaysWorkoutChart = createProgressRing('todays-progress-ring', progress.percentage, 70);
+    }, 0);
 }
 
 // ==================== Playlist View ====================
@@ -339,18 +474,44 @@ function showPlaylist(playlistId) {
     const formattedTitle = isAdvanced ? 'Advanced 4-6 Exercises' : 'Beginner 0-3 Exercises';
     
     if (titleEl) titleEl.textContent = formattedTitle;
-    if (descEl) descEl.innerHTML = `<strong><u>Instructions</u></strong>: Go through the below exercises at your own pace. Click to watch the videos to see how each exercise is done. Tap 'Save Progress' to keep your place in the workout.`;
-
-    // Show save button
-    const saveBtn = document.getElementById('save-progress-btn');
-    if (saveBtn) saveBtn.classList.remove('hidden');
+    if (descEl) descEl.innerHTML = `<strong><u>Instructions</u></strong>: Go through the below exercises at your own pace. Click to watch the videos to see how each exercise is done. Your progress is saved automatically when you click 'Done' in the exercise modal.`;
 
     // Initialize session progress for this playlist
     if (!sessionProgress[playlistId]) {
         sessionProgress[playlistId] = {};
     }
 
+    // Update progress ring in playlist view
+    updatePlaylistProgressRing();
+
     loadExerciseTable();
+}
+
+// Update progress ring in playlist view
+function updatePlaylistProgressRing() {
+    if (!currentPlaylist) return;
+    
+    const progressContainer = document.getElementById('playlist-progress-ring');
+    if (!progressContainer) return;
+
+    const progress = calculatePlaylistProgress(currentPlaylist.id);
+    
+    // Update the container HTML with canvas and label
+    progressContainer.innerHTML = `
+        <canvas id="playlist-view-progress-ring"></canvas>
+        <span class="progress-label">${progress.completed}/${progress.total} exercises</span>
+    `;
+
+    // Destroy existing chart if it exists
+    if (playlistViewChart) {
+        playlistViewChart.destroy();
+        playlistViewChart = null;
+    }
+
+    // Create progress ring after DOM is updated
+    setTimeout(() => {
+        playlistViewChart = createProgressRing('playlist-view-progress-ring', progress.percentage, 60);
+    }, 0);
 }
 
 // Get equipment display name (strip difficulty hints for cleaner display)
@@ -503,59 +664,6 @@ function updateSetsUI(videoId, currentCount, maxSets) {
 
     input.value = currentCount;
     if (minusBtn) minusBtn.disabled = currentCount <= 0;
-}
-
-// ==================== Save Progress ====================
-async function saveProgress() {
-    const saveBtn = document.getElementById('save-progress-btn');
-    if (!saveBtn) return;
-    
-    saveBtn.disabled = true;
-    saveBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Saving...';
-
-    const today = new Date().toISOString().split('T')[0];
-
-    const progressData = {};
-    Object.keys(sessionProgress).forEach(playlistId => {
-        progressData[playlistId] = sessionProgress[playlistId];
-    });
-
-    try {
-        const { error } = await window.supabaseClient
-            .from('workout_sessions')
-            .upsert({
-                user_id: currentUser.id,
-                session_date: today,
-                progress: progressData
-            }, {
-                onConflict: 'user_id,session_date'
-            });
-
-        if (error) {
-            console.error('Error saving progress:', error);
-            alert('Error saving progress. Please try again.');
-            saveBtn.disabled = false;
-            saveBtn.innerHTML = '<i class="fa-solid fa-floppy-disk"></i> Save Progress';
-            return;
-        }
-
-        await loadTodaySession();
-        await loadCompletionHistory();
-
-        saveBtn.classList.add('saved');
-        saveBtn.innerHTML = '<i class="fa-solid fa-check"></i> Progress Saved!';
-
-        setTimeout(() => {
-            saveBtn.classList.remove('saved');
-            saveBtn.innerHTML = '<i class="fa-solid fa-floppy-disk"></i> Save Progress';
-            saveBtn.disabled = false;
-        }, 2000);
-    } catch (error) {
-        console.error('Exception saving progress:', error);
-        alert('Error saving progress. Please try again.');
-        saveBtn.disabled = false;
-        saveBtn.innerHTML = '<i class="fa-solid fa-floppy-disk"></i> Save Progress';
-    }
 }
 
 console.log('App module loaded');
