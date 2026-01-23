@@ -9,6 +9,31 @@ let todaySession = null;
 let sessionProgress = {};
 let completionHistory = {};
 
+// ==================== Shared UI Functions ====================
+// Show form message (used by auth.js)
+function showMessage(elementId, message, isError = false) {
+    const element = document.getElementById(elementId);
+    if (element) {
+        element.textContent = message;
+        element.className = `form-message ${isError ? 'error' : 'success'}`;
+    }
+}
+
+// Clear auth form messages
+function clearAuthMessages() {
+    const signinMsg = document.getElementById('signin-message');
+    const signupMsg = document.getElementById('signup-message');
+    
+    if (signinMsg) {
+        signinMsg.textContent = '';
+        signinMsg.className = 'form-message';
+    }
+    if (signupMsg) {
+        signupMsg.textContent = '';
+        signupMsg.className = 'form-message';
+    }
+}
+
 // ==================== Data Loading Functions ====================
 async function loadCompletionHistory() {
     if (!currentUser) return;

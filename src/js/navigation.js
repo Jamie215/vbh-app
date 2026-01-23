@@ -123,30 +123,6 @@ function showSignUpView() {
     clearAuthMessages();
 }
 
-// Clear auth form messages
-function clearAuthMessages() {
-    const signinMsg = document.getElementById('signin-message');
-    const signupMsg = document.getElementById('signup-message');
-    
-    if (signinMsg) {
-        signinMsg.textContent = '';
-        signinMsg.className = 'form-message';
-    }
-    if (signupMsg) {
-        signupMsg.textContent = '';
-        signupMsg.className = 'form-message';
-    }
-}
-
-// Show form message
-function showMessage(elementId, message, isError = false) {
-    const element = document.getElementById(elementId);
-    if (element) {
-        element.textContent = message;
-        element.className = `form-message ${isError ? 'error' : 'success'}`;
-    }
-}
-
 // Placeholder for How to Use page
 function showHowToUse() {
     alert('How to Use page coming soon!');
