@@ -58,6 +58,22 @@ function showSignUpView() {
     if (signupMessage) signupMessage.textContent = '';
 }
 
+// ==================== Nav Active State ====================
+function updateNavActiveState(activeView) {
+    const navLinks = document.querySelectorAll('.nav-link');
+    navLinks.forEach(link => {
+        link.classList.remove('active');
+        
+        // Match link text to active view
+        const linkText = link.textContent.toLowerCase();
+        if (activeView === 'home' && linkText.includes('exercises')) {
+            link.classList.add('active');
+        } else if (activeView === 'progress' && linkText.includes('progress')) {
+            link.classList.add('active');
+        }
+    });
+}
+
 // ==================== Home View ====================
 function showHome() {
     if (!currentUser) {
