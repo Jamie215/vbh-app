@@ -108,7 +108,6 @@
             <section id="user-greeting-section">
                 <h1>Hello, <span id="user-name">there</span></h1>
                 <p>You've reached <strong>Week <span id="user-week">1</span></strong>. Keep it up!</p>
-                <div id="progress-alert-container" class="hidden"></div>
             </section>
             <section id="todays-workout-section">
                 <div class="section-header">
@@ -212,8 +211,23 @@
                 <div class="section-header">
                     <h2><i class="fa-solid fa-chart-bar"></i> Workout History</h2>
                 </div>
-                <div class="chart-container">
-                    <canvas id="workout-history-chart"></canvas>
+                <div class="chart-layout">
+                    <!-- Left: Main stacked bar chart -->
+                    <div class="chart-main">
+                        <div class="chart-container" id="history-chart-container">
+                            <canvas id="workout-history-chart"></canvas>
+                        </div>
+                    </div>
+                    <!-- Right: Detail breakdown panel -->
+                    <div class="chart-detail-panel">
+                        <div class="detail-tabs">
+                            <button class="detail-tab active" id="tab-day-view" onclick="switchDetailView('day')">Day View</button>
+                            <button class="detail-tab" id="tab-all-time" onclick="switchDetailView('alltime')">All Time</button>
+                        </div>
+                        <div class="detail-content" id="detail-panel-content">
+                            <!-- Content populated by JavaScript -->
+                        </div>
+                    </div>
                 </div>
             </section>
 
@@ -251,19 +265,19 @@
     <!-- 1. External dependencies -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://www.youtube.com/iframe_api"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+    
+    <!-- 2. Supabase client & data -->
+    <script src="js/playlists.js"></script>
 
-    <!-- 2. Shared utilities & state -->
+    <!-- 3. Shared utilities & state -->
     <script src="js/utility.js"></script>
-
-    <!-- 3. Navigation controller -->
+    
+    <!-- 4. Navigation controller -->
     <script src="js/navigation.js"></script>
     
-    <!-- 4. Auth module -->
+    <!-- 5. Auth module -->
     <script src="js/auth.js"></script>
-
-    <!-- 5. Supabase client & data -->
-    <script src="js/playlists.js"></script>
     
     <!-- 6. Videos module -->
     <script src="js/videos.js"></script>

@@ -1,7 +1,19 @@
 // Progress module - handles My Progress view functionality
 
-// Chart instance for cleanup
+// Chart instances for cleanup
 let workoutHistoryChart = null;
+let detailBreakdownChart = null;
+
+// State for detail panel
+let selectedDate = null;
+let currentDetailView = 'day'; // 'day' or 'alltime'
+
+// Store processed data for click handlers
+let chartData = {
+    sortedDates: [],
+    dateLabels: [],
+    detailedData: {}
+};
 
 // ==================== Show My Progress View ====================
 function showMyProgress() {
@@ -28,10 +40,15 @@ function showMyProgress() {
     const navbar = document.getElementById('navbar');
     if (navbar) navbar.classList.remove('hidden');
 
+    // Reset detail panel state
+    selectedDate = null;
+    currentDetailView = 'day';
+
     // Load all progress data
     loadProgressStats();
     loadStreakData();
     renderWorkoutHistoryChart();
+    renderDetailPanel();
     loadRecentActivity();
 }
 
@@ -60,7 +77,6 @@ function loadStreakData() {
 }
 
 function getWeekNumber(date) {
-    // Get the week number (ISO week) for a given date
     const d = new Date(date);
     d.setHours(0, 0, 0, 0);
     d.setDate(d.getDate() + 4 - (d.getDay() || 7));
@@ -74,7 +90,6 @@ function calculateWeeklyStreaks() {
         return { current: 0, longest: 0 };
     }
 
-    // Get all workout dates and convert to week identifiers
     const dates = Object.keys(completionHistory).sort();
     const weeksWithWorkouts = new Set();
     
@@ -83,14 +98,12 @@ function calculateWeeklyStreaks() {
         weeksWithWorkouts.add(weekId);
     });
 
-    // Convert to sorted array of weeks
     const sortedWeeks = Array.from(weeksWithWorkouts).sort();
     
     if (sortedWeeks.length === 0) {
         return { current: 0, longest: 0 };
     }
 
-    // Calculate longest streak
     let longestStreak = 1;
     let tempStreak = 1;
 
@@ -104,21 +117,17 @@ function calculateWeeklyStreaks() {
     }
     longestStreak = Math.max(longestStreak, tempStreak);
 
-    // Calculate current streak (from current week going backwards)
     const currentWeekId = getWeekNumber(new Date());
     const lastWeekId = getWeekNumber(new Date(Date.now() - 7 * 24 * 60 * 60 * 1000));
     
     let currentStreak = 0;
     
-    // Check if current week or last week has a workout (to start the streak)
     const hasCurrentWeek = weeksWithWorkouts.has(currentWeekId);
     const hasLastWeek = weeksWithWorkouts.has(lastWeekId);
     
     if (!hasCurrentWeek && !hasLastWeek) {
-        // No workout this week or last week - streak is broken
         currentStreak = 0;
     } else {
-        // Count backwards from the most recent active week
         const startWeek = hasCurrentWeek ? currentWeekId : lastWeekId;
         let checkWeek = startWeek;
         
@@ -132,14 +141,10 @@ function calculateWeeklyStreaks() {
 }
 
 function areConsecutiveWeeks(week1, week2) {
-    // Parse week strings like "2025-W03"
     const [year1, w1] = week1.split('-W').map((v, i) => i === 0 ? parseInt(v) : parseInt(v));
     const [year2, w2] = week2.split('-W').map((v, i) => i === 0 ? parseInt(v) : parseInt(v));
     
-    // Same year, consecutive weeks
     if (year1 === year2 && w2 === w1 + 1) return true;
-    
-    // Year transition: last week of year1 to first week of year2
     if (year2 === year1 + 1 && w1 >= 52 && w2 === 1) return true;
     
     return false;
@@ -149,13 +154,12 @@ function getPreviousWeek(weekId) {
     const [year, week] = weekId.split('-W').map((v, i) => i === 0 ? parseInt(v) : parseInt(v));
     
     if (week === 1) {
-        // Go to last week of previous year (52 or 53)
         return `${year - 1}-W52`;
     }
     return `${year}-W${(week - 1).toString().padStart(2, '0')}`;
 }
 
-// ==================== Workout History Stacked Bar Chart ====================
+// ==================== Workout History Chart (Aggregated by Playlist) ====================
 function renderWorkoutHistoryChart() {
     const canvas = document.getElementById('workout-history-chart');
     if (!canvas) return;
@@ -166,69 +170,56 @@ function renderWorkoutHistoryChart() {
         workoutHistoryChart = null;
     }
 
+    const chartContainer = document.getElementById('history-chart-container');
+    
     if (!completionHistory || Object.keys(completionHistory).length === 0) {
-        // Show empty state
-        const container = canvas.parentElement;
-        container.innerHTML = `
-            <div class="chart-empty">
-                <i class="fa-solid fa-chart-bar"></i>
-                <p>No workout data yet. Complete some exercises to see your progress chart!</p>
-            </div>
-        `;
+        if (chartContainer) {
+            chartContainer.innerHTML = `
+                <canvas id="workout-history-chart"></canvas>
+                <div class="chart-empty">
+                    <i class="fa-solid fa-chart-bar"></i>
+                    <p>No workout data yet. Complete some exercises to see your progress chart!</p>
+                </div>
+            `;
+        }
         return;
     }
 
     // Get sorted dates (last 14 sessions max for readability)
     const sortedDates = Object.keys(completionHistory).sort().slice(-14);
+    chartData.sortedDates = sortedDates;
     
-    // Build a map of all unique videos across all sessions
-    const allVideos = new Map(); // videoId -> { title, playlistId }
-    
+    // Process data - aggregate by playlist
+    const beginnerData = [];
+    const advancedData = [];
+    chartData.detailedData = {};
+
     sortedDates.forEach(dateStr => {
         const dayProgress = completionHistory[dateStr];
+        let beginnerSets = 0;
+        let advancedSets = 0;
+        
+        // Store detailed breakdown for this date
+        chartData.detailedData[dateStr] = {
+            beginner: { exercises: [], totalSets: 0 },
+            advanced: { exercises: [], totalSets: 0 }
+        };
+
         Object.keys(dayProgress).forEach(playlistId => {
             const playlist = PLAYLISTS.find(p => p.id === playlistId);
             if (!playlist) return;
             
+            const isAdvanced = playlistId.includes('advanced');
+            const targetData = isAdvanced ? chartData.detailedData[dateStr].advanced : chartData.detailedData[dateStr].beginner;
+
             Object.keys(dayProgress[playlistId]).forEach(videoId => {
-                if (!allVideos.has(videoId)) {
-                    const video = playlist.videos.find(v => v.id === videoId);
-                    if (video) {
-                        allVideos.set(videoId, { 
-                            title: video.title, 
-                            playlistId: playlistId 
-                        });
-                    }
-                }
-            });
-        });
-    });
+                const video = playlist.videos.find(v => v.id === videoId);
+                if (!video) return;
 
-    // Generate colors for each video
-    const colorPalette = [
-        '#10b981', '#3b82f6', '#8b5cf6', '#f59e0b', '#ef4444',
-        '#06b6d4', '#ec4899', '#84cc16', '#f97316', '#6366f1'
-    ];
+                const videoProgress = dayProgress[playlistId][videoId];
+                let completedSets = 0;
+                let repsData = [];
 
-    // Build datasets for each video
-    const datasets = [];
-    let colorIndex = 0;
-    
-    // Store detailed data for tooltips
-    const detailedData = {};
-    sortedDates.forEach(dateStr => {
-        detailedData[dateStr] = {};
-    });
-
-    allVideos.forEach((videoInfo, videoId) => {
-        const data = sortedDates.map(dateStr => {
-            const dayProgress = completionHistory[dateStr];
-            let completedSets = 0;
-            let repsData = [];
-            
-            // Check each playlist for this video
-            Object.keys(dayProgress).forEach(playlistId => {
-                const videoProgress = dayProgress[playlistId]?.[videoId];
                 if (videoProgress && typeof videoProgress === 'object') {
                     Object.keys(videoProgress).forEach(setKey => {
                         if (setKey.startsWith('set') && videoProgress[setKey]?.completed) {
@@ -240,35 +231,30 @@ function renderWorkoutHistoryChart() {
                         }
                     });
                 }
+
+                if (completedSets > 0) {
+                    if (isAdvanced) {
+                        advancedSets += completedSets;
+                    } else {
+                        beginnerSets += completedSets;
+                    }
+
+                    targetData.exercises.push({
+                        title: video.title,
+                        sets: completedSets,
+                        repsData: repsData
+                    });
+                    targetData.totalSets += completedSets;
+                }
             });
-            
-            // Store detailed info for tooltip
-            if (completedSets > 0) {
-                detailedData[dateStr][videoId] = {
-                    title: videoInfo.title,
-                    sets: completedSets,
-                    repsData: repsData
-                };
-            }
-            
-            return completedSets;
         });
 
-        const color = colorPalette[colorIndex % colorPalette.length];
-        colorIndex++;
-
-        datasets.push({
-            label: videoInfo.title,
-            data: data,
-            backgroundColor: color,
-            borderColor: color,
-            borderWidth: 1,
-            videoId: videoId
-        });
+        beginnerData.push(beginnerSets);
+        advancedData.push(advancedSets);
     });
 
     // Format date labels
-    const labels = sortedDates.map(dateStr => {
+    chartData.dateLabels = sortedDates.map(dateStr => {
         const date = new Date(dateStr + 'T00:00:00');
         return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
     });
@@ -278,12 +264,34 @@ function renderWorkoutHistoryChart() {
     workoutHistoryChart = new Chart(ctx, {
         type: 'bar',
         data: {
-            labels: labels,
-            datasets: datasets
+            labels: chartData.dateLabels,
+            datasets: [
+                {
+                    label: 'Beginner 0-3',
+                    data: beginnerData,
+                    backgroundColor: '#10b981',
+                    borderColor: '#10b981',
+                    borderWidth: 1
+                },
+                {
+                    label: 'Advanced 4-6',
+                    data: advancedData,
+                    backgroundColor: '#8b5cf6',
+                    borderColor: '#8b5cf6',
+                    borderWidth: 1
+                }
+            ]
         },
         options: {
             responsive: true,
             maintainAspectRatio: false,
+            onClick: (event, elements) => {
+                if (elements.length > 0) {
+                    const index = elements[0].index;
+                    const clickedDate = chartData.sortedDates[index];
+                    handleBarClick(clickedDate);
+                }
+            },
             scales: {
                 x: {
                     stacked: true,
@@ -328,41 +336,19 @@ function renderWorkoutHistoryChart() {
                     }
                 },
                 tooltip: {
-                    mode: 'index',
-                    intersect: false,
+                    enabled: true,
                     callbacks: {
                         title: function(context) {
-                            const index = context[0].dataIndex;
-                            return sortedDates[index];
+                            return chartData.dateLabels[context[0].dataIndex];
                         },
-                        label: function(context) {
-                            const dateStr = sortedDates[context.dataIndex];
-                            const videoId = context.dataset.videoId;
-                            const detail = detailedData[dateStr]?.[videoId];
-                            
-                            if (!detail || detail.sets === 0) {
-                                return null; // Hide if no sets
-                            }
-                            
-                            // Build detailed label
-                            const repsBreakdown = detail.repsData
-                                .map(r => `${r.set}: ${r.reps} reps`)
-                                .join(', ');
-                            
-                            return `${detail.title}: ${detail.sets} sets (${repsBreakdown})`;
-                        },
-                        filter: function(tooltipItem) {
-                            return tooltipItem.raw > 0;
+                        footer: function() {
+                            return 'Click to see breakdown';
                         }
                     },
                     backgroundColor: 'rgba(26, 26, 46, 0.95)',
-                    titleFont: {
-                        size: 13,
-                        weight: '600'
-                    },
-                    bodyFont: {
-                        size: 12
-                    },
+                    titleFont: { size: 13, weight: '600' },
+                    bodyFont: { size: 12 },
+                    footerFont: { size: 10, style: 'italic' },
                     padding: 12,
                     cornerRadius: 8
                 }
@@ -370,6 +356,326 @@ function renderWorkoutHistoryChart() {
             interaction: {
                 mode: 'index',
                 intersect: false
+            }
+        }
+    });
+}
+
+// ==================== Detail Panel ====================
+function handleBarClick(dateStr) {
+    selectedDate = dateStr;
+    currentDetailView = 'day';
+    updateDetailTabs();
+    renderDetailPanel();
+}
+
+function switchDetailView(view) {
+    currentDetailView = view;
+    updateDetailTabs();
+    renderDetailPanel();
+}
+
+function updateDetailTabs() {
+    const dayTab = document.getElementById('tab-day-view');
+    const allTimeTab = document.getElementById('tab-all-time');
+    
+    if (dayTab && allTimeTab) {
+        dayTab.classList.toggle('active', currentDetailView === 'day');
+        allTimeTab.classList.toggle('active', currentDetailView === 'alltime');
+    }
+}
+
+function renderDetailPanel() {
+    const detailContent = document.getElementById('detail-panel-content');
+    if (!detailContent) return;
+
+    // Destroy existing detail chart
+    if (detailBreakdownChart) {
+        detailBreakdownChart.destroy();
+        detailBreakdownChart = null;
+    }
+
+    if (currentDetailView === 'alltime') {
+        renderAllTimeView(detailContent);
+    } else if (selectedDate && chartData.detailedData[selectedDate]) {
+        renderDayView(detailContent, selectedDate);
+    } else {
+        renderInstructionalState(detailContent);
+    }
+}
+
+function renderInstructionalState(container) {
+    container.innerHTML = `
+        <div class="detail-empty">
+            <i class="fa-solid fa-hand-pointer"></i>
+            <p>Click a bar in the chart to see the exercise breakdown for that day</p>
+        </div>
+    `;
+}
+
+function renderDayView(container, dateStr) {
+    const data = chartData.detailedData[dateStr];
+    if (!data) {
+        renderInstructionalState(container);
+        return;
+    }
+
+    const formattedDate = new Date(dateStr + 'T00:00:00').toLocaleDateString('en-US', {
+        weekday: 'short',
+        month: 'short',
+        day: 'numeric'
+    });
+
+    // Combine all exercises from both playlists
+    const allExercises = [
+        ...data.beginner.exercises.map(e => ({ ...e, playlist: 'Beginner 0-3', color: '#10b981' })),
+        ...data.advanced.exercises.map(e => ({ ...e, playlist: 'Advanced 4-6', color: '#8b5cf6' }))
+    ];
+
+    const totalSets = data.beginner.totalSets + data.advanced.totalSets;
+
+    if (allExercises.length === 0) {
+        container.innerHTML = `
+            <div class="detail-header">
+                <h4>${formattedDate}</h4>
+                <span class="detail-total">No exercises recorded</span>
+            </div>
+        `;
+        return;
+    }
+
+    container.innerHTML = `
+        <div class="detail-header">
+            <h4>${formattedDate}</h4>
+            <span class="detail-total">${totalSets} total sets</span>
+        </div>
+        <div class="detail-chart-container">
+            <canvas id="detail-breakdown-chart"></canvas>
+        </div>
+    `;
+
+    // Create horizontal bar chart for exercise breakdown
+    const canvas = document.getElementById('detail-breakdown-chart');
+    if (!canvas) return;
+
+    const ctx = canvas.getContext('2d');
+    detailBreakdownChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: allExercises.map(e => e.title),
+            datasets: [{
+                data: allExercises.map(e => e.sets),
+                backgroundColor: allExercises.map(e => e.color),
+                borderColor: allExercises.map(e => e.color),
+                borderWidth: 1,
+                borderRadius: 4
+            }]
+        },
+        options: {
+            indexAxis: 'y',
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                x: {
+                    beginAtZero: true,
+                    title: {
+                        display: true,
+                        text: 'Sets',
+                        font: { size: 11 }
+                    },
+                    ticks: {
+                        stepSize: 1,
+                        font: { size: 10 }
+                    },
+                    grid: {
+                        display: true,
+                        color: 'rgba(0,0,0,0.05)'
+                    }
+                },
+                y: {
+                    ticks: {
+                        font: { size: 11 }
+                    },
+                    grid: {
+                        display: false
+                    }
+                }
+            },
+            plugins: {
+                legend: {
+                    display: false
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            const exercise = allExercises[context.dataIndex];
+                            const repsStr = exercise.repsData
+                                .map(r => `${r.set}: ${r.reps} reps`)
+                                .join(', ');
+                            return `${exercise.sets} sets (${repsStr})`;
+                        },
+                        afterLabel: function(context) {
+                            const exercise = allExercises[context.dataIndex];
+                            return `Playlist: ${exercise.playlist}`;
+                        }
+                    },
+                    backgroundColor: 'rgba(26, 26, 46, 0.95)',
+                    titleFont: { size: 12, weight: '600' },
+                    bodyFont: { size: 11 },
+                    padding: 10,
+                    cornerRadius: 6
+                }
+            }
+        }
+    });
+}
+
+function renderAllTimeView(container) {
+    if (!completionHistory || Object.keys(completionHistory).length === 0) {
+        container.innerHTML = `
+            <div class="detail-empty">
+                <i class="fa-solid fa-chart-pie"></i>
+                <p>No workout data yet</p>
+            </div>
+        `;
+        return;
+    }
+
+    // Aggregate all exercises across all sessions
+    const exerciseTotals = new Map(); // videoId -> { title, sets, playlist, color }
+
+    Object.keys(completionHistory).forEach(dateStr => {
+        const dayProgress = completionHistory[dateStr];
+
+        Object.keys(dayProgress).forEach(playlistId => {
+            const playlist = PLAYLISTS.find(p => p.id === playlistId);
+            if (!playlist) return;
+
+            const isAdvanced = playlistId.includes('advanced');
+
+            Object.keys(dayProgress[playlistId]).forEach(videoId => {
+                const video = playlist.videos.find(v => v.id === videoId);
+                if (!video) return;
+
+                const videoProgress = dayProgress[playlistId][videoId];
+                let completedSets = 0;
+
+                if (videoProgress && typeof videoProgress === 'object') {
+                    Object.keys(videoProgress).forEach(setKey => {
+                        if (setKey.startsWith('set') && videoProgress[setKey]?.completed) {
+                            completedSets++;
+                        }
+                    });
+                }
+
+                if (completedSets > 0) {
+                    if (exerciseTotals.has(videoId)) {
+                        exerciseTotals.get(videoId).sets += completedSets;
+                    } else {
+                        exerciseTotals.set(videoId, {
+                            title: video.title,
+                            sets: completedSets,
+                            playlist: isAdvanced ? 'Advanced 4-6' : 'Beginner 0-3',
+                            color: isAdvanced ? '#8b5cf6' : '#10b981'
+                        });
+                    }
+                }
+            });
+        });
+    });
+
+    const allExercises = Array.from(exerciseTotals.values())
+        .sort((a, b) => b.sets - a.sets); // Sort by sets descending
+
+    const totalSets = allExercises.reduce((sum, e) => sum + e.sets, 0);
+
+    if (allExercises.length === 0) {
+        container.innerHTML = `
+            <div class="detail-empty">
+                <i class="fa-solid fa-chart-pie"></i>
+                <p>No completed exercises yet</p>
+            </div>
+        `;
+        return;
+    }
+
+    container.innerHTML = `
+        <div class="detail-header">
+            <h4>All Time Totals</h4>
+            <span class="detail-total">${totalSets} total sets</span>
+        </div>
+        <div class="detail-chart-container">
+            <canvas id="detail-breakdown-chart"></canvas>
+        </div>
+    `;
+
+    // Create horizontal bar chart
+    const canvas = document.getElementById('detail-breakdown-chart');
+    if (!canvas) return;
+
+    const ctx = canvas.getContext('2d');
+    detailBreakdownChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: allExercises.map(e => e.title),
+            datasets: [{
+                data: allExercises.map(e => e.sets),
+                backgroundColor: allExercises.map(e => e.color),
+                borderColor: allExercises.map(e => e.color),
+                borderWidth: 1,
+                borderRadius: 4
+            }]
+        },
+        options: {
+            indexAxis: 'y',
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                x: {
+                    beginAtZero: true,
+                    title: {
+                        display: true,
+                        text: 'Total Sets',
+                        font: { size: 11 }
+                    },
+                    ticks: {
+                        font: { size: 10 }
+                    },
+                    grid: {
+                        display: true,
+                        color: 'rgba(0,0,0,0.05)'
+                    }
+                },
+                y: {
+                    ticks: {
+                        font: { size: 11 }
+                    },
+                    grid: {
+                        display: false
+                    }
+                }
+            },
+            plugins: {
+                legend: {
+                    display: false
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            const exercise = allExercises[context.dataIndex];
+                            return `${exercise.sets} total sets`;
+                        },
+                        afterLabel: function(context) {
+                            const exercise = allExercises[context.dataIndex];
+                            return `Playlist: ${exercise.playlist}`;
+                        }
+                    },
+                    backgroundColor: 'rgba(26, 26, 46, 0.95)',
+                    titleFont: { size: 12, weight: '600' },
+                    bodyFont: { size: 11 },
+                    padding: 10,
+                    cornerRadius: 6
+                }
             }
         }
     });
@@ -390,7 +696,6 @@ function loadRecentActivity() {
         return;
     }
 
-    // Get last 7 sessions, sorted by date descending
     const sortedDates = Object.keys(completionHistory).sort().reverse().slice(0, 7);
 
     let activityHTML = '';
@@ -398,8 +703,6 @@ function loadRecentActivity() {
     sortedDates.forEach(dateStr => {
         const progress = completionHistory[dateStr];
         const formattedDate = formatActivityDate(dateStr);
-        
-        // Calculate stats for this session
         const sessionStats = calculateSessionStats(progress);
 
         activityHTML += `
