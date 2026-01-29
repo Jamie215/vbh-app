@@ -504,7 +504,7 @@ function updatePlaylistProgressRing() {
     const progressContainer = document.getElementById('playlist-progress-ring');
     if (!progressContainer) return;
 
-    const progress = calculatePlaylistProgress(currentPlaylist.id);
+    const progress = calculatePlaylistProgress(currentPlaylist.id, true);
     
     // Update the container HTML with canvas and label
     progressContainer.innerHTML = `
