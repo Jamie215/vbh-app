@@ -80,6 +80,7 @@ async function loadTodaySession() {
         }
 
         todaySession = data;
+        console.log('Today\'s session data:', todaySession);
 
         if (data?.progress) {
             Object.keys(data.progress).forEach(playlistId => {
