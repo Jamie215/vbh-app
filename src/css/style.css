@@ -653,6 +653,7 @@ button {
 
 .dot-challenging {
     background-color: #FD3DB5;
+    background-color: #ef4444;
 }
 
 .dot-neutral {
@@ -677,6 +678,7 @@ button {
 .equipment-badge.badge-challenging {
     background: #fef2f2;
     color: #8C1946;
+    color: #b91c1c;
 }
 
 .equipment-badge.badge-neutral {
