@@ -117,21 +117,31 @@ function getSuggestedWorkout() {
 }
 
 // ==================== Progress Ring Calculation ====================
-function calculatePlaylistProgress(playlistId) {
+function calculatePlaylistProgress(playlistId, todayOnly = false) {
     const playlist = PLAYLISTS.find(p => p.id === playlistId);
     if (!playlist) return { completed: 0, total: 0, percentage: 0 };
 
     const totalExercises = playlist.videos.length;
     let completedExercises = 0;
 
-    // Use saved progress from completionHistory only
+    // Get saved progress
     let savedProgress = null;
-    if (completionHistory) {
-        const dates = Object.keys(completionHistory).sort().reverse();
-        for (const date of dates) {
-            if (completionHistory[date] && completionHistory[date][playlistId]) {
-                savedProgress = completionHistory[date][playlistId];
-                break;
+    
+    if (todayOnly) {
+        // Only look at today's session
+        const today = new Date().toISOString().split('T')[0];
+        if (completionHistory && completionHistory[today] && completionHistory[today][playlistId]) {
+            savedProgress = completionHistory[today][playlistId];
+        }
+    } else {
+        // Look at most recent saved session (original behavior)
+        if (completionHistory) {
+            const dates = Object.keys(completionHistory).sort().reverse();
+            for (const date of dates) {
+                if (completionHistory[date] && completionHistory[date][playlistId]) {
+                    savedProgress = completionHistory[date][playlistId];
+                    break;
+                }
             }
         }
     }
@@ -414,8 +424,8 @@ function loadTodaysWorkout() {
     const overlayClass = isAdvanced ? 'advanced' : 'beginner';
     const weekText = isAdvanced ? 'Advanced<br>Weeks 4-6 Workout' : 'Beginner<br>Weeks 0-3 Workout';
     
-    // Calculate progress for the suggested workout
-    const progress = calculatePlaylistProgress(suggested.id);
+    // Calculate progress for the suggested workout (today only)
+    const progress = calculatePlaylistProgress(suggested.id, true);
     
     container.innerHTML = `
         <div class="todays-workout-thumbnail">

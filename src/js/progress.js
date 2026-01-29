@@ -472,14 +472,12 @@ function calculateSessionStats(progress) {
             }
         });
 
-        if (exercisesCompleted > 0) {
-            const isAdvanced = playlistId.includes('advanced');
-            stats.push({
-                playlistName: isAdvanced ? 'Advanced 4-6' : 'Beginner 0-3',
-                exercisesCompleted: exercisesCompleted,
-                totalExercises: playlist.videos.length
-            });
-        }
+        const isAdvanced = playlistId.includes('advanced');
+        stats.push({
+            playlistName: isAdvanced ? 'Advanced 4-6' : 'Beginner 0-3',
+            exercisesCompleted: exercisesCompleted,
+            totalExercises: playlist.videos.length
+        });
     });
 
     return stats;
