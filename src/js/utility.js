@@ -92,6 +92,9 @@ async function loadTodaySession() {
                 });
             });
         }
+        else {
+            sessionProgress = {};
+        }
     } catch (error) {
         console.error('Exception in loadTodaySession:', error);
     }   
