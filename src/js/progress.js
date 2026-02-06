@@ -46,7 +46,6 @@ function showMyProgress() {
 
     // Load all progress data
     loadProgressStats();
-    loadStreakData();
     renderWorkoutHistoryChart();
     renderDetailPanel();
     loadRecentActivity();
@@ -65,17 +64,6 @@ function loadProgressStats() {
     if (currentWeekEl) currentWeekEl.textContent = currentWeek;
 }
 
-// ==================== Weekly Streak Calculation ====================
-function loadStreakData() {
-    const streaks = calculateWeeklyStreaks();
-    
-    const currentStreakEl = document.getElementById('current-streak');
-    const longestStreakEl = document.getElementById('longest-streak');
-    
-    if (currentStreakEl) currentStreakEl.textContent = streaks.current;
-    if (longestStreakEl) longestStreakEl.textContent = streaks.longest;
-}
-
 function getWeekNumber(date) {
     const d = new Date(date);
     d.setHours(0, 0, 0, 0);
@@ -83,61 +71,6 @@ function getWeekNumber(date) {
     const yearStart = new Date(d.getFullYear(), 0, 1);
     const weekNo = Math.ceil((((d - yearStart) / 86400000) + 1) / 7);
     return `${d.getFullYear()}-W${weekNo.toString().padStart(2, '0')}`;
-}
-
-function calculateWeeklyStreaks() {
-    if (!completionHistory || Object.keys(completionHistory).length === 0) {
-        return { current: 0, longest: 0 };
-    }
-
-    const dates = Object.keys(completionHistory).sort();
-    const weeksWithWorkouts = new Set();
-    
-    dates.forEach(dateStr => {
-        const weekId = getWeekNumber(new Date(dateStr + 'T00:00:00'));
-        weeksWithWorkouts.add(weekId);
-    });
-
-    const sortedWeeks = Array.from(weeksWithWorkouts).sort();
-    
-    if (sortedWeeks.length === 0) {
-        return { current: 0, longest: 0 };
-    }
-
-    let longestStreak = 1;
-    let tempStreak = 1;
-
-    for (let i = 1; i < sortedWeeks.length; i++) {
-        if (areConsecutiveWeeks(sortedWeeks[i - 1], sortedWeeks[i])) {
-            tempStreak++;
-        } else {
-            longestStreak = Math.max(longestStreak, tempStreak);
-            tempStreak = 1;
-        }
-    }
-    longestStreak = Math.max(longestStreak, tempStreak);
-
-    const currentWeekId = getWeekNumber(new Date());
-    const lastWeekId = getWeekNumber(new Date(Date.now() - 7 * 24 * 60 * 60 * 1000));
-    
-    let currentStreak = 0;
-    
-    const hasCurrentWeek = weeksWithWorkouts.has(currentWeekId);
-    const hasLastWeek = weeksWithWorkouts.has(lastWeekId);
-    
-    if (!hasCurrentWeek && !hasLastWeek) {
-        currentStreak = 0;
-    } else {
-        const startWeek = hasCurrentWeek ? currentWeekId : lastWeekId;
-        let checkWeek = startWeek;
-        
-        while (weeksWithWorkouts.has(checkWeek)) {
-            currentStreak++;
-            checkWeek = getPreviousWeek(checkWeek);
-        }
-    }
-
-    return { current: currentStreak, longest: longestStreak };
 }
 
 function areConsecutiveWeeks(week1, week2) {
