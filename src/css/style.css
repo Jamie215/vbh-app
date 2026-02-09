@@ -186,7 +186,7 @@ button {
 /* Base Alert Styles */
 .progress-alert {
     display: flex;
-    align-items: flex-start;
+    align-items: center;
     gap: 1rem;
     padding: 1rem 1.25rem;
     border-radius: 12px;
