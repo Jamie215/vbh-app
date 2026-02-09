@@ -280,12 +280,11 @@ button {
 }
 
 /* ==================== Alert Type Variations ==================== */
-
 /* Warning Alert (Progress Reset) */
 .alert-warning {
-    background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+    background: white;
     border-color: #f59e0b;
-    color: #92400e;
+    color: #fef3c7;
 }
 
 .alert-warning .alert-icon {
@@ -303,9 +302,9 @@ button {
 
 /* Info Alert (Approaching End) */
 .alert-info {
-    background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+    background: white;
     border-color: #3b82f6;
-    color: #1e40af;
+    color: #dbeafe;
 }
 
 .alert-info .alert-icon {
@@ -323,22 +322,22 @@ button {
 
 /* Success Alert (Program Completed) */
 .alert-success {
-    background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
-    border-color: #10b981;
-    color: #065f46;
+    background: white;
+    border-color: #FDE047;
+    color: #854D0E;
 }
 
 .alert-success .alert-icon {
-    background: #34d399;
-    color: #064e3b;
+    background: #FACC15;
+    color: #713F12;
 }
 
 .alert-success .alert-dismiss {
-    color: #065f46;
+    color: #854D0E;
 }
 
 .alert-success .alert-dismiss:hover {
-    background: rgba(6, 95, 70, 0.1);
+    background: rgba(133, 77, 14, 0.1);
 }
 
 /* ==================== Responsive Design ==================== */
@@ -367,58 +366,6 @@ button {
         width: 28px;
         height: 28px;
         font-size: 0.9rem;
-    }
-}
-
-/* ==================== Dark Mode Support (if applicable) ==================== */
-
-@media (prefers-color-scheme: dark) {
-    /* Warning Alert - Dark Mode */
-    .alert-warning {
-        background: white;
-        border-color: #f59e0b;
-        color: #fef3c7;
-    }
-
-    .alert-warning .alert-icon {
-        background: #b45309;
-        color: #fef3c7;
-    }
-
-    .alert-warning .alert-dismiss {
-        color: #fef3c7;
-    }
-
-    /* Info Alert - Dark Mode */
-    .alert-info {
-        background: white;
-        border-color: #3b82f6;
-        color: #dbeafe;
-    }
-
-    .alert-info .alert-icon {
-        background: #2563eb;
-        color: #dbeafe;
-    }
-
-    .alert-info .alert-dismiss {
-        color: #dbeafe;
-    }
-
-    /* Success Alert - Dark Mode */
-    .alert-success {
-        background: #FFF6D0;
-        border-color: #FFE581;
-        color: #faf1c5;
-    }
-
-    .alert-success .alert-icon {
-        background: #FFE581;
-        color: #faf1c5;
-    }
-
-    .alert-success .alert-dismiss {
-        color: #faf1c5;
     }
 }
 
