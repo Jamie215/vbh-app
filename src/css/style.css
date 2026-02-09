@@ -280,64 +280,64 @@ button {
 }
 
 /* ==================== Alert Type Variations ==================== */
-/* Warning Alert (Progress Reset) */
+/* Warning Alert - Buttery Yellow */
 .alert-warning {
     background: white;
-    border-color: #f59e0b;
-    color: #fef3c7;
+    border-color: #FCD34D;    /* Bright butter yellow border */
+    color: #854D0E;           /* Golden brown text */
 }
 
 .alert-warning .alert-icon {
-    background: #fbbf24;
-    color: #92400e;
+    background: #FDE047;      /* Vibrant lemon-butter yellow */
+    color: #713F12;           /* Deep golden brown */
 }
 
 .alert-warning .alert-dismiss {
-    color: #92400e;
+    color: #854D0E;
 }
 
 .alert-warning .alert-dismiss:hover {
-    background: rgba(146, 64, 14, 0.1);
+    background: rgba(133, 77, 14, 0.1);
 }
 
-/* Info Alert (Approaching End) */
+/* Info Alert - Blue */
 .alert-info {
     background: white;
-    border-color: #3b82f6;
-    color: #dbeafe;
+    border-color: #60A5FA;    /* Bright blue border */
+    color: #1E40AF;           /* Deep blue text */
 }
 
 .alert-info .alert-icon {
-    background: #60a5fa;
-    color: #1e3a8a;
+    background: #3B82F6;      /* Vibrant blue */
+    color: #1E3A8A;           /* Dark blue */
 }
 
 .alert-info .alert-dismiss {
-    color: #1e40af;
+    color: #1E40AF;
 }
 
 .alert-info .alert-dismiss:hover {
     background: rgba(30, 64, 175, 0.1);
 }
 
-/* Success Alert (Program Completed) */
+/* Success Alert - Purple */
 .alert-success {
     background: white;
-    border-color: #FDE047;
-    color: #854D0E;
+    border-color: #A78BFA;    /* Bright purple border */
+    color: #5B21B6;           /* Deep purple text */
 }
 
 .alert-success .alert-icon {
-    background: #FACC15;
-    color: #713F12;
+    background: #8B5CF6;      /* Vibrant purple */
+    color: #4C1D95;           /* Dark purple */
 }
 
 .alert-success .alert-dismiss {
-    color: #854D0E;
+    color: #5B21B6;
 }
 
 .alert-success .alert-dismiss:hover {
-    background: rgba(133, 77, 14, 0.1);
+    background: rgba(91, 33, 182, 0.1);
 }
 
 /* ==================== Responsive Design ==================== */
