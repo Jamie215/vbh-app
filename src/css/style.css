@@ -375,7 +375,7 @@ button {
 @media (prefers-color-scheme: dark) {
     /* Warning Alert - Dark Mode */
     .alert-warning {
-        background: linear-gradient(135deg, #451a03 0%, #78350f 100%);
+        background: white;
         border-color: #f59e0b;
         color: #fef3c7;
     }
@@ -391,7 +391,7 @@ button {
 
     /* Info Alert - Dark Mode */
     .alert-info {
-        background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 100%);
+        background: white;
         border-color: #3b82f6;
         color: #dbeafe;
     }
@@ -407,18 +407,18 @@ button {
 
     /* Success Alert - Dark Mode */
     .alert-success {
-        background: linear-gradient(135deg, #064e3b 0%, #065f46 100%);
-        border-color: #10b981;
-        color: #d1fae5;
+        background: #FFF6D0;
+        border-color: #FFE581;
+        color: #faf1c5;
     }
 
     .alert-success .alert-icon {
-        background: #059669;
-        color: #d1fae5;
+        background: #FFE581;
+        color: #faf1c5;
     }
 
     .alert-success .alert-dismiss {
-        color: #d1fae5;
+        color: #faf1c5;
     }
 }
 
