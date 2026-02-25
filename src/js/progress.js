@@ -59,21 +59,9 @@ function loadProgressStats() {
     if (totalDaysEl) totalDaysEl.textContent = totalDays;
 
     // Current program week
-    const state = getProgramWeekState();
+    const currentWeek = calculateUserWeek();
     const currentWeekEl = document.getElementById('current-week-stat');
-    if (currentWeekEl) currentWeekEl.textContent = state.programWeek;
-
-    // Sessions logged in current program week (for weeks 4+)
-    const sessionsEl = document.getElementById('sessions-this-week-stat');
-    if (sessionsEl) {
-        const statsCard = sessionsEl.closest('.stats-card');
-        if (state.programWeek >= 4) {
-            sessionsEl.textContent = `${state.sessionsInCurrentWeek} / 2`;
-            statsCard?.classList.remove('hidden');
-        } else {
-            statsCard?.classList.add('hidden');
-        }
-    }
+    if (currentWeekEl) currentWeekEl.textContent = currentWeek;
 }
 
 function getWeekNumber(date) {
