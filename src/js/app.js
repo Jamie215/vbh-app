@@ -202,7 +202,6 @@ function getProgramWeekState() {
             if (today >= advanceDate) {
                 programWeek++;
                 if (programWeek >= 6) {
-                    programWeek = 6;
                     windowAnchor = advanceDate;
                     // Count any remaining sessions that fall on/after the new anchor
                     sessionsInCurrentWeek = (sessionDate >= advanceDate) ? 1 : 0;
@@ -244,6 +243,158 @@ function getProgramWeekState() {
  */
 function calculateUserWeek() {
     return getProgramWeekState().programWeek;
+}
+
+/**
+ * Returns true if the user has completed the full 6-week program.
+ * Completed = program week 6 with 2+ sessions logged.
+ */
+function isProgramCompleted() {
+    const state = getProgramWeekState();
+    return state.programWeek === 6 && state.sessionsInCurrentWeek >= 2;
+}
+
+/**
+ * Checks if the user is about to begin their final session of the program
+ * (week 6, 1 session done, no advanced activity logged today).
+ * If so, shows a congratulatory modal.
+ */
+function checkAndShowFinalSessionModal() {
+    const state = getProgramWeekState();
+
+    // Must be on week 6 with exactly 1 session completed
+    if (state.programWeek !== 6 || state.sessionsInCurrentWeek !== 1) return;
+
+    // Check if today already has advanced activity (don't re-trigger)
+    const today = new Date().toISOString().split('T')[0];
+    const advancedDates = getAdvancedSessionDates();
+    if (advancedDates.includes(today)) return;
+
+    // Check if already dismissed this session
+    const dismissed = sessionStorage.getItem('dismissedFinalSessionModal');
+    if (dismissed) return;
+
+    // Show the modal
+    showFinalSessionModal();
+}
+
+/**
+ * Renders and displays the final session congratulatory modal.
+ */
+function showFinalSessionModal() {
+    // Remove existing modal if present
+    const existing = document.getElementById('final-session-modal');
+    if (existing) existing.remove();
+
+    const overlay = document.createElement('div');
+    overlay.id = 'final-session-modal';
+    overlay.className = 'final-session-modal-overlay';
+    overlay.innerHTML = `
+        <div class="final-session-modal">
+            <div class="final-session-icon">
+                <i class="fa-solid fa-star"></i>
+            </div>
+            <h2>You're Almost at the Finish Line!</h2>
+            <p>
+                This is your <strong>final session</strong> of the 6-week program. 
+            </p>
+            <p class="final-session-subtext">
+                Complete today's workout and you'll have officially finished the entire program. Let's make it count! 💪
+            </p>
+            <button class="final-session-btn" onclick="closeFinalSessionModal()">Let's Go!</button>
+        </div>
+    `;
+
+    document.getElementById('app').appendChild(overlay);
+
+    // Animate in
+    requestAnimationFrame(() => overlay.classList.add('visible'));
+}
+
+/**
+ * Closes the final session modal and marks it as dismissed for this session.
+ */
+function closeFinalSessionModal() {
+    const modal = document.getElementById('final-session-modal');
+    if (modal) {
+        modal.classList.add('dismissing');
+        modal.classList.remove('visible');
+        setTimeout(() => modal.remove(), 300);
+    }
+    sessionStorage.setItem('dismissedFinalSessionModal', 'true');
+}
+
+/**
+ * Checks if the user just completed the program by finishing all exercises
+ * in their 2nd session of week 6. Call this after saving progress.
+ * Returns true if the modal was shown.
+ */
+function checkAndShowProgramCompletionModal() {
+    // Must be on program week 6
+    const state = getProgramWeekState();
+    if (state.programWeek !== 6) return false;
+
+    // Today must be an advanced session (the 2nd one in week 6)
+    const today = new Date().toISOString().split('T')[0];
+    const advancedDates = getAdvancedSessionDates();
+    if (!advancedDates.includes(today)) return false;
+
+    // Check if today's advanced playlist progress is 100%
+    const progress = calculatePlaylistProgress('advanced-4-6', true);
+    if (progress.percentage < 100) return false;
+
+    // Check if already shown this session
+    const dismissed = sessionStorage.getItem('dismissedCompletionModal');
+    if (dismissed) return false;
+
+    showProgramCompletionModal();
+    return true;
+}
+
+/**
+ * Renders and displays the program completion celebration modal.
+ */
+function showProgramCompletionModal() {
+    // Remove existing if present
+    const existing = document.getElementById('program-completion-modal');
+    if (existing) existing.remove();
+
+    const overlay = document.createElement('div');
+    overlay.id = 'program-completion-modal';
+    overlay.className = 'completion-modal-overlay';
+    overlay.innerHTML = `
+        <div class="completion-modal">
+            <div class="completion-icon">
+                <i class="fa-solid fa-trophy"></i>
+            </div>
+            <h2>Congratulations! 🎉</h2>
+            <p>
+                You've officially completed the <strong>6-week HandsUP program</strong>! 
+            </p>
+            <p class="completion-subtext">
+                You're welcome to keep going with the Advanced exercises at your own pace. 
+                Your progress and streak data will continue to be tracked. Keep up the great work!
+            </p>
+            <button class="completion-btn" onclick="closeProgramCompletionModal()">Thank You! 🙌</button>
+        </div>
+    `;
+
+    document.getElementById('app').appendChild(overlay);
+
+    requestAnimationFrame(() => overlay.classList.add('visible'));
+}
+
+/**
+ * Closes the program completion modal.
+ */
+function closeProgramCompletionModal() {
+    const modal = document.getElementById('program-completion-modal');
+    if (modal) {
+        modal.classList.add('dismissing');
+        modal.classList.remove('visible');
+        setTimeout(() => modal.remove(), 300);
+    }
+    sessionStorage.setItem('dismissedCompletionModal', 'true');
 }
 
 function getSuggestedWorkout() {
@@ -465,32 +616,46 @@ function loadPlaylists() {
     const userNameEl = document.getElementById('user-name');
     if (userNameEl) userNameEl.textContent = userName;
 
-    // Update week display
+    // Update week display and greeting
     const state = getProgramWeekState();
     const userWeek = state.programWeek;
-    const weekDisplay = document.getElementById('user-week');
-    if (weekDisplay) weekDisplay.textContent = userWeek;
+    const programCompleted = isProgramCompleted();
 
     // Update greeting message
     const greetingP = document.querySelector('#user-greeting-section p');
-    if (greetingP) {
-        if (userWeek === 0) {
-            greetingP.innerHTML = `Welcome to the program! Start with <strong>Week 0</strong> and take it from there. Let's get started!`;
-        } else if (userWeek >= 4 && userWeek < 6) {
-            const sessionsLeft = 2 - state.sessionsInCurrentWeek;
-            if (sessionsLeft > 0) {
-                greetingP.innerHTML = `You're on <strong>Week ${userWeek}</strong>. ${sessionsLeft === 1 ? '1 more session' : '2 sessions'} to go this week to advance — keep it up!`;
+
+    if (programCompleted) {
+        if (greetingP) {
+            greetingP.innerHTML = `You've completed the <strong>6-week program</strong> — amazing work! 🎉 Feel free to continue the exercises at your own pace.`;
+        }
+    } else {
+        if (greetingP) {
+            if (userWeek === 0) {
+                greetingP.innerHTML = `Welcome to the program! Start with <strong>Week 0</strong> and take it from there. Let's get started!`;
+            } else if (userWeek >= 4 && userWeek < 6) {
+                const sessionsLeft = 2 - state.sessionsInCurrentWeek;
+                if (sessionsLeft > 0) {
+                    greetingP.innerHTML = `You're on <strong>Week ${userWeek}</strong>. ${sessionsLeft === 1 ? '1 more session' : '2 sessions'} to go this week to advance — keep it up!`;
+                } else {
+                    greetingP.innerHTML = `You've reached <strong>Week ${userWeek}</strong> and completed your sessions for this week. Well done!`;
+                }
+            } else if (userWeek === 6) {
+                const sessionsLeft = 2 - state.sessionsInCurrentWeek;
+                if (sessionsLeft > 0) {
+                    greetingP.innerHTML = `You're on the <strong>final week</strong>! ${sessionsLeft === 1 ? '1 more session' : '2 sessions'} to go to complete the program — you've got this!`;
+                }
             } else {
-                greetingP.innerHTML = `You've reached <strong>Week ${userWeek}</strong> and completed your sessions. The next week will unlock soon!`;
+                greetingP.innerHTML = `You've reached <strong>Week ${userWeek}</strong>. Keep it up!`;
             }
-        } else {
-            greetingP.innerHTML = `You've reached <strong>Week ${userWeek}</strong>. Keep it up!`;
         }
     }
 
     if (typeof renderProgressAlert === 'function') {
         renderProgressAlert();
     }
+
+    // Check if user is about to begin their final session of the program
+    checkAndShowFinalSessionModal();
 
     loadTodaysWorkout();
 

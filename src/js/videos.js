@@ -245,6 +245,9 @@ async function saveVideoProgress() {
         // Update progress ring in playlist view
         if (typeof updatePlaylistProgressRing === 'function') {
             updatePlaylistProgressRing();
+            
+            // Check if user just completed the program
+            checkAndShowProgramCompletionModal();
         }
 
         // Show success state briefly then close
