@@ -2261,3 +2261,104 @@ button {
 .final-session-btn:active {
     transform: translateY(0);
 }
+
+/* ==================== Program Completion Modal (6-Week Done) ==================== */
+.completion-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.6);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.completion-modal-overlay.visible {
+    opacity: 1;
+}
+
+.completion-modal-overlay.dismissing {
+    opacity: 0;
+}
+
+.completion-modal {
+    background: #fff;
+    border-radius: 16px;
+    padding: 2.5rem 2rem;
+    max-width: 440px;
+    width: 90%;
+    text-align: center;
+    transform: scale(0.9);
+    transition: transform 0.3s ease;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+}
+
+.completion-modal-overlay.visible .completion-modal {
+    transform: scale(1);
+}
+
+.completion-modal-overlay.dismissing .completion-modal {
+    transform: scale(0.9);
+}
+
+.completion-icon {
+    width: 72px;
+    height: 72px;
+    background: linear-gradient(135deg, #f59e0b, #f97316);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 1.25rem;
+}
+
+.completion-icon i {
+    font-size: 2rem;
+    color: #fff;
+}
+
+.completion-modal h2 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #1a1a2e;
+    margin: 0 0 0.75rem;
+}
+
+.completion-modal p {
+    font-size: 0.95rem;
+    color: #4a5568;
+    line-height: 1.6;
+    margin: 0 0 0.5rem;
+}
+
+.completion-subtext {
+    font-size: 0.875rem !important;
+    color: #718096 !important;
+    margin-bottom: 1.5rem !important;
+}
+
+.completion-btn {
+    background: linear-gradient(135deg, #7c3aed, #6d28d9);
+    color: #fff;
+    border: none;
+    padding: 0.75rem 2.5rem;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.completion-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(124, 58, 237, 0.3);
+}
+
+.completion-btn:active {
+    transform: translateY(0);
+}

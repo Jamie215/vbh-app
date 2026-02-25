@@ -626,7 +626,7 @@ function loadPlaylists() {
 
     if (programCompleted) {
         if (greetingP) {
-            greetingP.innerHTML = `You've completed the <strong>6-week program</strong> — amazing work! 🎉 Feel free to continue the exercises at your own pace.`;
+            greetingP.innerHTML = `You've completed the <strong>6-week program</strong>! Feel free to continue the exercises at your own pace.`;
         }
     } else {
         if (greetingP) {
