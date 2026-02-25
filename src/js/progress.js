@@ -58,10 +58,22 @@ function loadProgressStats() {
     const totalDaysEl = document.getElementById('total-workout-days');
     if (totalDaysEl) totalDaysEl.textContent = totalDays;
 
-    // Current week
-    const currentWeek = calculateUserWeek();
+    // Current program week
+    const state = getProgramWeekState();
     const currentWeekEl = document.getElementById('current-week-stat');
-    if (currentWeekEl) currentWeekEl.textContent = currentWeek;
+    if (currentWeekEl) currentWeekEl.textContent = state.programWeek;
+
+    // Sessions logged in current program week (for weeks 4+)
+    const sessionsEl = document.getElementById('sessions-this-week-stat');
+    if (sessionsEl) {
+        const statsCard = sessionsEl.closest('.stats-card');
+        if (state.programWeek >= 4) {
+            sessionsEl.textContent = `${state.sessionsInCurrentWeek} / 2`;
+            statsCard?.classList.remove('hidden');
+        } else {
+            statsCard?.classList.add('hidden');
+        }
+    }
 }
 
 function getWeekNumber(date) {

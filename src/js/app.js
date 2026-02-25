@@ -80,30 +80,170 @@ async function initializeSession() {
 }
 
 // ==================== Week Calculation ====================
-function calculateUserWeek() {
-    if (!completionHistory || Object.keys(completionHistory).length === 0) {
-        return 0;
-    }
-    
+
+/**
+ * Returns the pure calendar-based week number (days since first session / 7).
+ * Used for discrepancy comparison against the session-gated program week.
+ */
+function calculateCalendarWeek() {
+    if (!completionHistory || Object.keys(completionHistory).length === 0) return 0;
+
     const dates = Object.keys(completionHistory).sort();
     if (dates.length === 0) return 0;
-    
+
     const firstDate = new Date(dates[0] + 'T00:00:00');
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
-    const diffTime = today - firstDate;
-    const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
-    let weekNumber = Math.floor(diffDays / 7);
+    const diffDays = Math.floor((today - firstDate) / (1000 * 60 * 60 * 24));
+    return Math.min(Math.floor(diffDays / 7), 6);
+}
 
-    if (weekNumber <= 3) return weekNumber;
+/**
+ * Returns all dates where the user logged completed activity for the advanced playlist.
+ */
+function getAdvancedSessionDates() {
+    if (!completionHistory) return [];
 
-    const mostRecentDate = new Date(dates[dates.length - 1] + 'T00:00:00');
+    const dates = [];
+    for (const dateStr of Object.keys(completionHistory).sort()) {
+        const dayProgress = completionHistory[dateStr];
+        if (dayProgress && dayProgress['advanced-4-6']) {
+            const advancedProgress = dayProgress['advanced-4-6'];
+            const hasActivity = Object.values(advancedProgress).some(videoProgress => {
+                if (typeof videoProgress === 'object' && !Array.isArray(videoProgress)) {
+                    return Object.keys(videoProgress).some(key =>
+                        key.startsWith('set') && videoProgress[key]?.completed === true
+                    );
+                }
+                return typeof videoProgress === 'number' && videoProgress > 0;
+            });
+            if (hasActivity) dates.push(dateStr);
+        }
+    }
+    return dates;
+}
+
+/**
+ * Core function that computes the program week state for weeks 4-6.
+ * Returns detailed state used by calculateUserWeek(), alerts, and checkWeek6Activity().
+ *
+ * Weeks 0-3: purely calendar-based (days since first session / 7).
+ * Weeks 4-6: session-gated — requires 2 advanced sessions per program week to advance.
+ *
+ * 7-day window rules:
+ *   - Window anchors to the advance date of the previous week (initially day 28).
+ *   - If 2 sessions fall within the window → advance the day after the window expires.
+ *   - If session 2 falls outside the window → advance the day after session 2.
+ *   - New window starts on the advance date.
+ *   - 14+ days of inactivity → reset to week 4.
+ */
+function getProgramWeekState() {
+    const empty = { programWeek: 0, calendarWeek: 0, windowAnchor: null, sessionsInCurrentWeek: 0 };
+
+    if (!completionHistory || Object.keys(completionHistory).length === 0) return empty;
+
+    const allDates = Object.keys(completionHistory).sort();
+    if (allDates.length === 0) return empty;
+
+    const firstDate = new Date(allDates[0] + 'T00:00:00');
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const diffDays = Math.floor((today - firstDate) / (1000 * 60 * 60 * 24));
+    const calendarWeek = Math.min(Math.floor(diffDays / 7), 6);
+
+    // Weeks 0-3: purely calendar-based
+    if (calendarWeek <= 3) {
+        return { programWeek: calendarWeek, calendarWeek, windowAnchor: null, sessionsInCurrentWeek: 0 };
+    }
+
+    // Check 14-day inactivity reset
+    const mostRecentDate = new Date(allDates[allDates.length - 1] + 'T00:00:00');
     const daysSinceLastActivity = Math.floor((today - mostRecentDate) / (1000 * 60 * 60 * 24));
 
-    if (daysSinceLastActivity >= 14) return 4;
+    if (daysSinceLastActivity >= 14) {
+        return { programWeek: 4, calendarWeek, windowAnchor: null, sessionsInCurrentWeek: 0, wasReset: true };
+    }
 
-    return Math.min(weekNumber, 6);
+    // Weeks 4+: session-gated progression
+    const advancedSessions = getAdvancedSessionDates();
+
+    let programWeek = 4;
+    // Initial window anchor: day 28 from first-ever session (start of calendar week 4)
+    let windowAnchor = new Date(firstDate);
+    windowAnchor.setDate(windowAnchor.getDate() + 28);
+
+    let sessionsInCurrentWeek = 0;
+
+    for (const sessionDateStr of advancedSessions) {
+        const sessionDate = new Date(sessionDateStr + 'T00:00:00');
+
+        // Skip sessions before the current program week's window
+        if (sessionDate < windowAnchor) continue;
+
+        sessionsInCurrentWeek++;
+
+        if (sessionsInCurrentWeek >= 2) {
+            // Determine advance date based on whether session 2 is within the window
+            const windowEnd = new Date(windowAnchor);
+            windowEnd.setDate(windowEnd.getDate() + 7);
+
+            let advanceDate;
+            if (sessionDate < windowEnd) {
+                // Both sessions within the 7-day window → advance when window expires
+                advanceDate = new Date(windowEnd);
+            } else {
+                // Session 2 spilled outside the window → advance day after session 2
+                advanceDate = new Date(sessionDate);
+                advanceDate.setDate(advanceDate.getDate() + 1);
+            }
+
+            if (today >= advanceDate) {
+                programWeek++;
+                if (programWeek >= 6) {
+                    programWeek = 6;
+                    windowAnchor = advanceDate;
+                    // Count any remaining sessions that fall on/after the new anchor
+                    sessionsInCurrentWeek = (sessionDate >= advanceDate) ? 1 : 0;
+                    break;
+                }
+                windowAnchor = advanceDate;
+                // Does this session also count toward the new program week?
+                sessionsInCurrentWeek = (sessionDate >= advanceDate) ? 1 : 0;
+            } else {
+                // Prerequisite met but advance date not yet reached
+                break;
+            }
+        }
+    }
+
+    // If we reached week 6, recount sessions from the anchor point
+    if (programWeek === 6 && windowAnchor) {
+        sessionsInCurrentWeek = 0;
+        const anchorTime = windowAnchor.getTime();
+        for (const sessionDateStr of advancedSessions) {
+            const sd = new Date(sessionDateStr + 'T00:00:00');
+            if (sd.getTime() >= anchorTime) {
+                sessionsInCurrentWeek++;
+            }
+        }
+    }
+
+    return {
+        programWeek: Math.min(programWeek, 6),
+        calendarWeek,
+        windowAnchor,
+        sessionsInCurrentWeek
+    };
+}
+
+/**
+ * Main week calculation function used throughout the app.
+ * Weeks 0-3: calendar-based. Weeks 4-6: session-gated via getProgramWeekState().
+ */
+function calculateUserWeek() {
+    return getProgramWeekState().programWeek;
 }
 
 function getSuggestedWorkout() {
@@ -326,7 +466,8 @@ function loadPlaylists() {
     if (userNameEl) userNameEl.textContent = userName;
 
     // Update week display
-    const userWeek = calculateUserWeek();
+    const state = getProgramWeekState();
+    const userWeek = state.programWeek;
     const weekDisplay = document.getElementById('user-week');
     if (weekDisplay) weekDisplay.textContent = userWeek;
 
@@ -335,6 +476,13 @@ function loadPlaylists() {
     if (greetingP) {
         if (userWeek === 0) {
             greetingP.innerHTML = `Welcome to the program! Start with <strong>Week 0</strong> and take it from there. Let's get started!`;
+        } else if (userWeek >= 4 && userWeek < 6) {
+            const sessionsLeft = 2 - state.sessionsInCurrentWeek;
+            if (sessionsLeft > 0) {
+                greetingP.innerHTML = `You're on <strong>Week ${userWeek}</strong>. ${sessionsLeft === 1 ? '1 more session' : '2 sessions'} to go this week to advance — keep it up!`;
+            } else {
+                greetingP.innerHTML = `You've reached <strong>Week ${userWeek}</strong> and completed your sessions. The next week will unlock soon!`;
+            }
         } else {
             greetingP.innerHTML = `You've reached <strong>Week ${userWeek}</strong>. Keep it up!`;
         }

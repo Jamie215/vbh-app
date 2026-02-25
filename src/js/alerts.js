@@ -1,14 +1,14 @@
 // ==================== Alert System ====================
-// Handles contextual alerts for progress milestones and resets
-// Depends on: shared.js (completionHistory, calculateUserWeek)
+// Handles contextual alerts for progress milestones, resets, and pacing
+// Depends on: utility.js (completionHistory), app.js (calculateUserWeek, getProgramWeekState, calculateCalendarWeek)
 
 // Track if progress was reset (detected via inactivity)
 let wasProgressReset = false;
 let previousWeekBeforeReset = null;
 
 /**
- * Detects if user's progress was reset due to inactivity (14+ days)
- * Returns true if user was in weeks 4-6 and got reset back to week 4
+ * Detects if user's progress was reset due to inactivity (14+ days).
+ * Uses getProgramWeekState() which already computes the reset internally.
  */
 function detectProgressReset() {
     if (!completionHistory || Object.keys(completionHistory).length === 0) {
@@ -18,25 +18,21 @@ function detectProgressReset() {
     const dates = Object.keys(completionHistory).sort();
     if (dates.length === 0) return { wasReset: false };
 
-    const firstDate = new Date(dates[0] + 'T00:00:00');
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
+    const calendarWeek = calculateCalendarWeek();
 
-    const diffTime = today - firstDate;
-    const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
-    const naturalWeek = Math.floor(diffDays / 7);
-
-    // Only relevant if natural week would be 4-6
-    if (naturalWeek < 4) return { wasReset: false };
+    // Only relevant if calendar week would place user in 4-6 territory
+    if (calendarWeek < 4) return { wasReset: false };
 
     const mostRecentDate = new Date(dates[dates.length - 1] + 'T00:00:00');
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
     const daysSinceLastActivity = Math.floor((today - mostRecentDate) / (1000 * 60 * 60 * 24));
 
     // Check if inactivity triggered a reset
-    if (daysSinceLastActivity >= 14 && naturalWeek >= 4) {
+    if (daysSinceLastActivity >= 14) {
         return {
             wasReset: true,
-            naturalWeek: Math.min(naturalWeek, 6),
+            naturalWeek: calendarWeek,
             daysSinceActivity: daysSinceLastActivity
         };
     }
@@ -45,11 +41,16 @@ function detectProgressReset() {
 }
 
 /**
- * Determines which alert to show based on user's progress state
- * Returns: { type: string, message: string, icon: string } or null
+ * Determines which alert to show based on user's progress state.
+ * Priority order:
+ *   1. Progress reset (14+ days inactivity)
+ *   2. Program completed (week 6 with activity)
+ *   3. Pace discrepancy (calendar week ahead of program week)
+ *   4. Approaching end (week 5 / week 6 milestones)
  */
 function getAlertState() {
-    const userWeek = calculateUserWeek();
+    const state = getProgramWeekState();
+    const userWeek = state.programWeek;
     const resetInfo = detectProgressReset();
 
     // Priority 1: Progress was reset due to inactivity (weeks 4-6)
@@ -62,9 +63,8 @@ function getAlertState() {
         };
     }
 
-    // Priority 2: Completed program (week 6+)
+    // Priority 2: Completed program (week 6 with activity)
     if (userWeek >= 6) {
-        // Check if they've actually been active in week 6
         const hasWeek6Activity = checkWeek6Activity();
         if (hasWeek6Activity) {
             return {
@@ -76,7 +76,29 @@ function getAlertState() {
         }
     }
 
-    // Priority 3: Approaching end (weeks 5-6)
+    // Priority 3: Pace discrepancy — calendar week is ahead of program week
+    const calendarWeek = state.calendarWeek;
+    if (calendarWeek > userWeek && userWeek >= 4 && userWeek < 6) {
+        const sessionsNeeded = 2 - state.sessionsInCurrentWeek;
+        let actionText;
+
+        if (sessionsNeeded === 2) {
+            actionText = `Log 2 workout sessions this week to progress to <strong>Week ${userWeek + 1}</strong>.`;
+        } else if (sessionsNeeded === 1) {
+            actionText = `You're 1 session away from unlocking <strong>Week ${userWeek + 1}</strong> — keep it up!`;
+        } else {
+            actionText = `You've met the requirement — <strong>Week ${userWeek + 1}</strong> will unlock soon!`;
+        }
+
+        return {
+            type: 'info',
+            icon: 'fa-person-running',
+            title: 'Stay on Track!',
+            message: `You're in calendar week ${calendarWeek}, but your exercise program is on <strong>Week ${userWeek}</strong>. ${actionText} Aim for 2 sessions per week to keep pace. 💪`
+        };
+    }
+
+    // Priority 4: Approaching end (weeks 5-6)
     if (userWeek === 5) {
         return {
             type: 'info',
@@ -100,33 +122,16 @@ function getAlertState() {
 }
 
 /**
- * Checks if user has logged any activity during week 6
+ * Checks if user has logged any advanced activity while in program week 6.
+ * Uses getProgramWeekState() to determine when week 6 started (the window anchor).
  */
 function checkWeek6Activity() {
-    if (!completionHistory || Object.keys(completionHistory).length === 0) {
-        return false;
-    }
+    const state = getProgramWeekState();
 
-    const dates = Object.keys(completionHistory).sort();
-    if (dates.length === 0) return false;
+    // Must be in program week 6 to have week 6 activity
+    if (state.programWeek < 6) return false;
 
-    const firstDate = new Date(dates[0] + 'T00:00:00');
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-
-    // Week 6 starts at day 42 (6 * 7)
-    const week6Start = new Date(firstDate);
-    week6Start.setDate(week6Start.getDate() + 42);
-
-    // Check if any activity dates fall within week 6 or later
-    for (const dateStr of dates) {
-        const activityDate = new Date(dateStr + 'T00:00:00');
-        if (activityDate >= week6Start) {
-            return true;
-        }
-    }
-
-    return false;
+    return state.sessionsInCurrentWeek > 0;
 }
 
 /**
