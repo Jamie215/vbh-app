@@ -63,7 +63,7 @@ function openVideoPlayer() {
     
     // Create or update YouTube player
     if (player) {
-        player.loadVideoById(currentVideo.id);
+        player.cueVideoById(currentVideo.id);
     } else {
         player = new YT.Player('player', {
             height: '100%',
