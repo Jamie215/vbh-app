@@ -1754,6 +1754,46 @@ button {
     font-weight: 500;
 }
 
+/* Program Progress Bar (in stats card) */
+.stats-card-progress .stats-content {
+    flex: 1;
+    min-width: 0;
+}
+
+.program-progress-bar-container {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-top: 0.5rem;
+}
+
+.program-progress-bar {
+    flex: 1;
+    height: 10px;
+    background: #e5e7eb;
+    border-radius: 5px;
+    overflow: hidden;
+}
+
+.program-progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #10b981, #059669);
+    border-radius: 5px;
+    transition: width 0.6s ease;
+    width: 0%;
+}
+
+.program-progress-fill.completed {
+    background: linear-gradient(90deg, #7c3aed, #6d28d9);
+}
+
+.program-progress-text {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #1a1a2e;
+    white-space: nowrap;
+}
+
 /* ==================== Streak Section ==================== */
 .streak-section {
     margin-bottom: 2rem;
