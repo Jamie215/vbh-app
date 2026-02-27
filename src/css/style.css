@@ -2617,6 +2617,89 @@ button {
     margin-bottom: 0.15rem;
 }
 
+/* Exercise thumbnail - tap to preview */
+.manual-exercise-thumb-wrapper {
+    position: relative;
+    width: 90px;
+    height: 56px;
+    border-radius: 6px;
+    overflow: hidden;
+    flex-shrink: 0;
+    cursor: pointer;
+    background: #000;
+}
+
+.manual-exercise-thumb {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+.manual-exercise-play {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0, 0, 0, 0.35);
+    transition: background 0.2s ease;
+}
+
+.manual-exercise-thumb-wrapper:hover .manual-exercise-play {
+    background: rgba(0, 0, 0, 0.5);
+}
+
+.manual-exercise-play i {
+    color: white;
+    font-size: 0.85rem;
+}
+
+/* Active preview - expanded iframe */
+.manual-exercise-thumb-wrapper.preview-active {
+    width: 200px;
+    height: 113px;
+    cursor: default;
+    border: 2px solid #7c3aed;
+    border-radius: 8px;
+}
+
+.manual-preview-container {
+    position: relative;
+    width: 100%;
+    height: 100%;
+}
+
+.manual-preview-iframe {
+    width: 100%;
+    height: 100%;
+    display: block;
+    border-radius: 6px;
+}
+
+.manual-preview-close {
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: rgba(0, 0, 0, 0.6);
+    color: white;
+    border: none;
+    font-size: 0.65rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: background 0.2s ease;
+    z-index: 1;
+}
+
+.manual-preview-close:hover {
+    background: rgba(0, 0, 0, 0.85);
+}
+
 .manual-exercise-rec {
     font-size: 0.8rem;
     color: #64748b;
@@ -2741,6 +2824,12 @@ button {
 
     .manual-exercise-number {
         margin-top: 0;
+    }
+
+    .manual-exercise-thumb-wrapper.preview-active {
+        width: 100%;
+        height: 0;
+        padding-bottom: 56.25%; /* 16:9 aspect ratio */
     }
 }
 

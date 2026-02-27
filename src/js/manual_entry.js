@@ -3,6 +3,7 @@
 // State for manual entry
 let manualEntryProgress = {};
 let manualEntryPlaylist = null;
+let activePreviewVideoId = null; // Track which exercise has an active video preview
 
 // ==================== Open / Close Modal ====================
 function openManualEntryModal() {
@@ -62,6 +63,11 @@ function openManualEntryModal() {
 function closeManualEntryModal() {
     const modal = document.getElementById('manual-entry-modal');
     if (!modal) return;
+
+    // Clean up any active video preview
+    if (activePreviewVideoId) {
+        closeVideoPreview();
+    }
 
     modal.classList.remove('visible');
     setTimeout(() => {
@@ -208,6 +214,10 @@ function renderManualEntryExercises() {
                 <div class="manual-exercise-header">
                     <div class="manual-exercise-info">
                         <span class="manual-exercise-number">${index + 1}</span>
+                        <div class="manual-exercise-thumb-wrapper" id="manual-preview-${video.id}" onclick="toggleVideoPreview('${video.id}')">
+                            <img src="${video.thumbnail}" alt="${video.title}" class="manual-exercise-thumb">
+                            <span class="manual-exercise-play"><i class="fa-solid fa-play"></i></span>
+                        </div>
                         <div>
                             <h4>${video.title}</h4>
                             <p class="manual-exercise-rec">Recommended: ${video.sets} sets of ${video.reps} reps${video.needsEachSide ? ' (each side)' : ''}</p>
@@ -223,6 +233,65 @@ function renderManualEntryExercises() {
     });
 
     container.innerHTML = html;
+}
+
+// ==================== Tap-to-Preview Video ====================
+function toggleVideoPreview(videoId) {
+    const wrapper = document.getElementById(`manual-preview-${videoId}`);
+    if (!wrapper) return;
+
+    // If this video is already active, close it
+    if (activePreviewVideoId === videoId) {
+        closeVideoPreview();
+        return;
+    }
+
+    // Close any existing preview first
+    if (activePreviewVideoId) {
+        closeVideoPreview();
+    }
+
+    // Find the video data for the thumbnail fallback
+    const video = manualEntryPlaylist?.videos.find(v => v.id === videoId);
+    if (!video) return;
+
+    activePreviewVideoId = videoId;
+
+    // Swap thumbnail for muted, looping YouTube embed
+    wrapper.onclick = null; // Remove click handler while embed is active
+    wrapper.classList.add('preview-active');
+    wrapper.innerHTML = `
+        <div class="manual-preview-container">
+            <iframe 
+                src="https://www.youtube.com/embed/${videoId}?autoplay=1&mute=1&loop=1&playlist=${videoId}&controls=0&modestbranding=1&rel=0&playsinline=1"
+                frameborder="0"
+                allow="autoplay"
+                class="manual-preview-iframe">
+            </iframe>
+            <button type="button" class="manual-preview-close" onclick="event.stopPropagation(); closeVideoPreview();" title="Close preview">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+        </div>
+    `;
+}
+
+function closeVideoPreview() {
+    if (!activePreviewVideoId) return;
+
+    const wrapper = document.getElementById(`manual-preview-${activePreviewVideoId}`);
+    const video = manualEntryPlaylist?.videos.find(v => v.id === activePreviewVideoId);
+    const videoId = activePreviewVideoId;
+
+    activePreviewVideoId = null;
+
+    if (wrapper && video) {
+        wrapper.classList.remove('preview-active');
+        wrapper.innerHTML = `
+            <img src="${video.thumbnail}" alt="${video.title}" class="manual-exercise-thumb">
+            <span class="manual-exercise-play"><i class="fa-solid fa-play"></i></span>
+        `;
+        wrapper.onclick = () => toggleVideoPreview(videoId);
+    }
 }
 
 // ==================== Rep/Set Controls ====================
