@@ -70,9 +70,9 @@ function openVideoPlayer() {
             width: '100%',
             videoId: currentVideo.id,
             playerVars: {
+                'autoplay': 0,
                 'playsinline': 1,
                 'rel': 0,
-                'modestbranding': 1
             }
         });
     }
