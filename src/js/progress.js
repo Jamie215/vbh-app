@@ -58,10 +58,27 @@ function loadProgressStats() {
     const totalDaysEl = document.getElementById('total-workout-days');
     if (totalDaysEl) totalDaysEl.textContent = totalDays;
 
-    // Current program week
+    // Program program bar
     const currentWeek = calculateUserWeek();
-    const currentWeekEl = document.getElementById('current-week-stat');
-    if (currentWeekEl) currentWeekEl.textContent = currentWeek;
+    const completed = isProgramCompleted();
+    const progressFill = document.getElementById('program-progress-fill');
+    const progressText = document.getElementById('program-progress-text');
+    const progressLabel = document.getElementById('program-progress-label');
+
+    if (progressFill && progressText && progressLabel) {
+        if(completed) {
+            progressFill.style.width = '100%';
+            progressFill.classList.add('completed');
+            progressText.textContent = 'Complete!';
+            if (progressLabel) progressLabel.textContent = 'Program Completed 🎉';
+        } else {
+            const percentage = Math.round((currentWeek / 6) * 100);
+            progressFill.style.width = `${percentage}%`;
+            progressFill.classList.remove('completed');
+            progressText.textContent = `Week ${currentWeek} of 6`;
+            if (progressLabel) progressLabel.textContent = 'Program Progress';
+        }
+    }
 }
 
 function getWeekNumber(date) {
