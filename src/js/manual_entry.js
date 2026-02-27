@@ -39,7 +39,6 @@ function openManualEntryModal() {
     if (exerciseArea) {
         exerciseArea.innerHTML = `
             <div class="manual-entry-empty-state">
-                <i class="fa-solid fa-dumbbell"></i>
                 <p>Select a date and workout to log your exercises</p>
             </div>
         `;
@@ -316,6 +315,34 @@ function updateManualEntrySaveState() {
     saveBtn.disabled = !(hasDate && hasPlaylist && hasCompletedSet);
 }
 
+// ==================== Toast Notification ====================
+function showManualEntryToast(message, icon = 'fa-circle-info', type = 'info') {
+    // Remove any existing toast
+    const existing = document.getElementById('manual-entry-toast');
+    if (existing) existing.remove();
+
+    const toast = document.createElement('div');
+    toast.id = 'manual-entry-toast';
+    toast.className = `manual-entry-toast toast-${type}`;
+    toast.innerHTML = `
+        <i class="fa-solid ${icon}"></i>
+        <span>${message}</span>
+    `;
+
+    document.body.appendChild(toast);
+
+    // Animate in
+    requestAnimationFrame(() => {
+        toast.classList.add('visible');
+    });
+
+    // Auto-dismiss after 10 seconds
+    setTimeout(() => {
+        toast.classList.remove('visible');
+        setTimeout(() => toast.remove(), 300);
+    }, 10000);
+}
+
 // ==================== Save Manual Entry ====================
 async function saveManualEntry() {
     const saveBtn = document.getElementById('manual-entry-save-btn');
@@ -386,6 +413,21 @@ async function saveManualEntry() {
                 renderWorkoutHistoryChart();
                 renderDetailPanel();
                 loadRecentActivity();
+            }
+
+            // Show toast for program state changes
+            if (!completedBefore && completedAfter) {
+                showManualEntryToast(
+                    "You've completed the 6-week program! 🎉 Congratulations!",
+                    'fa-trophy',
+                    'success'
+                );
+            } else if (weekAfter > weekBefore) {
+                showManualEntryToast(
+                    `You've advanced to Week ${weekAfter}! Keep up the great work 💪`,
+                    'fa-arrow-up',
+                    'advance'
+                );
             }
         }, 800);
 
