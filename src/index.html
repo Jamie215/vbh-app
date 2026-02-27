@@ -31,6 +31,10 @@
                     </div>
                 </div>
                 <div class="nav-right">
+                    <button class="nav-log-workout-btn" onclick="openManualEntryModal()">
+                        <i class="fa-solid fa-clock-rotate-left"></i>
+                        <span class="nav-log-workout-label">Log Past Workout</span>
+                    </button>
                     <div id="user-info" class="hidden">
                         <span id="user-name-display"></span>
                         <div id="user-avatar">
@@ -162,16 +166,8 @@
         <!-- My Progress View (hidden by default) -->
         <main id="progress-view" class="hidden">
             <section class="progress-header">
-                <div class="progress-header-row">
-                    <div>
-                        <h1>My Progress</h1>
-                        <p>Track your fitness journey and see how far you've come.</p>
-                    </div>
-                    <button class="log-past-workout-btn" onclick="openManualEntryModal()">
-                        <i class="fa-solid fa-clock-rotate-left"></i>
-                        Log Past Workout
-                    </button>
-                </div>
+                <h1>My Progress</h1>
+                <p>Track your fitness journey and see how far you've come.</p>
             </section>
 
             <!-- Summary Stats Cards -->
@@ -185,18 +181,13 @@
                         <span class="stats-label">Total Workout Days</span>
                     </div>
                 </div>
-                <div class="stats-card stats-card-progress">
+                <div class="stats-card">
                     <div class="stats-icon">
                         <i class="fa-solid fa-chart-line"></i>
                     </div>
                     <div class="stats-content">
-                        <span class="stats-label" id="program-progress-label">Program Progress</span>
-                        <div class="program-progress-bar-container">
-                            <div class="program-progress-bar">
-                                <div class="program-progress-fill" id="program-progress-fill"></div>
-                            </div>
-                            <span class="program-progress-text" id="program-progress-text">Week 0 of 6</span>
-                        </div>
+                        <span class="stats-value" id="current-week-stat">0</span>
+                        <span class="stats-label">Current Week</span>
                     </div>
                 </div>
             </section>
@@ -279,6 +270,7 @@
                 <!-- Exercise Entry Area -->
                 <div id="manual-entry-exercises" class="manual-entry-exercises">
                     <div class="manual-entry-empty-state">
+                        <i class="fa-solid fa-dumbbell"></i>
                         <p>Select a date and workout to log your exercises</p>
                     </div>
                 </div>
@@ -341,7 +333,7 @@
     <script src="js/progress.js"></script>
 
     <!-- 9. Manual entry module -->
-    <script src="js/manual_entry.js"></script>
+    <script src="js/manual-entry.js"></script>
     
     <!-- 10. Main app -->
     <script src="js/app.js"></script>

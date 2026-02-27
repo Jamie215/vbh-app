@@ -1754,46 +1754,6 @@ button {
     font-weight: 500;
 }
 
-/* Program Progress Bar (in stats card) */
-.stats-card-progress .stats-content {
-    flex: 1;
-    min-width: 0;
-}
-
-.program-progress-bar-container {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    margin-top: 0.5rem;
-}
-
-.program-progress-bar {
-    flex: 1;
-    height: 10px;
-    background: #e5e7eb;
-    border-radius: 5px;
-    overflow: hidden;
-}
-
-.program-progress-fill {
-    height: 100%;
-    background: linear-gradient(90deg, #10b981, #059669);
-    border-radius: 5px;
-    transition: width 0.6s ease;
-    width: 0%;
-}
-
-.program-progress-fill.completed {
-    background: linear-gradient(90deg, #7c3aed, #6d28d9);
-}
-
-.program-progress-text {
-    font-size: 0.85rem;
-    font-weight: 600;
-    color: #1a1a2e;
-    white-space: nowrap;
-}
-
 /* ==================== Streak Section ==================== */
 .streak-section {
     margin-bottom: 2rem;
@@ -2401,4 +2361,385 @@ button {
 
 .completion-btn:active {
     transform: translateY(0);
+}
+
+/* ==================== Nav Log Past Workout Button ==================== */
+.nav-log-workout-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.5rem 1rem;
+    background: white;
+    color: #7c3aed;
+    border: 1.5px solid #7c3aed;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    white-space: nowrap;
+}
+
+.nav-log-workout-btn:hover {
+    background: #7c3aed;
+    color: white;
+}
+
+.nav-log-workout-btn:active {
+    transform: translateY(1px);
+}
+
+@media (max-width: 768px) {
+    .nav-log-workout-label {
+        display: none;
+    }
+
+    .nav-log-workout-btn {
+        padding: 0.5rem;
+        width: 36px;
+        height: 36px;
+        justify-content: center;
+        border-radius: 50%;
+    }
+
+    .nav-log-workout-btn i {
+        margin: 0;
+    }
+}
+
+/* ==================== Manual Entry Modal ==================== */
+.manual-entry-modal {
+    max-width: 700px;
+    max-height: 85vh;
+    overflow-y: auto;
+}
+
+.manual-entry-header {
+    text-align: center;
+    margin-bottom: 1.5rem;
+    padding-right: 2rem;
+}
+
+.manual-entry-icon {
+    width: 56px;
+    height: 56px;
+    border-radius: 14px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 1rem;
+}
+
+.manual-entry-icon i {
+    font-size: 1.5rem;
+    color: white;
+}
+
+.manual-entry-header h2 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #1a1a2e;
+    margin-bottom: 0.5rem;
+}
+
+.manual-entry-header p {
+    color: #64748b;
+    font-size: 0.95rem;
+    line-height: 1.5;
+}
+
+/* Selectors row */
+.manual-entry-selectors {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    margin-bottom: 1.25rem;
+}
+
+.manual-entry-field label {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #475569;
+    margin-bottom: 0.4rem;
+}
+
+.manual-entry-field label i {
+    font-size: 0.8rem;
+    color: #7c3aed;
+}
+
+.manual-entry-field input[type="date"],
+.manual-entry-field select {
+    width: 100%;
+    padding: 0.625rem 0.75rem;
+    border: 1.5px solid #e2e8f0;
+    border-radius: 8px;
+    font-size: 0.95rem;
+    font-family: inherit;
+    color: #1a1a2e;
+    background: white;
+    transition: border-color 0.2s ease;
+    cursor: pointer;
+}
+
+.manual-entry-field input[type="date"]:focus,
+.manual-entry-field select:focus {
+    outline: none;
+    border-color: #7c3aed;
+    box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.1);
+}
+
+/* Conflict warning */
+.manual-entry-conflict {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1rem;
+    background: #fef3c7;
+    border: 1px solid #fbbf24;
+    border-radius: 8px;
+    margin-bottom: 1.25rem;
+    font-size: 0.85rem;
+    color: #92400e;
+}
+
+.manual-entry-conflict i {
+    flex-shrink: 0;
+    color: #f59e0b;
+}
+
+/* Exercise entry area */
+.manual-entry-exercises {
+    margin-bottom: 1.5rem;
+    max-height: 400px;
+    overflow-y: auto;
+    padding-right: 0.25rem;
+}
+
+.manual-entry-empty-state {
+    text-align: center;
+    padding: 3rem 1rem;
+    color: #94a3b8;
+}
+
+.manual-entry-empty-state i {
+    font-size: 2rem;
+    margin-bottom: 0.75rem;
+    display: block;
+}
+
+.manual-entry-empty-state p {
+    font-size: 0.95rem;
+}
+
+/* Exercise cards */
+.manual-exercise-card {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    padding: 1rem 1.25rem;
+    margin-bottom: 0.75rem;
+}
+
+.manual-exercise-header {
+    margin-bottom: 0.75rem;
+}
+
+.manual-exercise-info {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+}
+
+.manual-exercise-number {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    font-size: 0.8rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    margin-top: 2px;
+}
+
+.manual-exercise-info h4 {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #1a1a2e;
+    margin-bottom: 0.15rem;
+}
+
+.manual-exercise-rec {
+    font-size: 0.8rem;
+    color: #64748b;
+}
+
+.manual-exercise-equipment {
+    margin-top: 0.35rem;
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+    flex-wrap: wrap;
+}
+
+.manual-exercise-equipment .equipment-badge {
+    font-size: 0.7rem;
+    padding: 0.2rem 0.5rem;
+}
+
+.manual-exercise-equipment .equipment-separator {
+    font-size: 0.7rem;
+}
+
+/* Manual set rows */
+.manual-sets-container {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    padding-left: 2.75rem;
+}
+
+.manual-set-row {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.manual-set-label {
+    width: 40px;
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: #475569;
+}
+
+/* Action buttons */
+.manual-entry-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.75rem;
+    padding-top: 1rem;
+    border-top: 1px solid #e9ecef;
+}
+
+.manual-entry-cancel-btn {
+    padding: 0.625rem 1.5rem;
+    background: white;
+    color: #64748b;
+    border: 1.5px solid #e2e8f0;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.manual-entry-cancel-btn:hover {
+    background: #f8fafc;
+    border-color: #cbd5e1;
+}
+
+.manual-entry-save-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.625rem 1.5rem;
+    background: linear-gradient(135deg, #7c3aed, #6d28d9);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.manual-entry-save-btn:hover:not(:disabled) {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(124, 58, 237, 0.3);
+}
+
+.manual-entry-save-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* Modal transition */
+.manual-entry-modal .modal-content {
+    transition: transform 0.3s ease, opacity 0.3s ease;
+}
+
+#manual-entry-modal.visible {
+    backdrop-filter: blur(4px);
+}
+
+/* ==================== Manual Entry Responsive ==================== */
+@media (max-width: 768px) {
+    .manual-entry-selectors {
+        grid-template-columns: 1fr;
+    }
+
+    .manual-entry-modal {
+        max-width: 100%;
+        margin: 0.5rem;
+    }
+
+    .manual-sets-container {
+        padding-left: 0;
+    }
+
+    .manual-exercise-info {
+        flex-direction: column;
+    }
+
+    .manual-exercise-number {
+        margin-top: 0;
+    }
+}
+
+/* ==================== Toast Notification ==================== */
+.manual-entry-toast {
+    position: fixed;
+    bottom: 2rem;
+    left: 50%;
+    transform: translateX(-50%) translateY(20px);
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.875rem 1.5rem;
+    border-radius: 10px;
+    font-size: 0.95rem;
+    font-weight: 500;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+    z-index: 2000;
+    opacity: 0;
+    transition: opacity 0.3s ease, transform 0.3s ease;
+    max-width: 90vw;
+}
+
+.manual-entry-toast.visible {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+}
+
+.manual-entry-toast i {
+    font-size: 1.1rem;
+    flex-shrink: 0;
+}
+
+.manual-entry-toast.toast-advance {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+}
+
+.manual-entry-toast.toast-success {
+    background: linear-gradient(135deg, #f59e0b 0%, #f97316 100%);
+    color: white;
 }
