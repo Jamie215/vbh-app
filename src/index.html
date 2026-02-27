@@ -162,8 +162,16 @@
         <!-- My Progress View (hidden by default) -->
         <main id="progress-view" class="hidden">
             <section class="progress-header">
-                <h1>My Progress</h1>
-                <p>Track your fitness journey and see how far you've come.</p>
+                <div class="progress-header-row">
+                    <div>
+                        <h1>My Progress</h1>
+                        <p>Track your fitness journey and see how far you've come.</p>
+                    </div>
+                    <button class="log-past-workout-btn" onclick="openManualEntryModal()">
+                        <i class="fa-solid fa-clock-rotate-left"></i>
+                        Log Past Workout
+                    </button>
+                </div>
             </section>
 
             <!-- Summary Stats Cards -->
@@ -224,7 +232,65 @@
             </section>
         </main>
 
+        <!-- Manual Entry Modal -->
+        <div id="manual-entry-modal" class="modal hidden">
+            <div class="modal-content manual-entry-modal">
+                <button class="close-button" onclick="closeManualEntryModal()"><i class="fa-solid fa-xmark"></i></button>
+                
+                <div class="manual-entry-header">
+                    <div class="manual-entry-icon">
+                        <i class="fa-solid fa-clock-rotate-left"></i>
+                    </div>
+                    <h2>Log a Past Workout</h2>
+                    <p>Forgot to log a session? Select the date and workout, then fill in what you completed.</p>
+                </div>
+
+                <!-- Date & Playlist Selectors -->
+                <div class="manual-entry-selectors">
+                    <div class="manual-entry-field">
+                        <label for="manual-entry-date">
+                            <i class="fa-solid fa-calendar-day"></i> Date
+                        </label>
+                        <input type="date" id="manual-entry-date" onchange="onManualEntryDateChange()">
+                    </div>
+                    <div class="manual-entry-field">
+                        <label for="manual-entry-playlist">
+                            <i class="fa-solid fa-dumbbell"></i> Workout
+                        </label>
+                        <select id="manual-entry-playlist" onchange="onManualEntryPlaylistChange()">
+                            <option value="">Select a workout...</option>
+                            <option value="beginner-0-3">Beginner Weeks 0-3</option>
+                            <option value="advanced-4-6">Advanced Weeks 4-6</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Conflict Warning -->
+                <div id="manual-entry-conflict" class="manual-entry-conflict hidden">
+                    <i class="fa-solid fa-circle-info"></i>
+                    <span></span>
+                </div>
+
+                <!-- Exercise Entry Area -->
+                <div id="manual-entry-exercises" class="manual-entry-exercises">
+                    <div class="manual-entry-empty-state">
+                        <i class="fa-solid fa-dumbbell"></i>
+                        <p>Select a date and workout to log your exercises</p>
+                    </div>
+                </div>
+
+                <!-- Save Button -->
+                <div class="manual-entry-actions">
+                    <button type="button" class="manual-entry-cancel-btn" onclick="closeManualEntryModal()">Cancel</button>
+                    <button type="button" id="manual-entry-save-btn" class="manual-entry-save-btn" disabled onclick="saveManualEntry()">
+                        <i class="fa-solid fa-floppy-disk"></i> Save Workout
+                    </button>
+                </div>
+            </div>
+        </div>
+
         <!-- Video Player Modal -->
+
         <div id="video-player-modal" class="modal hidden">
             <div class="modal-content video-modal">
                 <button class="close-button" onclick="closeVideo()"><i class="fa-solid fa-xmark"></i></button>
@@ -269,8 +335,11 @@
     
     <!-- 8. Progress module -->
     <script src="js/progress.js"></script>
+
+    <!-- 9. Manual entry module -->
+    <script src="js/manual-entry.js"></script>
     
-    <!-- 9. Main app -->
+    <!-- 10. Main app -->
     <script src="js/app.js"></script>
 </body>
 </html>
