@@ -2248,7 +2248,7 @@ button {
 .final-session-icon {
     width: 64px;
     height: 64px;
-    background: linear-gradient(135deg, #f59e0b, #f97316);
+    background: linear-gradient(to right, #BF953F, #FCF6BA, #B38728, #FBF5B7, #AA771C);
     border-radius: 50%;
     display: flex;
     align-items: center;

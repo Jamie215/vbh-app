@@ -93,8 +93,8 @@ function getAlertState() {
         return {
             type: 'info',
             icon: 'fa-person-running',
-            title: 'Stay on Track!',
-            message: `You're in calendar week ${calendarWeek}, but your exercise program is on <strong>Week ${userWeek}</strong>. ${actionText} Aim for 2 sessions per week to keep pace. 💪`
+            title: 'One More Session Remaining!',
+            message: `${actionText} Aim for 2 sessions per week to keep pace. 💪`
         };
     }
 
