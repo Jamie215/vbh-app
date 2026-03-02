@@ -77,7 +77,7 @@ button {
     padding: 0.5rem 1rem;
     color: #64748b;
     text-decoration: none;
-    font-size: 0.95rem;
+    font-size: 1rem;
     font-weight: 500;
     border-radius: 6px;
     transition: all 0.2s ease;
@@ -110,7 +110,7 @@ button {
 #user-name-display {
     font-weight: 500;
     color: #1a1a2e;
-    font-size: 0.95rem;
+    font-size: 1rem;
 }
 
 #user-avatar {
@@ -131,7 +131,7 @@ button {
     color: #dc3545;
     border: 2px solid #dc3545;
     padding: 0.5rem 1.25rem;
-    font-size: 0.9rem;
+    font-size: 1rem;
     font-weight: 500;
     border-radius: 6px;
     cursor: pointer;
@@ -247,7 +247,7 @@ button {
 
 .alert-message {
     margin: 0;
-    font-size: 0.9rem;
+    font-size: 1rem;
     line-height: 1.5;
     color: inherit;
     opacity: 0.9;
@@ -355,17 +355,17 @@ button {
     }
 
     .alert-title {
-        font-size: 0.95rem;
+        font-size: 1rem;
     }
 
     .alert-message {
-        font-size: 0.85rem;
+        font-size: 1rem;
     }
 
     .alert-dismiss {
         width: 28px;
         height: 28px;
-        font-size: 0.9rem;
+        font-size: 1rem;
     }
 }
 
@@ -403,7 +403,7 @@ button {
 /* ==================== Today's Workout Row Layout ==================== */
 .todays-workout-row {
     display: grid;
-    grid-template-columns: 1fr auto;
+    grid-template-columns: 3fr 1fr;
     gap: 1.5rem;
     align-items: stretch;
 }
@@ -421,7 +421,7 @@ button {
     text-align: center;
     cursor: pointer;
     transition: all 0.2s ease;
-    width: 200px;
+    width: 400px;
     gap: 0.5rem;
 }
 
@@ -447,13 +447,13 @@ button {
 }
 
 .log-past-card h3 {
-    font-size: 0.95rem;
+    font-size: 1rem;
     font-weight: 600;
     color: #1a1a2e;
 }
 
 .log-past-card p {
-    font-size: 0.8rem;
+    font-size: 1rem;
     color: #64748b;
     line-height: 1.4;
 }
@@ -509,7 +509,7 @@ button {
 
 .todays-workout-info > p {
     color: #64748b;
-    font-size: 0.95rem;
+    font-size: 1rem;
     margin-bottom: 1rem;
 }
 
@@ -522,7 +522,7 @@ button {
 }
 
 .todays-workout-progress .progress-label {
-    font-size: 0.9rem;
+    font-size: 1rem;
     color: #475569;
     font-weight: 500;
 }
@@ -532,7 +532,7 @@ button {
     color: white;
     border: none;
     padding: 0.75rem 1.5rem;
-    font-size: 0.95rem;
+    font-size: 1rem;
     font-weight: 600;
     border-radius: 6px;
     cursor: pointer;
@@ -628,7 +628,7 @@ button {
 
 .playlist-card-content > p {
     color: #64748b;
-    font-size: 0.9rem;
+    font-size: 1rem;
     margin-bottom: 0.75rem;
 }
 
@@ -657,7 +657,7 @@ button {
 }
 
 .completion-status span {
-    font-size: 0.85rem;
+    font-size: 1rem;
     color: #10b981;
     font-weight: 500;
 }
@@ -667,7 +667,7 @@ button {
     align-items: center;
     gap: 0.25rem;
     color: #1e3a5f;
-    font-size: 0.9rem;
+    font-size: 1rem;
     font-weight: 600;
     text-decoration: none;
 }
@@ -689,7 +689,7 @@ button {
     background: transparent;
     color: #475569;
     border: none;
-    font-size: 0.95rem;
+    font-size: 1rem;
     font-weight: 500;
     padding: 0.5rem 0;
     margin-bottom: 1rem;
@@ -728,7 +728,7 @@ button {
 
 .playlist-info p {
     color: #475569;
-    font-size: 0.95rem;
+    font-size: 1rem;
     line-height: 1.6;
 }
 
@@ -751,7 +751,7 @@ button {
 }
 
 .playlist-progress-ring .progress-label {
-    font-size: 0.85rem;
+    font-size: 1rem;
     color: #475569;
     font-weight: 500;
     text-align: center;
@@ -782,7 +782,7 @@ button {
     text-align: left;
     font-weight: 600;
     color: #475569;
-    font-size: 0.875rem;
+    font-size: 1rem;
     white-space: nowrap;
 }
 
@@ -873,7 +873,7 @@ button {
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 0.75rem;
+    font-size: 1rem;
     padding-left: 2px;
     transition: background 0.2s ease;
 }
@@ -884,20 +884,20 @@ button {
 
 .exercise-name {
     font-weight: 600;
-    font-size: 0.95rem;
+    font-size: 1rem;
     color: #1a1a2e;
 }
 
 /* Sets/Reps text */
 .sets-reps-text {
     color: #475569;
-    font-size: 0.9rem;
+    font-size: 1rem;
     line-height: 1.4;
 }
 
 .sets-reps-text .each-side {
     display: block;
-    font-size: 0.85rem;
+    font-size: 1rem;
     color: #64748b;
 }
 
@@ -908,7 +908,7 @@ button {
     gap: 0.5rem;
     padding: 0.4rem 0.85rem;
     border-radius: 20px;
-    font-size: 0.8rem;
+    font-size: 1rem;
     font-weight: 500;
     white-space: nowrap;
 }
@@ -972,7 +972,7 @@ button {
     display: inline-block;
     margin: 0 0.5rem;
     color: #94a3b8;
-    font-size: 0.85rem;
+    font-size: 1rem;
     font-weight: 400;
 }
 
@@ -995,7 +995,7 @@ button {
     background: #0d9488;
     color: white;
     padding: 0.75rem 1.5rem;
-    font-size: 0.95rem;
+    font-size: 1rem;
     font-weight: 600;
     white-space: nowrap;
     border: none;
@@ -1005,7 +1005,7 @@ button {
 }
 
 .save-progress-btn i {
-    font-size: 0.9rem;
+    font-size: 1rem;
 }
 
 .save-progress-btn:hover {
@@ -1099,7 +1099,7 @@ button {
 
 .sets-label {
     color: #64748b;
-    font-size: 0.9rem;
+    font-size: 1rem;
     font-weight: 500;
 }
 
@@ -1174,7 +1174,7 @@ button {
 
 .video-header p {
     color: #64748b;
-    font-size: 0.95rem;
+    font-size: 1rem;
 }
 
 /* Video modal body - two column layout */
@@ -1217,7 +1217,7 @@ button {
 }
 
 .tracking-header p {
-    font-size: 0.85rem;
+    font-size: 1rem;
     color: #64748b;
     line-height: 1.5;
 }
@@ -1238,7 +1238,7 @@ button {
 
 .set-label {
     width: 45px;
-    font-size: 0.9rem;
+    font-size: 1rem;
     font-weight: 500;
     color: #475569;
 }
@@ -1257,7 +1257,7 @@ button {
     height: 32px;
     background: #f8fafc;
     border: none;
-    font-size: 0.75rem;
+    font-size: 1rem;
     color: #64748b;
     cursor: pointer;
     display: flex;
@@ -1267,7 +1267,7 @@ button {
 }
 
 .rep-btn i {
-    font-size: 0.7rem;
+    font-size: 1rem;
 }
 
 .rep-btn:hover {
@@ -1286,7 +1286,7 @@ button {
     border-left: 1px solid #e2e8f0;
     border-right: 1px solid #e2e8f0;
     text-align: center;
-    font-size: 0.9rem;
+    font-size: 1rem;
     font-weight: 500;
     color: #1a1a2e;
     background: white;
@@ -1303,7 +1303,7 @@ button {
 }
 
 .reps-label {
-    font-size: 0.85rem;
+    font-size: 1rem;
     color: #64748b;
     margin-left: -0.25rem;
 }
@@ -1339,7 +1339,7 @@ button {
 
 .checkmark-box i {
     color: white;
-    font-size: 0.7rem;
+    font-size: 1rem;
     opacity: 0;
     transition: opacity 0.15s ease;
 }
@@ -1365,7 +1365,7 @@ button {
     color: #7c3aed;
     border: 2px solid #7c3aed;
     border-radius: 24px;
-    font-size: 0.95rem;
+    font-size: 1rem;
     font-weight: 600;
     cursor: pointer;
     transition: all 0.2s ease;
@@ -1481,7 +1481,7 @@ button {
 
 .auth-form-container .auth-subtitle {
     color: #64748b;
-    font-size: 0.95rem;
+    font-size: 1rem;
     margin-bottom: 2rem;
 }
 
@@ -1491,7 +1491,7 @@ button {
 
 .form-group label {
     display: block;
-    font-size: 0.9rem;
+    font-size: 1rem;
     font-weight: 500;
     color: #1a1a2e;
     margin-bottom: 0.5rem;
@@ -1534,7 +1534,7 @@ button {
     background: none;
     border: none;
     color: #7c3aed;
-    font-size: 0.85rem;
+    font-size: 1rem;
     font-weight: 500;
     cursor: pointer;
     padding: 0.25rem 0.5rem;
@@ -1568,7 +1568,7 @@ button {
     text-align: center;
     margin-top: 1.5rem;
     color: #64748b;
-    font-size: 0.95rem;
+    font-size: 1rem;
 }
 
 .auth-switch-text a {
@@ -1588,7 +1588,7 @@ button {
     margin-top: 1rem;
     color: #7c3aed;
     text-decoration: none;
-    font-size: 0.95rem;
+    font-size: 1rem;
     font-weight: 500;
 }
 
@@ -1621,7 +1621,7 @@ button {
     text-align: center;
     padding: 0.75rem;
     border-radius: 8px;
-    font-size: 0.9rem;
+    font-size: 1rem;
     margin-top: 1rem;
 }
 
@@ -1722,7 +1722,7 @@ button {
     }
     
     .equipment-badge {
-        font-size: 0.75rem;
+        font-size: 1rem;
         padding: 0.3rem 0.6rem;
     }
 
@@ -1830,7 +1830,7 @@ button {
 }
 
 .stats-label {
-    font-size: 0.9rem;
+    font-size: 1rem;
     color: #64748b;
     font-weight: 500;
 }
@@ -1869,7 +1869,7 @@ button {
 }
 
 .program-progress-text {
-    font-size: 0.85rem;
+    font-size: 1rem;
     font-weight: 600;
     color: #1a1a2e;
     white-space: nowrap;
@@ -1923,7 +1923,7 @@ button {
 }
 
 .streak-card .streak-label {
-    font-size: 0.9rem;
+    font-size: 1rem;
     color: #64748b;
     font-weight: 500;
     display: block;
@@ -1935,7 +1935,7 @@ button {
 }
 
 .streak-card .streak-unit {
-    font-size: 0.8rem;
+    font-size: 1rem;
     color: #94a3b8;
     display: block;
     margin-top: 0.25rem;
@@ -2008,7 +2008,7 @@ button {
 }
 
 .chart-empty p {
-    font-size: 0.95rem;
+    font-size: 1rem;
     max-width: 300px;
 }
 
@@ -2035,7 +2035,7 @@ button {
     background: transparent;
     border: none;
     border-bottom: 2px solid transparent;
-    font-size: 0.9rem;
+    font-size: 1rem;
     font-weight: 500;
     color: #64748b;
     cursor: pointer;
@@ -2077,7 +2077,7 @@ button {
 }
 
 .detail-total {
-    font-size: 0.85rem;
+    font-size: 1rem;
     color: #64748b;
     font-weight: 500;
 }
@@ -2110,7 +2110,7 @@ button {
 }
 
 .detail-empty p {
-    font-size: 0.9rem;
+    font-size: 1rem;
     max-width: 200px;
     line-height: 1.5;
 }
@@ -2164,13 +2164,13 @@ button {
 
 .activity-date i {
     color: #7c3aed;
-    font-size: 0.9rem;
+    font-size: 1rem;
 }
 
 .activity-date span {
     font-weight: 600;
     color: #1a1a2e;
-    font-size: 0.95rem;
+    font-size: 1rem;
 }
 
 .activity-details {
@@ -2188,12 +2188,12 @@ button {
 .activity-playlist {
     font-weight: 500;
     color: #475569;
-    font-size: 0.9rem;
+    font-size: 1rem;
 }
 
 .activity-count {
     color: #10b981;
-    font-size: 0.85rem;
+    font-size: 1rem;
     font-weight: 500;
 }
 
@@ -2211,7 +2211,7 @@ button {
 }
 
 .activity-empty p {
-    font-size: 0.95rem;
+    font-size: 1rem;
     max-width: 300px;
     margin: 0 auto;
 }
@@ -2278,7 +2278,7 @@ button {
 
     .detail-tab {
         padding: 0.6rem 0.75rem;
-        font-size: 0.85rem;
+        font-size: 1rem;
     }
 }
 
@@ -2350,14 +2350,14 @@ button {
 }
 
 .final-session-modal p {
-    font-size: 0.95rem;
+    font-size: 1rem;
     color: #4a5568;
     line-height: 1.6;
     margin: 0 0 0.5rem;
 }
 
 .final-session-subtext {
-    font-size: 0.875rem !important;
+    font-size: 1rem !important;
     color: #718096 !important;
     margin-bottom: 1.5rem !important;
 }
@@ -2451,14 +2451,14 @@ button {
 }
 
 .completion-modal p {
-    font-size: 0.95rem;
+    font-size: 1rem;
     color: #4a5568;
     line-height: 1.6;
     margin: 0 0 0.5rem;
 }
 
 .completion-subtext {
-    font-size: 0.875rem !important;
+    font-size: 1rem !important;
     color: #718096 !important;
     margin-bottom: 1.5rem !important;
 }
@@ -2494,7 +2494,7 @@ button {
     color: #7c3aed;
     border: 1.5px solid #7c3aed;
     border-radius: 8px;
-    font-size: 0.85rem;
+    font-size: 1rem;
     font-weight: 600;
     cursor: pointer;
     transition: all 0.2s ease;
@@ -2566,7 +2566,7 @@ button {
 
 .manual-entry-header p {
     color: #64748b;
-    font-size: 0.95rem;
+    font-size: 1rem;
     line-height: 1.5;
 }
 
@@ -2582,14 +2582,14 @@ button {
     display: flex;
     align-items: center;
     gap: 0.4rem;
-    font-size: 0.85rem;
+    font-size: 1rem;
     font-weight: 600;
     color: #475569;
     margin-bottom: 0.4rem;
 }
 
 .manual-entry-field label i {
-    font-size: 0.8rem;
+    font-size: 1rem;
     color: #7c3aed;
 }
 
@@ -2599,7 +2599,7 @@ button {
     padding: 0.625rem 0.75rem;
     border: 1.5px solid #e2e8f0;
     border-radius: 8px;
-    font-size: 0.95rem;
+    font-size: 1rem;
     font-family: inherit;
     color: #1a1a2e;
     background: white;
@@ -2624,7 +2624,7 @@ button {
     border: 1px solid #fbbf24;
     border-radius: 8px;
     margin-bottom: 1.25rem;
-    font-size: 0.85rem;
+    font-size: 1rem;
     color: #92400e;
 }
 
@@ -2654,7 +2654,7 @@ button {
 }
 
 .manual-entry-empty-state p {
-    font-size: 0.95rem;
+    font-size: 1rem;
 }
 
 /* Exercise cards */
@@ -2682,7 +2682,7 @@ button {
     border-radius: 50%;
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     color: white;
-    font-size: 0.8rem;
+    font-size: 1rem;
     font-weight: 700;
     display: flex;
     align-items: center;
@@ -2733,7 +2733,7 @@ button {
 
 .manual-exercise-play i {
     color: white;
-    font-size: 0.85rem;
+    font-size: 1rem;
 }
 
 /* Active preview - expanded iframe */
@@ -2768,7 +2768,7 @@ button {
     background: rgba(0, 0, 0, 0.6);
     color: white;
     border: none;
-    font-size: 0.65rem;
+    font-size: 1rem;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -2782,7 +2782,7 @@ button {
 }
 
 .manual-exercise-rec {
-    font-size: 0.8rem;
+    font-size: 1rem;
     color: #64748b;
 }
 
@@ -2795,12 +2795,12 @@ button {
 }
 
 .manual-exercise-equipment .equipment-badge {
-    font-size: 0.7rem;
+    font-size: 1rem;
     padding: 0.2rem 0.5rem;
 }
 
 .manual-exercise-equipment .equipment-separator {
-    font-size: 0.7rem;
+    font-size: 1rem;
 }
 
 /* Manual set rows */
@@ -2819,7 +2819,7 @@ button {
 
 .manual-set-label {
     width: 40px;
-    font-size: 0.85rem;
+    font-size: 1rem;
     font-weight: 500;
     color: #475569;
 }
@@ -2839,7 +2839,7 @@ button {
     color: #64748b;
     border: 1.5px solid #e2e8f0;
     border-radius: 8px;
-    font-size: 0.9rem;
+    font-size: 1rem;
     font-weight: 500;
     cursor: pointer;
     transition: all 0.2s ease;
@@ -2859,7 +2859,7 @@ button {
     color: white;
     border: none;
     border-radius: 8px;
-    font-size: 0.9rem;
+    font-size: 1rem;
     font-weight: 600;
     cursor: pointer;
     transition: all 0.2s ease;
@@ -2931,7 +2931,7 @@ button {
     gap: 0.75rem;
     padding: 0.875rem 1.5rem;
     border-radius: 10px;
-    font-size: 0.95rem;
+    font-size: 1rem;
     font-weight: 500;
     box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
     z-index: 2000;
