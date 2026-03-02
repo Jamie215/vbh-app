@@ -106,15 +106,12 @@ async function updateUIForAuthenticatedUser(user) {
     
     try {
         const { data, error } = await window.supabaseClient
-            .from('profiles')
-            .select('*')
-            .eq('id', user.id)
-            .maybeSingle();
+            .rpc('get_my_profile');
         
         if (error) {
             console.error('Error fetching profile:', error);
         } else {
-            profile = data;
+            profile = data?.[0] || null;
         }
     } catch (error) {
         console.error('Exception fetching profile:', error);
