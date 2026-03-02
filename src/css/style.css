@@ -400,6 +400,87 @@ button {
     max-width: 700px;
 }
 
+/* ==================== Today's Workout Row Layout ==================== */
+.todays-workout-row {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 1.5rem;
+    align-items: stretch;
+}
+
+/* Log Past Workout Card */
+.log-past-card {
+    background: white;
+    border-radius: 12px;
+    border: 1.5px dashed #cbd5e1;
+    padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    width: 200px;
+    gap: 0.5rem;
+}
+
+.log-past-card:hover {
+    border-color: #7c3aed;
+    background: #faf5ff;
+}
+
+.log-past-card-icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 0.25rem;
+}
+
+.log-past-card-icon i {
+    font-size: 1.1rem;
+    color: white;
+}
+
+.log-past-card h3 {
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: #1a1a2e;
+}
+
+.log-past-card p {
+    font-size: 0.8rem;
+    color: #64748b;
+    line-height: 1.4;
+}
+
+/* ==================== Responsive ==================== */
+@media (max-width: 768px) {
+    .todays-workout-row {
+        grid-template-columns: 1fr;
+    }
+
+    .log-past-card {
+        width: 100%;
+        flex-direction: row;
+        padding: 1rem 1.25rem;
+        gap: 1rem;
+        text-align: left;
+    }
+
+    .log-past-card-icon {
+        margin-bottom: 0;
+    }
+
+    .log-past-card p {
+        display: none;
+    }
+}
+
 .todays-workout-thumbnail {
     width: 200px;
     height: 140px;
@@ -2248,7 +2329,7 @@ button {
 .final-session-icon {
     width: 64px;
     height: 64px;
-    background: linear-gradient(to right, #BF953F, #FCF6BA, #B38728, #FBF5B7, #AA771C);
+    background: radial-gradient(ellipse farthest-corner at right bottom, #FEDB37 0%, #FDB931 8%, #9f7928 30%, #8A6E2F 40%, transparent 80%), radial-gradient(ellipse farthest-corner at left top, #FFFFFF 0%, #FFFFAC 8%, #D1B464 25%, #5d4a1f 62.5%, #5d4a1f 100%);
     border-radius: 50%;
     display: flex;
     align-items: center;
@@ -2349,7 +2430,7 @@ button {
 .completion-icon {
     width: 72px;
     height: 72px;
-    background: linear-gradient(to right, #BF953F, #FCF6BA, #B38728, #FBF5B7, #AA771C);
+    background: radial-gradient(ellipse farthest-corner at right bottom, #FEDB37 0%, #FDB931 8%, #9f7928 30%, #8A6E2F 40%, transparent 80%), radial-gradient(ellipse farthest-corner at left top, #FFFFFF 0%, #FFFFAC 8%, #D1B464 25%, #5d4a1f 62.5%, #5d4a1f 100%);
     border-radius: 50%;
     display: flex;
     align-items: center;

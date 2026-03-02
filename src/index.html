@@ -31,10 +31,6 @@
                     </div>
                 </div>
                 <div class="nav-right">
-                    <button class="nav-log-workout-btn" onclick="openManualEntryModal()">
-                        <i class="fa-solid fa-clock-rotate-left"></i>
-                        <span class="nav-log-workout-label">Log Past Workout</span>
-                    </button>
                     <div id="user-info" class="hidden">
                         <span id="user-name-display"></span>
                         <div id="user-avatar">
@@ -118,7 +114,16 @@
                 <div class="section-header">
                     <h2>Today's Workout</h2>
                 </div>
-                <div id="todays-workout-card"></div>
+                <div class="todays-workout-row">
+                    <div id="todays-workout-card"></div>
+                    <div class="log-past-card" onclick="openManualEntryModal()">
+                        <div class="log-past-card-icon">
+                            <i class="fa-solid fa-clock-rotate-left"></i>
+                        </div>
+                        <h3>Log Past Workout</h3>
+                        <p>Missed logging a session? You can log it here to keep your progress up to date.</p>
+                    </div>
+                </div>
             </section>
             <section id="all-workouts-section">
                 <div class="section-header">
