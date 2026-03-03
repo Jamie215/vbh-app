@@ -1,0 +1,137 @@
+{
+  "version": "3.97.34031.0",
+  "course_id": "68XsGIt4XK9",
+  "title": "Behaviour Change Plan",
+  "thumbnail": "story_content/thumbnail.jpg",
+  "scenes": [
+    {
+      "title": "Untitled Scene"
+    }
+  ],
+  "slides": [
+    {
+      "id": "6aVAh3khMyQ",
+      "title": "Behaviour change selection",
+      "scene_index": "1.1"
+    },
+    {
+      "id": "5fGVnSOO2D6",
+      "title": "Exercise - attitudes and beliefs",
+      "scene_index": "1.2"
+    },
+    {
+      "id": "5rY0Sr2XnWl",
+      "title": "Learn - attitudes and beliefs",
+      "scene_index": "1.3"
+    },
+    {
+      "id": "5xmbCiq4iXT",
+      "title": "Fall hazards - attitudes and beliefs",
+      "scene_index": "1.4"
+    },
+    {
+      "id": "6YB6Mb56b6A",
+      "title": "Protein - attitudes and beliefs",
+      "scene_index": "1.5"
+    },
+    {
+      "id": "6jzjacpOT88",
+      "title": "Other - attitudes and beliefs",
+      "scene_index": "1.6"
+    },
+    {
+      "id": "5i9e5Uflnm0",
+      "title": "Other - subjective norm",
+      "scene_index": "1.7"
+    },
+    {
+      "id": "5WmtS5hB7Os",
+      "title": "Other - perceived control",
+      "scene_index": "1.8"
+    },
+    {
+      "id": "6HKxjvyNk4J",
+      "title": "Other - plan",
+      "scene_index": "1.9"
+    },
+    {
+      "id": "6kO9VPZOfTi",
+      "title": "Protein - subjective norm",
+      "scene_index": "1.10"
+    },
+    {
+      "id": "6FqmqDpZzyK",
+      "title": "Protein - perceived control",
+      "scene_index": "1.11"
+    },
+    {
+      "id": "5up5NRQr8ab",
+      "title": "Protein - plan",
+      "scene_index": "1.12"
+    },
+    {
+      "id": "6Wv5AumCnLr",
+      "title": "Fall hazards - subjective norm",
+      "scene_index": "1.13"
+    },
+    {
+      "id": "5y0BJBBaMaE",
+      "title": "Learn - subjective norm",
+      "scene_index": "1.14"
+    },
+    {
+      "id": "6ZKzY2SsWhZ",
+      "title": "Fall hazards - perceived control",
+      "scene_index": "1.15"
+    },
+    {
+      "id": "5bueht6N2N5",
+      "title": "Fall hazards - plan",
+      "scene_index": "1.16"
+    },
+    {
+      "id": "5nDduULyVQ4",
+      "title": "Learn - plan",
+      "scene_index": "1.17"
+    },
+    {
+      "id": "5uojb1nqrER",
+      "title": "Learn - perceived control",
+      "scene_index": "1.18"
+    },
+    {
+      "id": "5WQO6FFgL6o",
+      "title": "Exercise - subjective norm",
+      "scene_index": "1.19"
+    },
+    {
+      "id": "6q53SWxDobb",
+      "title": "Exercise - perceived control",
+      "scene_index": "1.20"
+    },
+    {
+      "id": "6pGXl3f7lPi",
+      "title": "Exercise - plan",
+      "scene_index": "1.21"
+    },
+    {
+      "id": "5nYyPvZxh8p",
+      "title": "Exercise - summary",
+      "scene_index": "1.22"
+    },
+    {
+      "id": "6XTnwuE61Gm",
+      "title": "End",
+      "scene_index": "1.23"
+    }
+  ],
+  "player": {
+    "name": "unified",
+    "width": 740,
+    "height": 611
+  },
+  "stage": {
+    "width": 720,
+    "height": 540
+  }
+}
