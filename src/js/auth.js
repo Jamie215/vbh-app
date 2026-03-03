@@ -158,9 +158,117 @@ function togglePasswordVisibility(inputId, toggleId) {
     }
 }
 
-// Forgot password placeholder
+// Forgot password - show the form
 function showForgotPassword() {
-    alert('Forgot password feature coming soon!');
+    showForgotPasswordView();
+}
+
+// Send password reset email
+async function sendPasswordReset() {
+    const email = document.getElementById('forgot-email').value.trim();
+
+    if (!email) {
+        showMessage('forgot-message', 'Please enter your email address', true);
+        return;
+    }
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+        showMessage('forgot-message', 'Please enter a valid email address', true);
+        return;
+    }
+
+    const submitBtn = document.getElementById('forgot-submit-btn');
+    if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Sending...';
+    }
+
+    try {
+        // redirectTo should point to your deployed app URL
+        // Supabase will append the recovery token to this URL
+        const currentOrigin = window.location.origin;
+        const { error } = await window.supabaseClient.auth.resetPasswordForEmail(email, {
+            redirectTo: currentOrigin
+        });
+
+        if (error) {
+            showMessage('forgot-message', error.message, true);
+        } else {
+            // Always show success to avoid leaking whether an email exists
+            showMessage('forgot-message', 'If an account exists with this email, you will receive a password reset link. Please check your inbox (and spam folder).', false);
+            document.getElementById('forgot-email').value = '';
+        }
+    } catch (error) {
+        console.error('Password reset error:', error);
+        showMessage('forgot-message', 'An error occurred. Please try again.', true);
+    } finally {
+        if (submitBtn) {
+            submitBtn.disabled = false;
+            submitBtn.textContent = 'Send Reset Link';
+        }
+    }
+}
+
+// Update password (called from the reset password form)
+async function updatePassword() {
+    const password = document.getElementById('reset-password').value;
+    const confirmPassword = document.getElementById('reset-password-confirm').value;
+
+    if (!password || !confirmPassword) {
+        showMessage('reset-message', 'Please fill in both fields', true);
+        return;
+    }
+
+    if (password.length < 6) {
+        showMessage('reset-message', 'Password must be at least 6 characters', true);
+        return;
+    }
+
+    if (password !== confirmPassword) {
+        showMessage('reset-message', 'Passwords do not match', true);
+        return;
+    }
+
+    const submitBtn = document.getElementById('reset-submit-btn');
+    if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Updating...';
+    }
+
+    try {
+        const { error } = await window.supabaseClient.auth.updateUser({
+            password: password
+        });
+
+        if (error) {
+            showMessage('reset-message', error.message, true);
+        } else {
+            showMessage('reset-message', 'Password updated successfully! Redirecting...', false);
+
+            // Clear form
+            document.getElementById('reset-password').value = '';
+            document.getElementById('reset-password-confirm').value = '';
+
+            // Redirect to home after a brief pause
+            setTimeout(() => {
+                // The user is already authenticated via the recovery token
+                if (currentUser) {
+                    showHome();
+                } else {
+                    showSignInView();
+                }
+            }, 2000);
+        }
+    } catch (error) {
+        console.error('Password update error:', error);
+        showMessage('reset-message', 'An error occurred. Please try again.', true);
+    } finally {
+        if (submitBtn) {
+            submitBtn.disabled = false;
+            submitBtn.textContent = 'Update Password';
+        }
+    }
 }
 
 // Listen to auth state changes
@@ -205,6 +313,17 @@ function initAuthListener() {
                 if (session?.user) {
                     currentUser = session.user;
                 }
+                break;
+
+            case 'PASSWORD_RECOVERY':
+                console.log('PASSWORD_RECOVERY - showing reset password form');
+                // User clicked the reset link in their email
+                // Supabase has already verified the token and created a session
+                if (session?.user) {
+                    currentUser = session.user;
+                }
+                hideLoadingScreen();
+                showResetPasswordView();
                 break;
                 
             default:
@@ -251,6 +370,30 @@ function initAuthFormListeners() {
     if (signupPassword) {
         signupPassword.addEventListener('keypress', (e) => {
             if (e.key === 'Enter') signUp();
+        });
+    }
+
+    // Forgot password form
+    const forgotEmail = document.getElementById('forgot-email');
+    if (forgotEmail) {
+        forgotEmail.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') sendPasswordReset();
+        });
+    }
+
+    // Reset password form
+    const resetPassword = document.getElementById('reset-password');
+    const resetPasswordConfirm = document.getElementById('reset-password-confirm');
+
+    if (resetPassword) {
+        resetPassword.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') updatePassword();
+        });
+    }
+
+    if (resetPasswordConfirm) {
+        resetPasswordConfirm.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') updatePassword();
         });
     }
 }

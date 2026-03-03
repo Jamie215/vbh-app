@@ -103,6 +103,43 @@
                     </div>
                     <p class="form-message" id="signup-message"></p>
                 </div>
+
+                <!-- Forgot Password Form -->
+                <div id="forgot-password-view" class="auth-form-container hidden">
+                    <h1>Reset Password</h1>
+                    <p class="auth-subtitle">Enter your email and we'll send you a link to reset your password</p>
+                    <div class="form-group">
+                        <label for="forgot-email">Email</label>
+                        <input type="email" id="forgot-email" placeholder="test@email.com" required>
+                    </div>
+                    <button onclick="sendPasswordReset()" class="primary-button" id="forgot-submit-btn">Send Reset Link</button>
+                    <p class="form-message" id="forgot-message"></p>
+                    <p class="auth-switch-text">
+                        <a href="#" onclick="showSignInView(); return false;"><i class="fa-solid fa-arrow-left"></i> Back to Sign In</a>
+                    </p>
+                </div>
+
+                <!-- Reset Password Form (shown after clicking email link) -->
+                <div id="reset-password-view" class="auth-form-container hidden">
+                    <h1>Set New Password</h1>
+                    <p class="auth-subtitle">Enter your new password below</p>
+                    <div class="form-group">
+                        <label for="reset-password">New Password</label>
+                        <div class="password-wrapper">
+                            <input type="password" id="reset-password" placeholder="8+ characters" required>
+                            <button type="button" onclick="togglePasswordVisibility('reset-password', 'reset-toggle')" class="toggle-password-btn" id="reset-toggle">Show</button>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="reset-password-confirm">Confirm New Password</label>
+                        <div class="password-wrapper">
+                            <input type="password" id="reset-password-confirm" placeholder="Confirm your password" required>
+                            <button type="button" onclick="togglePasswordVisibility('reset-password-confirm', 'reset-confirm-toggle')" class="toggle-password-btn" id="reset-confirm-toggle">Show</button>
+                        </div>
+                    </div>
+                    <button onclick="updatePassword()" class="primary-button" id="reset-submit-btn">Update Password</button>
+                    <p class="form-message" id="reset-message"></p>
+                </div>
             </div>
         </main>
 

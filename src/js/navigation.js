@@ -33,29 +33,72 @@ function showAuthPage() {
 function showSignInView() {
     const signinView = document.getElementById('signin-view');
     const signupView = document.getElementById('signup-view');
+    const forgotView = document.getElementById('forgot-password-view');
+    const resetView = document.getElementById('reset-password-view');
     
     if (signinView) signinView.classList.remove('hidden');
     if (signupView) signupView.classList.add('hidden');
+    if (forgotView) forgotView.classList.add('hidden');
+    if (resetView) resetView.classList.add('hidden');
     
-    // Clear any messages
-    const signinMessage = document.getElementById('signin-message');
-    const signupMessage = document.getElementById('signup-message');
-    if (signinMessage) signinMessage.textContent = '';
-    if (signupMessage) signupMessage.textContent = '';
+    clearAuthMessages();
 }
 
 function showSignUpView() {
     const signinView = document.getElementById('signin-view');
     const signupView = document.getElementById('signup-view');
+    const forgotView = document.getElementById('forgot-password-view');
+    const resetView = document.getElementById('reset-password-view');
     
     if (signinView) signinView.classList.add('hidden');
     if (signupView) signupView.classList.remove('hidden');
+    if (forgotView) forgotView.classList.add('hidden');
+    if (resetView) resetView.classList.add('hidden');
     
     // Clear any messages
-    const signinMessage = document.getElementById('signin-message');
-    const signupMessage = document.getElementById('signup-message');
-    if (signinMessage) signinMessage.textContent = '';
-    if (signupMessage) signupMessage.textContent = '';
+    clearAuthMessages();
+}
+
+function showForgotPasswordView() {
+    const signinView = document.getElementById('signin-view');
+    const signupView = document.getElementById('signup-view');
+    const forgotView = document.getElementById('forgot-password-view');
+    const resetView = document.getElementById('reset-password-view');
+    
+    if (signinView) signinView.classList.add('hidden');
+    if (signupView) signupView.classList.add('hidden');
+    if (forgotView) forgotView.classList.remove('hidden');
+    if (resetView) resetView.classList.add('hidden');
+    
+    clearAuthMessages();
+}
+
+function showResetPasswordView() {
+    const authView = document.getElementById('auth-view');
+    const homeView = document.getElementById('home-view');
+    const playlistView = document.getElementById('playlist-view');
+    const progressView = document.getElementById('progress-view');
+    const navbar = document.getElementById('navbar');
+    
+    // Show auth container, hide everything else
+    if (authView) authView.classList.remove('hidden');
+    if (homeView) homeView.classList.add('hidden');
+    if (playlistView) playlistView.classList.add('hidden');
+    if (progressView) progressView.classList.add('hidden');
+    if (navbar) navbar.classList.add('hidden');
+    
+    // Within auth, only show the reset password form
+    const signinView = document.getElementById('signin-view');
+    const signupView = document.getElementById('signup-view');
+    const forgotView = document.getElementById('forgot-password-view');
+    const resetView = document.getElementById('reset-password-view');
+    
+    if (signinView) signinView.classList.add('hidden');
+    if (signupView) signupView.classList.add('hidden');
+    if (forgotView) forgotView.classList.add('hidden');
+    if (resetView) resetView.classList.remove('hidden');
+    
+    clearAuthMessages();
 }
 
 // ==================== Nav Active State ====================

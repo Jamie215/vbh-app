@@ -21,17 +21,14 @@ function showMessage(elementId, message, isError = false) {
 
 // Clear auth form messages
 function clearAuthMessages() {
-    const signinMsg = document.getElementById('signin-message');
-    const signupMsg = document.getElementById('signup-message');
-    
-    if (signinMsg) {
-        signinMsg.textContent = '';
-        signinMsg.className = 'form-message';
-    }
-    if (signupMsg) {
-        signupMsg.textContent = '';
-        signupMsg.className = 'form-message';
-    }
+    const messageIds = ['signin-message', 'signup-message', 'forgot-message', 'reset-message'];
+    messageIds.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) {
+            el.textContent = '';
+            el.className = 'form-message';
+        }
+    });
 }
 
 // ==================== Data Loading Functions ====================
