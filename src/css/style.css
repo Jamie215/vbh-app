@@ -2723,7 +2723,12 @@ button {
         gap: 1.5rem;
     }
     .nav-links {
-        display: none;
+        display: 0.25rem;
+    }
+
+    .nav-link {
+        font-size: var(--font-size-base);
+        padding: 0.4rem 0.6rem;
     }
     #todays-workout-card {
         flex-direction: column;
