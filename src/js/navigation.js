@@ -126,3 +126,38 @@ function showPlaylistView(playlistId) {
 function showHowToUse() {
     alert('How to Use page coming soon!');
 }
+
+// ==================== Mobile Hamburger Menu ====================
+
+function toggleMobileMenu() {
+    const navLinks = document.getElementById('nav-links');
+    const icon = document.getElementById('hamburger-icon');
+
+    navLinks.classList.toggle('open');
+
+    // Swap icon between bars and X
+    if (navLinks.classList.contains('open')) {
+        icon.classList.remove('fa-bars');
+        icon.classList.add('fa-xmark');
+    } else {
+        icon.classList.remove('fa-xmark');
+        icon.classList.add('fa-bars');
+    }
+}
+
+// Close menu when a nav link is clicked (smooth UX)
+document.addEventListener('DOMContentLoaded', function () {
+    document.querySelectorAll('.nav-link').forEach(function (link) {
+        link.addEventListener('click', function () {
+            var navLinks = document.getElementById('nav-links');
+            var icon = document.getElementById('hamburger-icon');
+            if (navLinks && navLinks.classList.contains('open')) {
+                navLinks.classList.remove('open');
+                if (icon) {
+                    icon.classList.remove('fa-xmark');
+                    icon.classList.add('fa-bars');
+                }
+            }
+        });
+    });
+});
