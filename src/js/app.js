@@ -21,6 +21,11 @@ document.addEventListener('DOMContentLoaded', () => {
     if (typeof initAuthListener === 'function') {
         initAuthListener();
     }
+
+    // Detect password recovery flow from URL hash BEFORE session routing
+    if (typeof detectPasswordRecovery === 'function') {
+        detectPasswordRecovery();
+    }
     
     // Initialize session - this handles the initial page load
     initializeSession();
@@ -29,6 +34,12 @@ document.addEventListener('DOMContentLoaded', () => {
 // Initialize session on page load
 async function initializeSession() {
     console.log('initializeSession: Starting...');
+
+    // If this is a password recovery redirect, the auth listener handles it — skip normal routing
+    if (isPasswordRecovery) {
+        console.log('initializeSession: Password recovery flow detected, skipping normal routing');
+        return;
+    }
     
     try {
         const { data: { session }, error } = await window.supabaseClient.auth.getSession();

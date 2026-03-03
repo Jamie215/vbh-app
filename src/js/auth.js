@@ -3,6 +3,20 @@
 // Flag to track if initial session has been handled by app.js
 let initialSessionHandled = false;
 
+// Detect password recovery flow from URL hash BEFORE session routing
+// Supabase appends #access_token=...&type=recovery&... to the redirect URL
+let isPasswordRecovery = false;
+
+function detectPasswordRecovery() {
+    const hash = window.location.hash;
+    if (hash && hash.includes('type=recovery')) {
+        console.log('Password recovery flow detected from URL');
+        isPasswordRecovery = true;
+        return true;
+    }
+    return false;
+}
+
 function markInitialSessionHandled() {
     initialSessionHandled = true;
 }
@@ -246,6 +260,14 @@ async function updatePassword() {
         } else {
             showMessage('reset-message', 'Password updated successfully! Redirecting...', false);
 
+            // Clear recovery state
+            isPasswordRecovery = false;
+
+            // Clean the hash from the URL
+            if (window.history.replaceState) {
+                window.history.replaceState(null, '', window.location.pathname);
+            }
+
             // Clear form
             document.getElementById('reset-password').value = '';
             document.getElementById('reset-password-confirm').value = '';
@@ -286,11 +308,29 @@ function initAuthListener() {
         
         switch (event) {
             case 'INITIAL_SESSION':
-                console.log('INITIAL_SESSION - handled by app.js');
+                if (isPasswordRecovery) {
+                    console.log('INITIAL_SESSION during recovery - showing reset form');
+                    if (session?.user) {
+                        currentUser = session.user;
+                    }
+                    hideLoadingScreen();
+                    showResetPasswordView();
+                } else {
+                    console.log('INITIAL_SESSION - handled by app.js');
+                }
                 break;
                 
             case 'SIGNED_IN':
-                console.log('SIGNED_IN - handled by signIn()');
+                if (isPasswordRecovery) {
+                    console.log('SIGNED_IN during recovery - deferring to PASSWORD_RECOVERY handler');
+                    if (session?.user) {
+                        currentUser = session.user;
+                    }
+                    hideLoadingScreen();
+                    showResetPasswordView();
+                } else {
+                    console.log('SIGNED_IN - handled by signIn()');
+                }
                 break;
                 
             case 'SIGNED_OUT':
