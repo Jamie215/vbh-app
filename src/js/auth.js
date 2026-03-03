@@ -274,9 +274,8 @@ async function updatePassword() {
 
             // Redirect to home after a brief pause
             setTimeout(() => {
-                // The user is already authenticated via the recovery token
                 if (currentUser) {
-                    showHome();
+                    handlePostSignIn(currentUser);
                 } else {
                     showSignInView();
                 }
