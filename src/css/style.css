@@ -442,7 +442,7 @@ button {
 .log-past-card {
     background: white;
     border-radius: var(--radius-lg);
-    border: 1.5px dashed var(--color-border-medium);
+    border: 1.5px solid var(--color-border-medium);
     padding: 1.5rem;
     display: flex;
     flex-direction: column;
@@ -453,11 +453,7 @@ button {
     transition: all 0.2s ease;
     width: 400px;
     gap: 0.5rem;
-}
-
-.log-past-card:hover {
-    border-color: var(--color-brand);
-    background: #faf5ff;
+    box-shadow: var(--shadow-sm);
 }
 
 .log-past-card-icon {
@@ -486,6 +482,32 @@ button {
     font-size: 1rem;
     color: var(--color-text-secondary);
     line-height: 1.4;
+    margin-bottom: 0.25rem;
+}
+
+.log-past-card-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.5rem 1.25rem;
+    background: white;
+    color: var(--color-brand);
+    border: 1.5px solid var(--color-brand);
+    border-radius: var(--radius-md);
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    margin-top: 0.5rem;
+}
+
+.log-past-card-btn:hover {
+    background: var(--color-brand);
+    color: white;
+}
+
+.log-past-card:active {
+    transform: translateY(1px);
 }
 
 .todays-workout-thumbnail {
@@ -2290,32 +2312,6 @@ button {
     transform: translateY(0);
 }
 
-/* ==================== Nav Log Past Workout Button ==================== */
-.nav-log-workout-btn {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.4rem;
-    padding: 0.5rem 1rem;
-    background: white;
-    color: var(--color-brand);
-    border: 1.5px solid var(--color-brand);
-    border-radius: var(--radius-md);
-    font-size: 1rem;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    white-space: nowrap;
-}
-
-.nav-log-workout-btn:hover {
-    background: var(--color-brand);
-    color: white;
-}
-
-.nav-log-workout-btn:active {
-    transform: translateY(1px);
-}
-
 /* ==================== Manual Entry Modal ==================== */
 .manual-entry-modal {
     max-width: 700px;
@@ -2788,12 +2784,19 @@ button {
         padding: 1rem 1.25rem;
         gap: 1rem;
         text-align: left;
+        align-items: center;
+        justify-content: flex-start;
     }
     .log-past-card-icon {
         margin-bottom: 0;
     }
     .log-past-card p {
         display: none;
+    }
+    .log-past-card-btn {
+        margin-top: 0;
+        margin-left: auto;
+        white-space:nowrap;
     }
 
     /* General */
@@ -2865,21 +2868,6 @@ button {
     }
     .activity-date {
         min-width: auto;
-    }
-
-    /* General */
-    .nav-log-workout-label {
-        display: none;
-    }
-    .nav-log-workout-btn {
-        padding: 0.5rem;
-        width: 36px;
-        height: 36px;
-        justify-content: center;
-        border-radius: 50%;
-    }
-    .nav-log-workout-btn i {
-        margin: 0;
     }
 
     /* General */
