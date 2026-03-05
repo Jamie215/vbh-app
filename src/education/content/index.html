@@ -126,7 +126,57 @@
       fetch: window.__fetchCourse,
       isExport: isExport,
       resolvePath: resolvePath,
-      resolveFontPath: resolveFontPath
+      resolveFontPath: resolveFontPath,
+
+      // ── Read progress (called synchronously on course init) ──
+      getProgress: function(defaults) {
+        try {
+          var saved = window.parent.eduProgress;
+          return saved || defaults;
+        } catch(e) {
+          return defaults;
+        }
+      },
+
+      // ── Save progress (debounced in parent → Supabase) ──
+      setCourseProgress: function(progress) {
+        try { window.parent.saveEducationProgress(progress); }
+        catch(e) { console.warn('Education progress save failed', e); }
+        return progress;
+      },
+
+      setLessonProgress: function(progress) {
+        try { window.parent.saveEducationProgress(progress); }
+        catch(e) { console.warn('Education progress save failed', e); }
+        return progress;
+      },
+
+      setLessonComplete: function(progress) {
+        try { window.parent.saveEducationProgress(progress); }
+        catch(e) { console.warn('Education progress save failed', e); }
+        return progress;
+      },
+
+      // ── Bookmark (which lesson the user was on) ──
+      bookmark: function(lessonId) {
+        try { window.parent.saveEducationBookmark(lessonId); }
+        catch(e) {}
+      },
+
+      // ── Course completion status ──
+      isComplete: function() {
+        try {
+          var saved = window.parent.eduProgress;
+          return saved ? saved.percentComplete === 100 : false;
+        } catch(e) {
+          return false;
+        }
+      },
+
+      finish: function(progress) {
+        try { window.parent.saveEducationProgress(progress); }
+        catch(e) {}
+      }
     };
   }(window));
 </script>

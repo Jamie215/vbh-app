@@ -34,7 +34,6 @@ function showMyProgress() {
     if (authView) authView.classList.add('hidden');
     if (progressView) progressView.classList.remove('hidden');
     if (educationView) educationView.classList.add('hidden');
-    unloadEducationIframe();
 
     // Update nav link active states
     updateNavActiveState('progress');

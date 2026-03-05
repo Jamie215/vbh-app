@@ -21,13 +21,17 @@ function showAuthPage() {
     const homeView = document.getElementById('home-view');
     const playlistView = document.getElementById('playlist-view');
     const progressView = document.getElementById('progress-view');
+    const educationView = document.getElementById('education-view');
     const navbar = document.getElementById('navbar');
     
     if (authView) authView.classList.remove('hidden');
     if (homeView) homeView.classList.add('hidden');
     if (playlistView) playlistView.classList.add('hidden');
     if (progressView) progressView.classList.add('hidden');
+    if (educationView) educationView.classList.add('hidden');
     if (navbar) navbar.classList.add('hidden');
+
+    unloadEducationIframe();
 }
 
 function showSignInView() {
@@ -113,6 +117,8 @@ function updateNavActiveState(activeView) {
             link.classList.add('active');
         } else if (activeView === 'progress' && linkText.includes('progress')) {
             link.classList.add('active');
+        } elseif (activeView === 'education' && linkText.includes('education')) {
+            link.classList.add('active');
         }
     });
 }
@@ -137,8 +143,6 @@ function showHome() {
     if (progressView) progressView.classList.add('hidden');
     if (educationView) educationView.classList.add('hidden');
     if (navbar) navbar.classList.remove('hidden');
-
-    unloadEducationIframe();
 
     // Update nav link active states
     updateNavActiveState('home');
@@ -169,8 +173,6 @@ function showPlaylistView(playlistId) {
     if (progressView) progressView.classList.add('hidden');
     if (educationView) educationView.classList.add('hidden');
     if (navbar) navbar.classList.remove('hidden');
-
-    unloadEducationIframe();
 }
 
 // Placeholder for How to Use page
@@ -178,8 +180,70 @@ function showHowToUse() {
     alert('How to Use page coming soon!');
 }
 
-// Education page
-function showEducation(playlistId) {
+// Education View
+
+// Cached progress that the Rise iframe reads synchronously on initial load
+window.eduProgress = null;
+window.eduBookmark = '';
+
+// Save queue to debounce rapid writes from Rise
+let _eduSaveTimer = null;
+
+// Load education progress from Supabase and cache it for the iframe to read
+async function loadEducationProgress() {
+    if (!currentUser) return;
+
+    try {
+        const { data, error } = await window.supabaseClient
+            .from('education_progress')
+            .select('*')
+            .eq('user_id', currentUser.id)
+            .maybeSingle();
+        if (error) {
+            console.error('Error loading education progress:', error);
+            return;
+        }
+
+        if (data) {
+            window.eduProgress = data.progress || null;
+            window.eduBookmark = data.bookmark || '';
+        }
+    } catch (error) {
+        console.error('Exception loading education progress:', error);
+    }
+}
+
+// Called by the Rise iframe via postMessage when progress is updated
+window.saveEducationProgress = function (progress) {
+    window.eduProgress = progress;
+
+    if (_eduSaveTimer) clearTimeout(_eduSaveTimer);
+
+    // Debounce saves to avoid excessive writes if user is rapidly progressing through content
+    _eduSaveTimer = setTimeout(async () => {
+        if (!currentUser) return;
+        try {
+            const { error } = await window.supabaseClient
+                .from('education_progress')
+                .upsert({
+                    user_id: currentUser.id,
+                    progress: window.eduProgress,
+                    bookmark: window.eduBookmark
+                }, {
+                    onConflict: 'user_id'
+                });
+        } catch (error) {
+            console.error('Exception saving education progress:', error);
+        }
+    }, 1000);
+};
+
+// Called by the Rise iframe via postMessage when bookmark is updated
+window.saveEducationBookmark = function (lessonId) {
+    window.eduBookmark = lessonId || '';
+};
+
+async function showEducation() {
     if (!currentUser) {
         showAuthPage();
         return;
@@ -201,8 +265,9 @@ function showEducation(playlistId) {
     // Hide navbar for immersive experience, but can be toggled back on if needed
     if (navbar) navbar.classList.remove('hidden');
 
-    // Load education content
-    if (iframe) {
+    // Fetch progress & set iframe src
+    if (iframe && !iframe.src) {
+        await loadEducationProgress();
         iframe.src = 'education/content/index.html';
     }
 
@@ -216,15 +281,17 @@ function hideEducation() {
     if (educationView) educationView.classList.add('hidden');
     if (navbar) navbar.classList.remove('hidden');
 
-    unloadEducationIframe();
     showHome();
 }
 
+// Only used on sign-out to fully tear down the iframe
 function unloadEducationIframe() {
     const iframe = document.getElementById('education-iframe');
     if (iframe) {
         iframe.removeAttribute('src');
     }
+    window.eduProgress = null;
+    window.eduBookmark = '';
 }
 
 // ==================== Mobile Hamburger Menu ====================
