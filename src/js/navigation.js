@@ -117,7 +117,7 @@ function updateNavActiveState(activeView) {
             link.classList.add('active');
         } else if (activeView === 'progress' && linkText.includes('progress')) {
             link.classList.add('active');
-        } elseif (activeView === 'education' && linkText.includes('education')) {
+        } else if (activeView === 'education' && linkText.includes('education')) {
             link.classList.add('active');
         }
     });
