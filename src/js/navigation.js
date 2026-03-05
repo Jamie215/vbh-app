@@ -206,6 +206,7 @@ async function loadEducationProgress() {
         }
 
         if (data) {
+            console.log('Loaded education progress:', data);
             window.eduProgress = data.progress || null;
             window.eduBookmark = data.bookmark || '';
         }
@@ -215,7 +216,7 @@ async function loadEducationProgress() {
 }
 
 // Called by the Rise iframe via postMessage when progress is updated
-window.parent.saveEducationProgress = function (progress) {
+window.saveEducationProgress = function (progress) {
     window.eduProgress = progress;
 
     if (_eduSaveTimer) clearTimeout(_eduSaveTimer);
@@ -240,7 +241,7 @@ window.parent.saveEducationProgress = function (progress) {
 };
 
 // Called by the Rise iframe via postMessage when bookmark is updated
-window.parent.saveEducationBookmark = function (lessonId) {
+window.saveEducationBookmark = function (lessonId) {
     window.eduBookmark = lessonId || '';
 };
 

@@ -128,32 +128,30 @@
       resolvePath: resolvePath,
       resolveFontPath: resolveFontPath,
 
-      // ── Read progress (called synchronously on course init) ──
+      // ── Read progress (called on course init) ──
       getProgress: function(defaults) {
         try {
           var saved = window.parent.eduProgress;
-          return saved || defaults;
-        } catch(e) {
-          return defaults;
-        }
+          if (saved && typeof saved === 'object' && 'lessons' in saved) {
+            return saved;
+          }
+        } catch(e) {}
+        return defaults;
       },
 
-      // ── Save progress (debounced in parent → Supabase) ──
-      setCourseProgress: function(progress) {
+      // ── Save COURSE-level progress only (this is what getProgress returns) ──
+      setCourseProgress: function(progress, rawProgress) {
         try { window.parent.saveEducationProgress(progress); }
         catch(e) { console.warn('Education progress save failed', e); }
         return progress;
       },
 
+      // ── Lesson-level: just pass through, don't save ──
       setLessonProgress: function(progress) {
-        try { window.parent.saveEducationProgress(progress); }
-        catch(e) { console.warn('Education progress save failed', e); }
         return progress;
       },
 
       setLessonComplete: function(progress) {
-        try { window.parent.saveEducationProgress(progress); }
-        catch(e) { console.warn('Education progress save failed', e); }
         return progress;
       },
 
