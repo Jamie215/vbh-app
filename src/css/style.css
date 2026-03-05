@@ -6079,7 +6079,7 @@ button {
     margin-top: 60px;
     top: 0;
     left: 0;
-    width: 100%;
+    max-width: 1200px;
     height: calc(100vh - 60px);
     z-index: 200;
     display: flex;
