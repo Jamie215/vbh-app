@@ -27,11 +27,14 @@ function showMyProgress() {
     const playlistView = document.getElementById('playlist-view');
     const authView = document.getElementById('auth-view');
     const progressView = document.getElementById('progress-view');
+    const educationView = document.getElementById('education-view');
     
     if (homeView) homeView.classList.add('hidden');
     if (playlistView) playlistView.classList.add('hidden');
     if (authView) authView.classList.add('hidden');
     if (progressView) progressView.classList.remove('hidden');
+    if (educationView) educationView.classList.add('hidden');
+    unloadEducationIframe();
 
     // Update nav link active states
     updateNavActiveState('progress');

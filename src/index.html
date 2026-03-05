@@ -28,6 +28,7 @@
                         <a href="#" class="nav-link active" onclick="showHome(); return false;">Exercises</a>
                         <a href="#" class="nav-link" onclick="showMyProgress(); return false;">My Progress</a>
                         <a href="#" class="nav-link" onclick="showHowToUse(); return false;">How to Use the Program</a>
+                        <a href="#" class="nav-link" onclick="showEducation(); return false;">Education</a>
                     </div>
                 </div>
                 <div class="nav-right">
@@ -276,6 +277,15 @@
                 </div>
             </section>
         </main>
+
+        <!-- Education Section -->
+        <section id="education-view" class="hidden">
+            <div class="education-topbar">
+                <button class="education-back-btn" onclick="hideEducation()"><i class="fa-solid fa-arrow-left"></i> Back to App</button>
+                <span>Education Program</span>
+            </div>
+            <iframe id="education-iframe" class="education-iframe" title="Education Modules"></iframe>
+        </section>
 
         <!-- Manual Entry Modal -->
         <div id="manual-entry-modal" class="modal hidden">

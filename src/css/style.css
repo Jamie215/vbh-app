@@ -6070,3 +6070,75 @@ button {
         font-size: 1rem;
     }
 }
+/* ============================================================
+   EDUCATION VIEW (fullscreen iframe takeover)
+   ============================================================ */
+#education-view {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 200;
+    display: flex;
+    flex-direction: column;
+    background: var(--color-bg-page);
+}
+
+.education-topbar {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 0.6rem 1.5rem;
+    background: white;
+    border-bottom: 1px solid var(--color-border);
+    box-shadow: var(--shadow-sm);
+    flex-shrink: 0;
+}
+
+.education-back-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    background: none;
+    border: 1px solid var(--color-border-medium);
+    border-radius: var(--radius-md);
+    color: var(--color-text-primary);
+    font-size: var(--font-size-base);
+    cursor: pointer;
+    transition: background 0.2s, border-color 0.2s;
+}
+
+.education-back-btn:hover {
+    background: var(--color-bg-subtle);
+    border-color: var(--color-brand);
+    color: var(--color-brand);
+}
+
+.education-topbar-title {
+    font-weight: 600;
+    font-size: var(--font-size-md);
+    color: var(--color-text-primary);
+}
+
+.education-iframe {
+    flex: 1;
+    width: 100%;
+    border: none;
+}
+
+@media (max-width: 768px) {
+    .education-topbar {
+        padding: 0.5rem 1rem;
+    }
+
+    .education-back-btn {
+        padding: 0.4rem 0.75rem;
+        font-size: 0.9rem;
+    }
+
+    .education-topbar-title {
+        font-size: 1rem;
+    }
+}

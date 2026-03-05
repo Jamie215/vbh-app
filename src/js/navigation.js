@@ -128,13 +128,17 @@ function showHome() {
     const homeView = document.getElementById('home-view');
     const playlistView = document.getElementById('playlist-view');
     const progressView = document.getElementById('progress-view');
+    const educationView = document.getElementById('education-view');
     const navbar = document.getElementById('navbar');
     
     if (authView) authView.classList.add('hidden');
     if (homeView) homeView.classList.remove('hidden');
     if (playlistView) playlistView.classList.add('hidden');
     if (progressView) progressView.classList.add('hidden');
+    if (educationView) educationView.classList.add('hidden');
     if (navbar) navbar.classList.remove('hidden');
+
+    unloadEducationIframe();
 
     // Update nav link active states
     updateNavActiveState('home');
@@ -156,18 +160,71 @@ function showPlaylistView(playlistId) {
     const homeView = document.getElementById('home-view');
     const playlistView = document.getElementById('playlist-view');
     const progressView = document.getElementById('progress-view');
+    const educationView = document.getElementById('education-view');
     const navbar = document.getElementById('navbar');
     
     if (authView) authView.classList.add('hidden');
     if (homeView) homeView.classList.add('hidden');
     if (playlistView) playlistView.classList.remove('hidden');
     if (progressView) progressView.classList.add('hidden');
+    if (educationView) educationView.classList.add('hidden');
     if (navbar) navbar.classList.remove('hidden');
+
+    unloadEducationIframe();
 }
 
 // Placeholder for How to Use page
 function showHowToUse() {
     alert('How to Use page coming soon!');
+}
+
+// Education page
+function showEducation(playlistId) {
+    if (!currentUser) {
+        showAuthPage();
+        return;
+    }
+
+    const authView = document.getElementById('auth-view');
+    const homeView = document.getElementById('home-view');
+    const playlistView = document.getElementById('playlist-view');
+    const progressView = document.getElementById('progress-view');
+    const educationView = document.getElementById('education-view');
+    const navbar = document.getElementById('navbar');
+    const iframe = document.getElementById('education-iframe');
+    
+    if (authView) authView.classList.add('hidden');
+    if (homeView) homeView.classList.add('hidden');
+    if (playlistView) playlistView.classList.add('hidden');
+    if (progressView) progressView.classList.add('hidden');
+    if (educationView) educationView.classList.remove('hidden');
+    // Hide navbar for immersive experience, but can be toggled back on if needed
+    if (navbar) navbar.classList.remove('hidden');
+
+    // Load education content
+    if (iframe) {
+        iframe.src = 'education/content/index.html';
+    }
+
+    updateNavActiveState('education');
+}
+
+function hideEducation() {
+    const educationView = document.getElementById('education-view');
+    const navbar = document.getElementById('navbar');
+    
+    if (educationView) educationView.classList.add('hidden');
+    if (navbar) navbar.classList.remove('hidden');
+
+    unloadEducationIframe();
+    showHome();
+}
+
+function unloadEducationIframe() {
+    const iframe = document.getElementById('education-iframe');
+    if (iframe) {
+        iframe.removeAttribute('src');
+    }
 }
 
 // ==================== Mobile Hamburger Menu ====================
