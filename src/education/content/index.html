@@ -128,50 +128,61 @@
       resolvePath: resolvePath,
       resolveFontPath: resolveFontPath,
 
-      // ── Read progress (called on course init) ──
       getProgress: function(defaults) {
         try {
           var saved = window.parent.eduProgress;
-          if (saved && typeof saved === 'object' && 'lessons' in saved) {
+          console.log('[EDU] getProgress called');
+          console.log('[EDU]   defaults keys:', defaults ? Object.keys(defaults) : 'null');
+          console.log('[EDU]   saved keys:', saved ? Object.keys(saved) : 'null');
+          console.log('[EDU]   returning:', saved ? 'SAVED' : 'DEFAULTS');
+          if (saved && typeof saved === 'object') {
             return saved;
           }
-        } catch(e) {}
+        } catch(e) {
+          console.error('[EDU] getProgress error:', e);
+        }
         return defaults;
       },
 
-      // ── Save COURSE-level progress only (this is what getProgress returns) ──
-      setCourseProgress: function(progress, rawProgress) {
+      setCourseProgress: function(progress, extra) {
+        console.log('[EDU] setCourseProgress keys:', progress ? Object.keys(progress) : 'null');
+        console.log('[EDU] setCourseProgress data:', JSON.stringify(progress).substring(0, 200));
         try { window.parent.saveEducationProgress(progress); }
-        catch(e) { console.warn('Education progress save failed', e); }
+        catch(e) {}
         return progress;
       },
 
-      // ── Lesson-level: just pass through, don't save ──
       setLessonProgress: function(progress) {
+        console.log('[EDU] setLessonProgress keys:', progress ? Object.keys(progress) : 'null');
+        // Don't save — this is lesson-level data, not course-level
         return progress;
       },
 
       setLessonComplete: function(progress) {
+        console.log('[EDU] setLessonComplete keys:', progress ? Object.keys(progress) : 'null');
+        // Don't save — this is lesson-level data, not course-level
         return progress;
       },
 
-      // ── Bookmark (which lesson the user was on) ──
       bookmark: function(lessonId) {
+        console.log('[EDU] bookmark:', lessonId);
         try { window.parent.saveEducationBookmark(lessonId); }
         catch(e) {}
       },
 
-      // ── Course completion status ──
       isComplete: function() {
         try {
           var saved = window.parent.eduProgress;
-          return saved ? saved.percentComplete === 100 : false;
+          var result = saved ? saved.percentComplete === 100 : false;
+          console.log('[EDU] isComplete:', result);
+          return result;
         } catch(e) {
           return false;
         }
       },
 
       finish: function(progress) {
+        console.log('[EDU] finish called');
         try { window.parent.saveEducationProgress(progress); }
         catch(e) {}
       }
