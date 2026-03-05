@@ -200,7 +200,6 @@ async function loadEducationProgress() {
             .eq('user_id', currentUser.id)
             .maybeSingle();
 
-        console.log('Fetched education progress:', data);
         if (error) {
             console.error('Error loading education progress:', error);
             return;
@@ -216,7 +215,7 @@ async function loadEducationProgress() {
 }
 
 // Called by the Rise iframe via postMessage when progress is updated
-window.saveEducationProgress = function (progress) {
+window.parent.saveEducationProgress = function (progress) {
     window.eduProgress = progress;
 
     if (_eduSaveTimer) clearTimeout(_eduSaveTimer);
@@ -241,7 +240,7 @@ window.saveEducationProgress = function (progress) {
 };
 
 // Called by the Rise iframe via postMessage when bookmark is updated
-window.saveEducationBookmark = function (lessonId) {
+window.parent.saveEducationBookmark = function (lessonId) {
     window.eduBookmark = lessonId || '';
 };
 
