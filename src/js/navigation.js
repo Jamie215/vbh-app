@@ -199,6 +199,8 @@ async function loadEducationProgress() {
             .select('*')
             .eq('user_id', currentUser.id)
             .maybeSingle();
+
+        console.log('Fetched education progress:', data);
         if (error) {
             console.error('Error loading education progress:', error);
             return;
