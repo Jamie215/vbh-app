@@ -6076,10 +6076,9 @@ button {
    ============================================================ */
 #education-view {
     position: fixed;
-    margin-top: 60px;
-    top: 0;
+    top: 60px;
     left: 0;
-    max-width: 1200px;
+    width: 100%;
     height: calc(100vh - 60px);
     z-index: 200;
     display: flex;
