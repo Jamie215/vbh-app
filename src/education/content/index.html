@@ -132,35 +132,32 @@
         try {
           var saved = window.parent.eduProgress;
           console.log('[EDU] getProgress called');
-          console.log('[EDU]   defaults keys:', defaults ? Object.keys(defaults) : 'null');
-          console.log('[EDU]   saved keys:', saved ? Object.keys(saved) : 'null');
-          console.log('[EDU]   returning:', saved ? 'SAVED' : 'DEFAULTS');
-          if (saved && typeof saved === 'object') {
+          console.log('[EDU]   defaults:', typeof defaults, defaults ? Object.keys(defaults) : 'null');
+          console.log('[EDU]   saved:', typeof saved, saved);
+          if (saved && typeof saved === 'object' && Object.keys(saved).length > 0) {
+            console.log('[EDU]   → returning SAVED');
             return saved;
           }
         } catch(e) {
           console.error('[EDU] getProgress error:', e);
         }
+        console.log('[EDU]   → returning DEFAULTS');
         return defaults;
       },
 
-      setCourseProgress: function(progress, extra) {
-        console.log('[EDU] setCourseProgress keys:', progress ? Object.keys(progress) : 'null');
-        console.log('[EDU] setCourseProgress data:', JSON.stringify(progress).substring(0, 200));
-        try { window.parent.saveEducationProgress(progress); }
-        catch(e) {}
-        return progress;
+      setCourseProgress: function(arg1, arg2) {
+        console.log('[EDU] setCourseProgress arg1:', typeof arg1, arg1);
+        console.log('[EDU] setCourseProgress arg2:', typeof arg2, arg2);
+        return arg1;
       },
 
       setLessonProgress: function(progress) {
-        console.log('[EDU] setLessonProgress keys:', progress ? Object.keys(progress) : 'null');
-        // Don't save — this is lesson-level data, not course-level
+        console.log('[EDU] setLessonProgress:', typeof progress, progress ? Object.keys(progress) : 'null');
         return progress;
       },
 
       setLessonComplete: function(progress) {
-        console.log('[EDU] setLessonComplete keys:', progress ? Object.keys(progress) : 'null');
-        // Don't save — this is lesson-level data, not course-level
+        console.log('[EDU] setLessonComplete:', typeof progress, progress ? Object.keys(progress) : 'null');
         return progress;
       },
 
@@ -171,20 +168,11 @@
       },
 
       isComplete: function() {
-        try {
-          var saved = window.parent.eduProgress;
-          var result = saved ? saved.percentComplete === 100 : false;
-          console.log('[EDU] isComplete:', result);
-          return result;
-        } catch(e) {
-          return false;
-        }
+        return false;
       },
 
       finish: function(progress) {
-        console.log('[EDU] finish called');
-        try { window.parent.saveEducationProgress(progress); }
-        catch(e) {}
+        console.log('[EDU] finish:', typeof progress, progress);
       }
     };
   }(window));
