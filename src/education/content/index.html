@@ -131,49 +131,42 @@
       getProgress: function(defaults) {
         try {
           var saved = window.parent.eduProgress;
-          console.log('[EDU] getProgress called');
-          console.log('[EDU]   defaults:', typeof defaults, defaults ? Object.keys(defaults) : 'null');
-          console.log('[EDU]   saved:', typeof saved, saved);
-          if (saved && typeof saved === 'object' && Object.keys(saved).length > 0) {
-            console.log('[EDU]   → returning SAVED');
+          if (saved && typeof saved === 'object' && saved.lessons) {
             return saved;
           }
-        } catch(e) {
-          console.error('[EDU] getProgress error:', e);
-        }
-        console.log('[EDU]   → returning DEFAULTS');
+        } catch(e) {}
         return defaults;
       },
 
-      setCourseProgress: function(arg1, arg2) {
-        console.log('[EDU] setCourseProgress arg1:', typeof arg1, arg1);
-        console.log('[EDU] setCourseProgress arg2:', typeof arg2, arg2);
-        return arg1;
+      setCourseProgress: function(progress) {
+        try { window.parent.saveEducationProgress(progress); }
+        catch(e) {}
+        return progress;
       },
 
       setLessonProgress: function(progress) {
-        console.log('[EDU] setLessonProgress:', typeof progress, progress ? Object.keys(progress) : 'null');
         return progress;
       },
 
       setLessonComplete: function(progress) {
-        console.log('[EDU] setLessonComplete:', typeof progress, progress ? Object.keys(progress) : 'null');
         return progress;
       },
 
       bookmark: function(lessonId) {
-        console.log('[EDU] bookmark:', lessonId);
         try { window.parent.saveEducationBookmark(lessonId); }
         catch(e) {}
       },
 
       isComplete: function() {
-        return false;
+        try {
+          var saved = window.parent.eduProgress;
+          return saved ? saved.percentComplete === 100 : false;
+        } catch(e) {
+          return false;
+        }
       },
 
-      finish: function(progress) {
-        console.log('[EDU] finish:', typeof progress, progress);
-      }
+      finish: function() {}
     };
   }(window));
 </script>
