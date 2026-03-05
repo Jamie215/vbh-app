@@ -264,7 +264,6 @@ async function showEducation() {
     if (playlistView) playlistView.classList.add('hidden');
     if (progressView) progressView.classList.add('hidden');
     if (educationView) educationView.classList.remove('hidden');
-    // Hide navbar for immersive experience, but can be toggled back on if needed
     if (navbar) navbar.classList.remove('hidden');
 
     // Wait for progress to load so Rise can read it on init,
@@ -282,11 +281,8 @@ async function showEducation() {
 }
 
 function hideEducation() {
-    const educationView = document.getElementById('education-view');
-    const navbar = document.getElementById('navbar');
-    
+    const educationView = document.getElementById('education-view');    
     if (educationView) educationView.classList.add('hidden');
-    if (navbar) navbar.classList.remove('hidden');
 
     showHome();
 }
