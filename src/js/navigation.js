@@ -265,10 +265,14 @@ async function showEducation() {
     // Hide navbar for immersive experience, but can be toggled back on if needed
     if (navbar) navbar.classList.remove('hidden');
 
-    // Load iframe immediately; fetch progress in parallel
-    // (Rise takes a moment to init, so progress arrives in time for getProgress)
+    // Wait for progress to load so Rise can read it on init,
+    // but always load the iframe even if the fetch fails
     if (iframe && !iframe.src) {
-        loadEducationProgress();
+        try {
+            await loadEducationProgress();
+        } catch (e) {
+            console.warn('Could not load education progress, starting fresh:', e);
+        }
         iframe.src = 'education/content/index.html';
     }
 
