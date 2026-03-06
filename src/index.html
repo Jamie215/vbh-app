@@ -21,7 +21,7 @@
         }
     </script>
 
-    <!-- Navbar dynamic states (JS-toggled classes that are awkward as pure utilities) -->
+    <!-- Navbar dynamic states -->
     <style type="text/tailwindcss">
         /* Base nav link: layout + colors + transitions */
         .nav-link {
@@ -88,9 +88,11 @@
                         <span class="text-xl font-bold text-[#1a1a2e]">HandsUP</span>
                     </div>
                     <div class="flex items-center gap-2" id="nav-links">
-                        <a href="/exercises" class="nav-link active" onclick="showHome(); return false;">Exercises</a>
-                        <a href="/progress" class="nav-link" onclick="showMyProgress(); return false;">My Progress</a>
-                        <a href="/how-to-use" class="nav-link" onclick="showHowToUse(); return false;">How to Use the Program</a>
+                        <a href="/exercises" class="nav-link active" onclick="showHome(); return false;">Exercise Program</a>
+                        <div class="nav-dropdown-menu">
+                            <a href="/how-to-use" class="nav-link" onclick="showHowToUse(); return false;">How to Use the Program</a>
+                            <a href="/progress" class="nav-link" onclick="showMyProgress(); return false;">My Exercise Progress</a>
+                        </div> 
                         <a href="/education" class="nav-link" onclick="showEducation(); return false;">Education</a>
                     </div>
                 </div>
@@ -343,9 +345,9 @@
         </main>
 
         <!-- Education Section -->
-        <section id="education-view" class="hidden">
+        <main id="education-view" class="hidden">
             <iframe id="education-iframe" class="education-iframe" title="Education Modules"></iframe>
-        </section>
+        </main>
 
         <!-- Manual Entry Modal -->
         <div id="manual-entry-modal" class="modal hidden">
@@ -405,7 +407,6 @@
         </div>
 
         <!-- Video Player Modal -->
-
         <div id="video-player-modal" class="modal hidden">
             <div class="modal-content video-modal">
                 <button class="close-button" onclick="closeVideo()"><i class="fa-solid fa-xmark"></i></button>
