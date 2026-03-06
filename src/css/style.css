@@ -1392,76 +1392,6 @@ button {
 /* ==================== My Progress View (Tailwind) ==================== */
 /* Layout, header, stats cards, and progress bar styles moved to inline Tailwind in index.html */
 
-/* ==================== Streak Section ==================== */
-.streak-section {
-    margin-bottom: 2rem;
-}
-
-.streak-section .section-header h2 {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-}
-
-.streak-section .section-header h2 i {
-    color: #f97316;
-}
-
-.streak-cards {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-    gap: 1rem;
-}
-
-.streak-card {
-    background: white;
-    border-radius: var(--radius-lg);
-    padding: 1.5rem;
-    text-align: center;
-    box-shadow: var(--shadow-sm);
-    border: 1px solid var(--color-border);
-}
-
-.streak-card.current-streak {
-    background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
-    border-color: #fbbf24;
-}
-
-.streak-card .streak-value {
-    font-size: 3rem;
-    font-weight: 700;
-    color: var(--color-text-primary);
-    display: block;
-    line-height: 1;
-}
-
-.streak-card.current-streak .streak-value {
-    color: #b45309;
-}
-
-.streak-card .streak-label {
-    font-size: 1rem;
-    color: var(--color-text-secondary);
-    font-weight: 500;
-    display: block;
-    margin-top: 0.5rem;
-}
-
-.streak-card.current-streak .streak-label {
-    color: #92400e;
-}
-
-.streak-card .streak-unit {
-    font-size: 1rem;
-    color: var(--color-text-muted);
-    display: block;
-    margin-top: 0.25rem;
-}
-
-.streak-card.current-streak .streak-unit {
-    color: #a16207;
-}
-
 /* ==================== Chart Section (Tailwind) ==================== */
 /* Layout, container, and detail panel styles moved to inline Tailwind in index.html */
 
@@ -1471,170 +1401,9 @@ button {
     height: 100% !important;
 }
 
-.chart-empty {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    height: 100%;
-    color: var(--color-text-secondary);
-    text-align: center;
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-}
-
-.chart-empty i {
-    font-size: 3rem;
-    color: var(--color-border-medium);
-    margin-bottom: 1rem;
-}
-
-.chart-empty p {
-    font-size: 1rem;
-    max-width: 300px;
-}
-
-/* Detail panel, tabs, and content styles moved to Tailwind (index.html)
-   JS-generated content styles (.detail-header, .detail-total, etc.) remain below */
-
-.detail-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 1rem;
-    padding-bottom: 0.75rem;
-    border-bottom: 1px solid var(--color-border-subtle);
-}
-
-.detail-header h4 {
-    font-size: 1rem;
-    font-weight: 600;
-    color: var(--color-text-primary);
-    margin: 0;
-}
-
-.detail-total {
-    font-size: 1rem;
-    color: var(--color-text-secondary);
-    font-weight: 500;
-}
-
-.detail-chart-container {
-    flex: 1;
-    min-height: 0;
-}
-
-.detail-chart-container canvas {
-    width: 100% !important;
-    height: 100% !important;
-}
-
-.detail-empty {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    height: 100%;
-    color: var(--color-text-secondary);
-    text-align: center;
-    padding: 1rem;
-}
-
-.detail-empty i {
-    font-size: 2.5rem;
-    color: var(--color-border-medium);
-    margin-bottom: 1rem;
-}
-
-.detail-empty p {
-    font-size: 1rem;
-    max-width: 200px;
-    line-height: 1.5;
-}
-
 /* ==================== Activity Feed (Tailwind) ==================== */
-/* Section and container styles moved to Tailwind. JS-generated item styles remain below. */
-
-.activity-item {
-    padding: 1rem 1.5rem;
-    border-bottom: 1px solid var(--color-border-subtle);
-    display: flex;
-    align-items: flex-start;
-    gap: 1rem;
-}
-
-.activity-item:last-child {
-    border-bottom: none;
-}
-
-.activity-item:hover {
-    background: #fafbfc;
-}
-
-.activity-date {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    min-width: 120px;
-    flex-shrink: 0;
-}
-
-.activity-date i {
-    color: var(--color-brand);
-    font-size: 1rem;
-}
-
-.activity-date span {
-    font-weight: 600;
-    color: var(--color-text-primary);
-    font-size: 1rem;
-}
-
-.activity-details {
-    display: flex;
-    flex-direction: column;
-    gap: 0.25rem;
-}
-
-.activity-stat {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-}
-
-.activity-playlist {
-    font-weight: 500;
-    color: var(--color-text-tertiary);
-    font-size: 1rem;
-}
-
-.activity-count {
-    color: var(--color-success);
-    font-size: 1rem;
-    font-weight: 500;
-}
-
-.activity-empty {
-    padding: 3rem;
-    text-align: center;
-    color: var(--color-text-secondary);
-}
-
-.activity-empty i {
-    font-size: 2.5rem;
-    color: var(--color-border-medium);
-    margin-bottom: 1rem;
-    display: block;
-}
-
-.activity-empty p {
-    font-size: 1rem;
-    max-width: 300px;
-    margin: 0 auto;
-}
+/* All progress view JS-generated styles (chart-empty, detail-header, detail-empty,
+   activity-item, activity-empty) moved to inline Tailwind in progress.js */
 
 /* ==================== Final Session Modal (Week 6 Completion) ==================== */
 .final-session-modal-overlay {
@@ -2350,18 +2119,6 @@ button {
         align-items: flex-start;
     }
 
-    /* My Progress Responsive */
-    .streak-cards {
-        grid-template-columns: 1fr 1fr;
-    }
-    .activity-item {
-        flex-direction: column;
-        gap: 0.5rem;
-    }
-    .activity-date {
-        min-width: auto;
-    }
-
     /* General */
     .manual-entry-selectors {
         grid-template-columns: 1fr;
@@ -2413,15 +2170,6 @@ button {
     .exercise-table th.col-sets-reps,
     .exercise-table td.col-sets-reps {
         display: none;
-    }
-}
-
-/* --- max-width: 480px --- */
-@media (max-width: 480px) {
-
-    /* General */
-    .streak-cards {
-        grid-template-columns: 1fr;
     }
 }
 

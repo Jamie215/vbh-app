@@ -120,9 +120,9 @@ function renderWorkoutHistoryChart() {
         if (chartContainer) {
             chartContainer.innerHTML = `
                 <canvas id="workout-history-chart"></canvas>
-                <div class="chart-empty">
-                    <i class="fa-solid fa-chart-bar"></i>
-                    <p>No workout data yet. Complete some exercises to see your progress chart!</p>
+                <div class="absolute inset-0 flex flex-col items-center justify-center text-text-secondary text-center">
+                    <i class="fa-solid fa-chart-bar text-5xl text-border-medium mb-4"></i>
+                    <p class="text-base max-w-[300px]">No workout data yet. Complete some exercises to see your progress chart!</p>
                 </div>
             `;
         }
@@ -350,9 +350,9 @@ function renderDetailPanel() {
 
 function renderInstructionalState(container) {
     container.innerHTML = `
-        <div class="detail-empty">
-            <i class="fa-solid fa-hand-pointer"></i>
-            <p>Click a bar in the chart to see the exercise breakdown for that day</p>
+        <div class="flex flex-col items-center justify-center h-full text-text-secondary text-center p-4">
+            <i class="fa-solid fa-hand-pointer text-4xl text-border-medium mb-4"></i>
+            <p class="text-base max-w-[200px] leading-relaxed">Click a bar in the chart to see the exercise breakdown for that day</p>
         </div>
     `;
 }
@@ -380,20 +380,20 @@ function renderDayView(container, dateStr) {
 
     if (allExercises.length === 0) {
         container.innerHTML = `
-            <div class="detail-header">
-                <h4>${formattedDate}</h4>
-                <span class="detail-total">No exercises recorded</span>
+            <div class="flex justify-between items-center mb-4 pb-3 border-b border-border-subtle">
+                <h4 class="text-base font-semibold text-text-primary m-0">${formattedDate}</h4>
+                <span class="text-base text-text-secondary font-medium">No exercises recorded</span>
             </div>
         `;
         return;
     }
 
     container.innerHTML = `
-        <div class="detail-header">
-            <h4>${formattedDate}</h4>
-            <span class="detail-total">${totalSets} total sets</span>
+        <div class="flex justify-between items-center mb-4 pb-3 border-b border-border-subtle">
+            <h4 class="text-base font-semibold text-text-primary m-0">${formattedDate}</h4>
+            <span class="text-base text-text-secondary font-medium">${totalSets} total sets</span>
         </div>
-        <div class="detail-chart-container">
+        <div class="flex-1 min-h-0">
             <canvas id="detail-breakdown-chart"></canvas>
         </div>
     `;
@@ -477,9 +477,9 @@ function renderDayView(container, dateStr) {
 function renderAllTimeView(container) {
     if (!completionHistory || Object.keys(completionHistory).length === 0) {
         container.innerHTML = `
-            <div class="detail-empty">
-                <i class="fa-solid fa-chart-pie"></i>
-                <p>No workout data yet</p>
+            <div class="flex flex-col items-center justify-center h-full text-text-secondary text-center p-4">
+                <i class="fa-solid fa-chart-pie text-4xl text-border-medium mb-4"></i>
+                <p class="text-base max-w-[200px] leading-relaxed">No workout data yet</p>
             </div>
         `;
         return;
@@ -535,20 +535,20 @@ function renderAllTimeView(container) {
 
     if (allExercises.length === 0) {
         container.innerHTML = `
-            <div class="detail-empty">
-                <i class="fa-solid fa-chart-pie"></i>
-                <p>No completed exercises yet</p>
+            <div class="flex flex-col items-center justify-center h-full text-text-secondary text-center p-4">
+                <i class="fa-solid fa-chart-pie text-4xl text-border-medium mb-4"></i>
+                <p class="text-base max-w-[200px] leading-relaxed">No completed exercises yet</p>
             </div>
         `;
         return;
     }
 
     container.innerHTML = `
-        <div class="detail-header">
-            <h4>All Time Totals</h4>
-            <span class="detail-total">${totalSets} total sets</span>
+        <div class="flex justify-between items-center mb-4 pb-3 border-b border-border-subtle">
+            <h4 class="text-base font-semibold text-text-primary m-0">All Time Totals</h4>
+            <span class="text-base text-text-secondary font-medium">${totalSets} total sets</span>
         </div>
-        <div class="detail-chart-container">
+        <div class="flex-1 min-h-0">
             <canvas id="detail-breakdown-chart"></canvas>
         </div>
     `;
@@ -632,9 +632,9 @@ function loadRecentActivity() {
 
     if (!completionHistory || Object.keys(completionHistory).length === 0) {
         activityFeed.innerHTML = `
-            <div class="activity-empty">
-                <i class="fa-solid fa-dumbbell"></i>
-                <p>No workout activity yet. Start your first workout to see your progress here!</p>
+            <div class="py-12 text-center text-text-secondary">
+                <i class="fa-solid fa-dumbbell text-4xl text-border-medium mb-4 block"></i>
+                <p class="text-base max-w-[300px] mx-auto">No workout activity yet. Start your first workout to see your progress here!</p>
             </div>
         `;
         return;
@@ -650,16 +650,16 @@ function loadRecentActivity() {
         const sessionStats = calculateSessionStats(progress);
 
         activityHTML += `
-            <div class="activity-item">
-                <div class="activity-date">
-                    <i class="fa-solid fa-calendar-day"></i>
-                    <span>${formattedDate}</span>
+            <div class="px-6 py-4 border-b border-border-subtle last:border-b-0 flex items-start gap-4 hover:bg-[#fafbfc] max-md:flex-col max-md:gap-2">
+                <div class="flex items-center gap-2 min-w-[120px] shrink-0 max-md:min-w-0">
+                    <i class="fa-solid fa-calendar-day text-brand text-base"></i>
+                    <span class="font-semibold text-text-primary text-base">${formattedDate}</span>
                 </div>
-                <div class="activity-details">
+                <div class="flex flex-col gap-1">
                     ${sessionStats.map(stat => `
-                        <div class="activity-stat">
-                            <span class="activity-playlist">${stat.playlistName}</span>
-                            <span class="activity-count">${stat.exercisesCompleted}/${stat.totalExercises} exercises</span>
+                        <div class="flex items-center gap-3">
+                            <span class="font-medium text-text-tertiary text-base">${stat.playlistName}</span>
+                            <span class="text-success text-base font-medium">${stat.exercisesCompleted}/${stat.totalExercises} exercises</span>
                         </div>
                     `).join('')}
                 </div>
