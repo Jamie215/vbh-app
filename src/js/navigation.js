@@ -6,9 +6,6 @@
 // When true, show* functions skip history.pushState (used during popstate)
 let _skipPush = false;
 
-// Track current playlist so we can restore it from URL
-let _currentPlaylistId = null;
-
 /**
  * Push a path to the browser address bar without a page reload.
  * Automatically skipped during popstate handling (back/forward).
@@ -32,14 +29,9 @@ function routeFromURL() {
     const playlistMatch = path.match(/^\/exercises\/(.+)$/);
     if (playlistMatch) {
         const playlistId = playlistMatch[1];
-        // If playlist data is already loaded (back/forward), show it.
-        // If arriving fresh (page refresh), redirect to /exercises since
-        // the exercise table data isn't in memory yet.
-        if (_currentPlaylistId === playlistId) {
-            showPlaylistView(playlistId);
-        } else if (typeof renderPlaylistFromRoute === 'function') {
-            // app.js can expose this to support direct-URL playlist loading
-            renderPlaylistFromRoute(playlistId);
+        // showPlaylist() lives in app.js — it handles rendering + view switching
+        if (typeof showPlaylist === 'function') {
+            showPlaylist(playlistId);
         } else {
             showHome();
         }
@@ -294,29 +286,6 @@ function showHome() {
     if (typeof loadPlaylists === 'function') {
         loadPlaylists();
     }
-}
-
-
-// ==================== Playlist View ====================
-
-function showPlaylistView(playlistId) {
-    if (!currentUser) {
-        showAuthPage();
-        return;
-    }
-
-    _currentPlaylistId = playlistId;
-    pushRoute('/exercises/' + playlistId);
-
-    hideAllViews();
-    const playlistView = document.getElementById('playlist-view');
-    const navbar = document.getElementById('navbar');
-
-    if (playlistView) playlistView.classList.remove('hidden');
-    if (navbar) navbar.classList.remove('hidden');
-
-    // Nav state: keep "Exercises" highlighted since playlists are a sub-view
-    updateNavActiveState('home');
 }
 
 

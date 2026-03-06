@@ -22,25 +22,17 @@ function showMyProgress() {
         return;
     }
 
-    // Hide other views
-    const homeView = document.getElementById('home-view');
-    const playlistView = document.getElementById('playlist-view');
-    const authView = document.getElementById('auth-view');
+    pushRoute('/progress');
+    hideAllViews();
+
     const progressView = document.getElementById('progress-view');
-    const educationView = document.getElementById('education-view');
-    
-    if (homeView) homeView.classList.add('hidden');
-    if (playlistView) playlistView.classList.add('hidden');
-    if (authView) authView.classList.add('hidden');
     if (progressView) progressView.classList.remove('hidden');
-    if (educationView) educationView.classList.add('hidden');
+
+    const navbar = document.getElementById('navbar');
+    if (navbar) navbar.classList.remove('hidden');
 
     // Update nav link active states
     updateNavActiveState('progress');
-
-    // Show navbar
-    const navbar = document.getElementById('navbar');
-    if (navbar) navbar.classList.remove('hidden');
 
     // Reset detail panel state
     selectedDate = null;

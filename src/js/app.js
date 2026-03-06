@@ -75,7 +75,7 @@ async function initializeSession() {
             }
             
             hideLoadingScreen();
-            showHome();
+            routeAfterAuth();
             console.log('initializeSession: Done!');
         } else {
             console.log('initializeSession: No session, showing auth page');
@@ -725,7 +725,7 @@ function createPlaylistCard(playlist) {
             <h3>${playlist.title}</h3>
             <p>${playlist.description}</p>
             ${completionHTML}
-            <a href="#" class="go-to-workout-link" onclick="event.stopPropagation(); showPlaylist('${playlist.id}'); return false;">
+            <a href="/exercises/${playlist.id}" class="go-to-workout-link" onclick="event.stopPropagation(); showPlaylist('${playlist.id}'); return false;">
                 Go to Workout 
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <path d="M5 12h14M12 5l7 7-7 7"/>
@@ -790,14 +790,14 @@ function showPlaylist(playlistId) {
     currentPlaylist = PLAYLISTS.find(p => p.id === playlistId);
     if (!currentPlaylist) return;
 
-    // Hide other views, show playlist view
-    const homeView = document.getElementById('home-view');
+    pushRoute('/exercises/' + playlistId);
+    hideAllViews();
+
     const playlistView = document.getElementById('playlist-view');
-    const authView = document.getElementById('auth-view');
-    
-    if (homeView) homeView.classList.add('hidden');
+    const navbar = document.getElementById('navbar');
+
     if (playlistView) playlistView.classList.remove('hidden');
-    if (authView) authView.classList.add('hidden');
+    if (navbar) navbar.classList.remove('hidden');
 
     // Update playlist info with new title format
     const titleEl = document.getElementById('playlist-title');
