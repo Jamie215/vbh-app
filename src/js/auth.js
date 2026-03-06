@@ -134,7 +134,7 @@ async function handlePostSignIn(user) {
     }
     
     hideLoadingScreen();
-    showHome();
+    routeAfterAuth();
     console.log('handlePostSignIn: Complete');
 }
 

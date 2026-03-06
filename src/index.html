@@ -88,10 +88,10 @@
                         <span class="text-xl font-bold text-[#1a1a2e]">HandsUP</span>
                     </div>
                     <div class="flex items-center gap-2" id="nav-links">
-                        <a href="#" class="nav-link active" onclick="showHome(); return false;">Exercises</a>
-                        <a href="#" class="nav-link" onclick="showMyProgress(); return false;">My Progress</a>
-                        <a href="#" class="nav-link" onclick="showHowToUse(); return false;">How to Use the Program</a>
-                        <a href="#" class="nav-link" onclick="showEducation(); return false;">Education</a>
+                        <a href="/exercises" class="nav-link active" onclick="showHome(); return false;">Exercises</a>
+                        <a href="/progress" class="nav-link" onclick="showMyProgress(); return false;">My Progress</a>
+                        <a href="/how-to-use" class="nav-link" onclick="showHowToUse(); return false;">How to Use the Program</a>
+                        <a href="/education" class="nav-link" onclick="showEducation(); return false;">Education</a>
                     </div>
                 </div>
                 <!-- Right: user info + sign out + hamburger -->
@@ -136,9 +136,9 @@
                     <button onclick="signIn()" class="primary-button">Sign In</button>
                     <p class="form-message" id="signin-message"></p>
                     <p class="auth-switch-text">
-                        Don't have an account? <a href="#" onclick="showSignUpView(); return false;">Sign Up</a>
+                        Don't have an account? <a href="/signup" onclick="showSignUpView(); return false;">Sign Up</a>
                     </p>
-                    <a href="#" class="forgot-password-link" onclick="showForgotPassword(); return false;">Forgot Password?</a>
+                    <a href="/forgot-password" class="forgot-password-link" onclick="showForgotPassword(); return false;">Forgot Password?</a>
                 </div>
                 
                 <!-- Sign Up Form -->
@@ -162,7 +162,7 @@
                     </div>
                     <div class="signup-footer">
                         <p class="auth-switch-text">
-                            Already have an account? <a href="#" onclick="showSignInView(); return false;">Sign In</a>
+                            Already have an account? <a href="/login" onclick="showSignInView(); return false;">Sign In</a>
                         </p>
                         <button onclick="signUp()" class="primary-button">Sign Up</button>
                     </div>
@@ -180,7 +180,7 @@
                     <button onclick="sendPasswordReset()" class="primary-button" id="forgot-submit-btn">Send Reset Link</button>
                     <p class="form-message" id="forgot-message"></p>
                     <p class="auth-switch-text">
-                        <a href="#" onclick="showSignInView(); return false;"><i class="fa-solid fa-arrow-left"></i> Back to Sign In</a>
+                        <a href="/login" onclick="showSignInView(); return false;"><i class="fa-solid fa-arrow-left"></i> Back to Sign In</a>
                     </p>
                 </div>
 

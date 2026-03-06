@@ -1,6 +1,148 @@
-// Navigation controller - handles view switching
+// Navigation controller - handles view switching and client-side routing
+// ============================================================
+
+// ==================== Routing Infrastructure ====================
+
+// When true, show* functions skip history.pushState (used during popstate)
+let _skipPush = false;
+
+// Track current playlist so we can restore it from URL
+let _currentPlaylistId = null;
+
+/**
+ * Push a path to the browser address bar without a page reload.
+ * Automatically skipped during popstate handling (back/forward).
+ */
+function pushRoute(path, state = {}) {
+    if (!_skipPush && window.location.pathname !== path) {
+        history.pushState(state, '', path);
+    }
+}
+
+/**
+ * Central router — reads the current URL and activates the matching view.
+ * Called:
+ *   1. After auth resolves on page load (replaces the old showHome() call)
+ *   2. On popstate (browser back / forward)
+ */
+function routeFromURL() {
+    const path = window.location.pathname;
+
+    // Dynamic route: /exercises/:playlistId
+    const playlistMatch = path.match(/^\/exercises\/(.+)$/);
+    if (playlistMatch) {
+        const playlistId = playlistMatch[1];
+        // If playlist data is already loaded (back/forward), show it.
+        // If arriving fresh (page refresh), redirect to /exercises since
+        // the exercise table data isn't in memory yet.
+        if (_currentPlaylistId === playlistId) {
+            showPlaylistView(playlistId);
+        } else if (typeof renderPlaylistFromRoute === 'function') {
+            // app.js can expose this to support direct-URL playlist loading
+            renderPlaylistFromRoute(playlistId);
+        } else {
+            showHome();
+        }
+        return;
+    }
+
+    switch (path) {
+        case '/':
+        case '/exercises':
+            showHome();
+            break;
+        case '/progress':
+            if (typeof showMyProgress === 'function') {
+                showMyProgress();
+            } else {
+                showHome();
+            }
+            break;
+        case '/education':
+            showEducation();
+            break;
+        case '/how-to-use':
+            showHowToUse();
+            break;
+        case '/login':
+            showAuthPage();
+            showSignInView();
+            break;
+        case '/signup':
+            showAuthPage();
+            showSignUpView();
+            break;
+        case '/forgot-password':
+            showAuthPage();
+            showForgotPasswordView();
+            break;
+        case '/reset-password':
+            showResetPasswordView();
+            break;
+        default:
+            // Unknown route — fall back
+            if (currentUser) {
+                showHome();
+            } else {
+                showAuthPage();
+                showSignInView();
+            }
+    }
+}
+
+/**
+ * Called by auth.js after sign-in / session restore.
+ * Routes to the URL the user is actually on, instead of always going home.
+ * 
+ * AUTH.JS INTEGRATION — replace your `showHome()` call in handlePostSignIn
+ * (or wherever you redirect after successful auth) with:
+ *     routeAfterAuth();
+ */
+function routeAfterAuth() {
+    const path = window.location.pathname;
+    // If user is on a login/signup page, send them home
+    if (path === '/login' || path === '/signup' || path === '/forgot-password' || path === '/reset-password' || path === '/') {
+        showHome();
+    } else {
+        routeFromURL();
+    }
+}
+
+// Browser back / forward
+window.addEventListener('popstate', () => {
+    _skipPush = true;
+    routeFromURL();
+    _skipPush = false;
+});
+
+
+// ==================== View Helpers ====================
+
+/** Hide every top-level view in the app */
+function hideAllViews() {
+    const ids = ['auth-view', 'home-view', 'playlist-view', 'progress-view', 'education-view'];
+    ids.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.classList.add('hidden');
+    });
+}
+
+/** Close the mobile hamburger menu (if open) */
+function closeMobileMenu() {
+    const navLinks = document.getElementById('nav-links');
+    const icon = document.getElementById('hamburger-icon');
+    if (navLinks && navLinks.classList.contains('open')) {
+        navLinks.classList.remove('open');
+        if (icon) {
+            icon.classList.remove('fa-xmark');
+            icon.classList.add('fa-bars');
+        }
+    }
+}
+
 
 // ==================== Loading Screen ====================
+
 function hideLoadingScreen() {
     const loadingScreen = document.getElementById('loading-screen');
     if (loadingScreen) {
@@ -15,103 +157,107 @@ function showLoadingScreen() {
     }
 }
 
-// ==================== Auth Page ====================
+
+// ==================== Auth Views ====================
+
 function showAuthPage() {
+    pushRoute('/login');
+
+    hideAllViews();
     const authView = document.getElementById('auth-view');
-    const homeView = document.getElementById('home-view');
-    const playlistView = document.getElementById('playlist-view');
-    const progressView = document.getElementById('progress-view');
-    const educationView = document.getElementById('education-view');
     const navbar = document.getElementById('navbar');
-    
+
     if (authView) authView.classList.remove('hidden');
-    if (homeView) homeView.classList.add('hidden');
-    if (playlistView) playlistView.classList.add('hidden');
-    if (progressView) progressView.classList.add('hidden');
-    if (educationView) educationView.classList.add('hidden');
     if (navbar) navbar.classList.add('hidden');
 
     unloadEducationIframe();
 }
 
 function showSignInView() {
+    pushRoute('/login');
+
     const signinView = document.getElementById('signin-view');
     const signupView = document.getElementById('signup-view');
     const forgotView = document.getElementById('forgot-password-view');
     const resetView = document.getElementById('reset-password-view');
-    
+
     if (signinView) signinView.classList.remove('hidden');
     if (signupView) signupView.classList.add('hidden');
     if (forgotView) forgotView.classList.add('hidden');
     if (resetView) resetView.classList.add('hidden');
-    
+
     clearAuthMessages();
 }
 
 function showSignUpView() {
+    pushRoute('/signup');
+
     const signinView = document.getElementById('signin-view');
     const signupView = document.getElementById('signup-view');
     const forgotView = document.getElementById('forgot-password-view');
     const resetView = document.getElementById('reset-password-view');
-    
+
     if (signinView) signinView.classList.add('hidden');
     if (signupView) signupView.classList.remove('hidden');
     if (forgotView) forgotView.classList.add('hidden');
     if (resetView) resetView.classList.add('hidden');
-    
-    // Clear any messages
+
     clearAuthMessages();
 }
 
 function showForgotPasswordView() {
+    pushRoute('/forgot-password');
+
     const signinView = document.getElementById('signin-view');
     const signupView = document.getElementById('signup-view');
     const forgotView = document.getElementById('forgot-password-view');
     const resetView = document.getElementById('reset-password-view');
-    
+
     if (signinView) signinView.classList.add('hidden');
     if (signupView) signupView.classList.add('hidden');
     if (forgotView) forgotView.classList.remove('hidden');
     if (resetView) resetView.classList.add('hidden');
-    
+
     clearAuthMessages();
 }
 
+// Alias used by onclick in index.html
+function showForgotPassword() {
+    showForgotPasswordView();
+}
+
 function showResetPasswordView() {
+    pushRoute('/reset-password');
+
+    hideAllViews();
     const authView = document.getElementById('auth-view');
-    const homeView = document.getElementById('home-view');
-    const playlistView = document.getElementById('playlist-view');
-    const progressView = document.getElementById('progress-view');
     const navbar = document.getElementById('navbar');
-    
-    // Show auth container, hide everything else
+
     if (authView) authView.classList.remove('hidden');
-    if (homeView) homeView.classList.add('hidden');
-    if (playlistView) playlistView.classList.add('hidden');
-    if (progressView) progressView.classList.add('hidden');
     if (navbar) navbar.classList.add('hidden');
-    
+
     // Within auth, only show the reset password form
     const signinView = document.getElementById('signin-view');
     const signupView = document.getElementById('signup-view');
     const forgotView = document.getElementById('forgot-password-view');
     const resetView = document.getElementById('reset-password-view');
-    
+
     if (signinView) signinView.classList.add('hidden');
     if (signupView) signupView.classList.add('hidden');
     if (forgotView) forgotView.classList.add('hidden');
     if (resetView) resetView.classList.remove('hidden');
-    
+
     clearAuthMessages();
 }
 
+
 // ==================== Nav Active State ====================
+
 function updateNavActiveState(activeView) {
     const navLinks = document.querySelectorAll('.nav-link');
     navLinks.forEach(link => {
         link.classList.remove('active');
-        
-        // Match link text to active view
+
         const linkText = link.textContent.toLowerCase();
         if (activeView === 'home' && linkText.includes('exercises')) {
             link.classList.add('active');
@@ -119,68 +265,83 @@ function updateNavActiveState(activeView) {
             link.classList.add('active');
         } else if (activeView === 'education' && linkText.includes('education')) {
             link.classList.add('active');
+        } else if (activeView === 'how-to-use' && linkText.includes('how to use')) {
+            link.classList.add('active');
         }
     });
 }
 
+
 // ==================== Home View ====================
+
 function showHome() {
     if (!currentUser) {
         showAuthPage();
         return;
     }
 
-    const authView = document.getElementById('auth-view');
+    pushRoute('/exercises');
+
+    hideAllViews();
     const homeView = document.getElementById('home-view');
-    const playlistView = document.getElementById('playlist-view');
-    const progressView = document.getElementById('progress-view');
-    const educationView = document.getElementById('education-view');
     const navbar = document.getElementById('navbar');
-    
-    if (authView) authView.classList.add('hidden');
+
     if (homeView) homeView.classList.remove('hidden');
-    if (playlistView) playlistView.classList.add('hidden');
-    if (progressView) progressView.classList.add('hidden');
-    if (educationView) educationView.classList.add('hidden');
     if (navbar) navbar.classList.remove('hidden');
 
-    // Update nav link active states
     updateNavActiveState('home');
 
-    // Load playlists data
     if (typeof loadPlaylists === 'function') {
         loadPlaylists();
     }
 }
 
-// Show playlist view
+
+// ==================== Playlist View ====================
+
 function showPlaylistView(playlistId) {
     if (!currentUser) {
         showAuthPage();
         return;
     }
-    
-    const authView = document.getElementById('auth-view');
-    const homeView = document.getElementById('home-view');
+
+    _currentPlaylistId = playlistId;
+    pushRoute('/exercises/' + playlistId);
+
+    hideAllViews();
     const playlistView = document.getElementById('playlist-view');
-    const progressView = document.getElementById('progress-view');
-    const educationView = document.getElementById('education-view');
     const navbar = document.getElementById('navbar');
-    
-    if (authView) authView.classList.add('hidden');
-    if (homeView) homeView.classList.add('hidden');
+
     if (playlistView) playlistView.classList.remove('hidden');
-    if (progressView) progressView.classList.add('hidden');
-    if (educationView) educationView.classList.add('hidden');
     if (navbar) navbar.classList.remove('hidden');
+
+    // Nav state: keep "Exercises" highlighted since playlists are a sub-view
+    updateNavActiveState('home');
 }
 
-// Placeholder for How to Use page
+
+// ==================== How to Use ====================
+
 function showHowToUse() {
+    if (!currentUser) {
+        showAuthPage();
+        return;
+    }
+
+    pushRoute('/how-to-use');
+    updateNavActiveState('how-to-use');
+
+    // Placeholder — replace with actual view when ready
     alert('How to Use page coming soon!');
+
+    // Reset since we're not actually navigating to a new view yet
+    // Remove these two lines once the real How to Use view exists:
+    updateNavActiveState('home');
+    showHome();
 }
 
-// Education View
+
+// ==================== Education View ====================
 
 // Cached progress that the Rise iframe reads synchronously on initial load
 window.eduProgress = null;
@@ -221,7 +382,6 @@ window.saveEducationProgress = function (progress) {
 
     if (_eduSaveTimer) clearTimeout(_eduSaveTimer);
 
-    // Debounce saves to avoid excessive writes if user is rapidly progressing through content
     _eduSaveTimer = setTimeout(async () => {
         if (!currentUser) return;
         try {
@@ -251,23 +411,17 @@ async function showEducation() {
         return;
     }
 
-    const authView = document.getElementById('auth-view');
-    const homeView = document.getElementById('home-view');
-    const playlistView = document.getElementById('playlist-view');
-    const progressView = document.getElementById('progress-view');
+    pushRoute('/education');
+
+    hideAllViews();
     const educationView = document.getElementById('education-view');
     const navbar = document.getElementById('navbar');
     const iframe = document.getElementById('education-iframe');
-    
-    if (authView) authView.classList.add('hidden');
-    if (homeView) homeView.classList.add('hidden');
-    if (playlistView) playlistView.classList.add('hidden');
-    if (progressView) progressView.classList.add('hidden');
+
     if (educationView) educationView.classList.remove('hidden');
     if (navbar) navbar.classList.remove('hidden');
 
-    // Wait for progress to load so Rise can read it on init,
-    // but always load the iframe even if the fetch fails
+    // Load progress then set iframe src (only once)
     if (iframe && !iframe.src) {
         try {
             await loadEducationProgress();
@@ -281,9 +435,8 @@ async function showEducation() {
 }
 
 function hideEducation() {
-    const educationView = document.getElementById('education-view');    
+    const educationView = document.getElementById('education-view');
     if (educationView) educationView.classList.add('hidden');
-
     showHome();
 }
 
@@ -297,6 +450,7 @@ function unloadEducationIframe() {
     window.eduBookmark = '';
 }
 
+
 // ==================== Mobile Hamburger Menu ====================
 
 function toggleMobileMenu() {
@@ -305,7 +459,6 @@ function toggleMobileMenu() {
 
     navLinks.classList.toggle('open');
 
-    // Swap icon between bars and X
     if (navLinks.classList.contains('open')) {
         icon.classList.remove('fa-bars');
         icon.classList.add('fa-xmark');
@@ -315,19 +468,13 @@ function toggleMobileMenu() {
     }
 }
 
-// Close menu when a nav link is clicked (smooth UX)
+// Close menu when any nav link is clicked
 document.addEventListener('DOMContentLoaded', function () {
     document.querySelectorAll('.nav-link').forEach(function (link) {
         link.addEventListener('click', function () {
-            var navLinks = document.getElementById('nav-links');
-            var icon = document.getElementById('hamburger-icon');
-            if (navLinks && navLinks.classList.contains('open')) {
-                navLinks.classList.remove('open');
-                if (icon) {
-                    icon.classList.remove('fa-xmark');
-                    icon.classList.add('fa-bars');
-                }
-            }
+            closeMobileMenu();
         });
     });
 });
+
+console.log('Navigation module loaded');
