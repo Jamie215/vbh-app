@@ -119,7 +119,7 @@ function hideAllViews() {
     });
 }
 
-/** Close the mobile hamburger menu (if open) */
+/** Close the mobile hamburger menu (if open) and collapse dropdown */
 function closeMobileMenu() {
     const navLinks = document.getElementById('nav-links');
     const icon = document.getElementById('hamburger-icon');
@@ -130,6 +130,9 @@ function closeMobileMenu() {
             icon.classList.add('fa-bars');
         }
     }
+    // Also collapse the dropdown
+    const dropdown = document.getElementById('nav-dropdown');
+    if (dropdown) dropdown.classList.remove('open');
 }
 
 
@@ -246,29 +249,29 @@ function showResetPasswordView() {
 // ==================== Nav Active State ====================
 
 function updateNavActiveState(activeView) {
-    // Clear all active states
-    document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+    // Clear all active states on top-level nav links and dropdown items
+    document.querySelectorAll('.nav-link, .nav-dropdown-item').forEach(el => {
+        el.classList.remove('active');
+    });
 
-    // Map views to their nav link selectors
-    const viewMap = {
-        'home':       '[href="/exercises"]',
-        'progress':   '[href="/progress"]',
-        'education':  '[href="/education"]',
-        'how-to-use': '[href="/how-to-use"]'
-    };
+    // Views that live inside the Exercise Program dropdown
+    const dropdownViews = ['home', 'progress', 'how-to-use'];
+    const parentToggle = document.querySelector('.nav-dropdown-toggle');
 
-    const selector = viewMap[activeView];
-    if (!selector) return;
+    if (dropdownViews.includes(activeView)) {
+        // Highlight the parent "Exercise Program" toggle
+        if (parentToggle) parentToggle.classList.add('active');
 
-    const link = document.querySelector(selector);
-    if (link) link.classList.add('active');
-
-    // If the active link lives inside the dropdown, also highlight the parent
-    const parentLink = document.querySelector('.nav-dropdown > .nav-link');
-    if (activeView === 'home' || activeView === 'progress' || activeView === 'how-to-use') {
-        if (parentLink) parentLink.classList.add('active');
+        // Highlight the specific child item
+        const hrefMap = { 'home': '/exercises', 'progress': '/progress', 'how-to-use': '/how-to-use' };
+        const child = document.querySelector(`.nav-dropdown-item[href="${hrefMap[activeView]}"]`);
+        if (child) child.classList.add('active');
+    } else if (activeView === 'education') {
+        const eduLink = document.querySelector('.nav-link[href="/education"]');
+        if (eduLink) eduLink.classList.add('active');
     }
 }
+
 
 // ==================== Home View ====================
 
@@ -426,6 +429,26 @@ function unloadEducationIframe() {
 }
 
 
+// ==================== Dropdown Menu ====================
+
+/** Toggle the Exercise Program dropdown (used on both mobile and desktop click) */
+function toggleDropdown(event) {
+    event.preventDefault();
+    event.stopPropagation();
+
+    const dropdown = document.getElementById('nav-dropdown');
+    if (dropdown) dropdown.classList.toggle('open');
+}
+
+/** Close dropdown when clicking outside of it (desktop) */
+document.addEventListener('click', function (e) {
+    const dropdown = document.getElementById('nav-dropdown');
+    if (dropdown && !dropdown.contains(e.target)) {
+        dropdown.classList.remove('open');
+    }
+});
+
+
 // ==================== Mobile Hamburger Menu ====================
 
 function toggleMobileMenu() {
@@ -443,45 +466,13 @@ function toggleMobileMenu() {
     }
 }
 
-function toggleDropdownMenu(event) {
-    if (window.innerWidth >= 1024) return;
-
-    event.preventDefault();
-    event.stopPropagation();
-
-    const dropdown = document.querySelector('.nav-dropdown-menu');
-    if (dropdown) {
-        dropdown.classList.toggle('open');
-    }
-}
-
-function closeMobileMenu() {
-    const navLinks = document.getElementById('nav-links');
-    const icon = document.getElementById('hamburger-icon');
-    if (navLinks && navLinks.classList.contains('open')) {
-        navLinks.classList.remove('open');
-        if (icon) {
-            icon.classList.remove('fa-xmark');
-            icon.classList.add('fa-bars');
-        }
-    }
-    // Also collapse the dropdown
-    const dropdown = document.querySelector('.nav-dropdown');
-    if (dropdown) dropdown.classList.remove('open');
-}
-
-// Close menu when any nav link is clicked
+// Close menu and dropdown when any nav link or dropdown item is clicked
 document.addEventListener('DOMContentLoaded', function () {
-    document.querySelectorAll('.nav-link').forEach(function (link) {
+    document.querySelectorAll('.nav-link[href], .nav-dropdown-item').forEach(function (link) {
         link.addEventListener('click', function () {
             closeMobileMenu();
         });
     });
-
-    const parentLink = document.querySelector('.nav-dropdown > .nav-link');
-    if (parentLink) {
-        parentLink.addEventListener('click', toggleDropdownMenu);
-    }
 });
 
 console.log('Navigation module loaded');
