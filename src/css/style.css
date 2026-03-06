@@ -116,9 +116,8 @@ button {
     color: var(--color-text-primary);
 }
 
-/* ==================== Progress Alert Styles ==================== */
-
-/* Alert Container */
+/* ==================== Progress Alert (Tailwind) ==================== */
+/* Container spacing + slide-in animation (styles live in alerts.js as Tailwind classes) */
 #progress-alert-container {
     margin-bottom: 1.5rem;
 }
@@ -127,161 +126,13 @@ button {
     display: none;
 }
 
-/* Base Alert Styles */
-.progress-alert {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-    padding: 1rem 1.25rem;
-    border-radius: var(--radius-lg);
-    border-left: 4px solid;
-    animation: slideIn 0.3s ease-out;
-}
-
-.progress-alert.dismissing {
-    animation: slideOut 0.3s ease-out forwards;
-}
-
 @keyframes slideIn {
-    from {
-        opacity: 0;
-        transform: translateY(-10px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
+    from { opacity: 0; transform: translateY(-10px); }
+    to   { opacity: 1; transform: translateY(0); }
 }
 
-@keyframes slideOut {
-    from {
-        opacity: 1;
-        transform: translateY(0);
-    }
-    to {
-        opacity: 0;
-        transform: translateY(-10px);
-    }
-}
-
-/* Alert Icon */
-.alert-icon {
-    flex-shrink: 0;
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 1.25rem;
-}
-
-/* Alert Content */
-.alert-content {
-    flex: 1;
-    min-width: 0;
-}
-
-.alert-title {
-    margin: 0 0 0.25rem 0;
-    font-size: 1rem;
-    font-weight: 600;
-    line-height: 1.3;
-}
-
-.alert-message {
-    margin: 0;
-    font-size: 1rem;
-    line-height: 1.5;
-    color: inherit;
-    opacity: 0.9;
-}
-
-.alert-message strong {
-    font-weight: 600;
-}
-
-/* Dismiss Button */
-.alert-dismiss {
-    flex-shrink: 0;
-    width: 32px;
-    height: 32px;
-    border: none;
-    background: transparent;
-    border-radius: 50%;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 1rem;
-    opacity: 0.6;
-    transition: all 0.2s ease;
-}
-
-.alert-dismiss:hover {
-    opacity: 1;
-    background: rgba(0, 0, 0, 0.1);
-}
-
-/* ==================== Alert Type Variations ==================== */
-/* Warning Alert - Buttery Yellow */
-.alert-warning {
-    background: white;
-    border-color: #FCD34D;    /* Bright butter yellow border */
-    color: #854D0E;           /* Golden brown text */
-}
-
-.alert-warning .alert-icon {
-    background: #FDE047;      /* Vibrant lemon-butter yellow */
-    color: #713F12;           /* Deep golden brown */
-}
-
-.alert-warning .alert-dismiss {
-    color: #854D0E;
-}
-
-.alert-warning .alert-dismiss:hover {
-    background: rgba(133, 77, 14, 0.1);
-}
-
-/* Info Alert - Blue */
-.alert-info {
-    background: white;
-    border-color: #60A5FA;    /* Bright blue border */
-    color: #1E40AF;           /* Deep blue text */
-}
-
-.alert-info .alert-icon {
-    background: #3B82F6;      /* Vibrant blue */
-    color: #1E3A8A;           /* Dark blue */
-}
-
-.alert-info .alert-dismiss {
-    color: #1E40AF;
-}
-
-.alert-info .alert-dismiss:hover {
-    background: rgba(30, 64, 175, 0.1);
-}
-
-/* Success Alert - Purple */
-.alert-success {
-    background: white;
-    border-color: #A78BFA;    /* Bright purple border */
-    color: #5B21B6;           /* Deep purple text */
-}
-
-.alert-success .alert-icon {
-    background: #8B5CF6;      /* Vibrant purple */
-    color: #4C1D95;           /* Dark purple */
-}
-
-.alert-success .alert-dismiss {
-    color: #5B21B6;
-}
-
-.alert-success .alert-dismiss:hover {
-    background: rgba(91, 33, 182, 0.1);
+.progress-alert {
+    animation: slideIn 0.3s ease-out;
 }
 
 /* ==================== Section Headers ==================== */
@@ -2771,32 +2622,6 @@ button {
     .manual-exercise-thumb-wrapper.preview-active .manual-preview-container {
         position: absolute;
         inset: 0;
-    }
-}
-
-/* --- max-width: 640px --- */
-@media (max-width: 640px) {
-
-    /* General */
-    .progress-alert {
-        padding: 0.875rem 1rem;
-        gap: 0.75rem;
-    }
-    .alert-icon {
-        width: 36px;
-        height: 36px;
-        font-size: 1.1rem;
-    }
-    .alert-title {
-        font-size: 1rem;
-    }
-    .alert-message {
-        font-size: 1rem;
-    }
-    .alert-dismiss {
-        width: 28px;
-        height: 28px;
-        font-size: 1rem;
     }
 }
 

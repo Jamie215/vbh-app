@@ -160,17 +160,38 @@ function renderProgressAlert() {
         }
     }
 
+    // Tailwind color maps per alert type
+    const styles = {
+        warning: {
+            container: 'bg-white border-yellow-300 text-yellow-800',
+            icon:      'bg-yellow-300 text-yellow-900',
+            dismiss:   'text-yellow-800 hover:bg-yellow-800/10',
+        },
+        info: {
+            container: 'bg-white border-blue-400 text-blue-800',
+            icon:      'bg-blue-500 text-blue-900',
+            dismiss:   'text-blue-800 hover:bg-blue-800/10',
+        },
+        success: {
+            container: 'bg-white border-violet-400 text-violet-800',
+            icon:      'bg-violet-500 text-violet-900',
+            dismiss:   'text-violet-800 hover:bg-violet-800/10',
+        },
+    };
+
+    const s = styles[alertState.type] || styles.info;
+
     alertContainer.classList.remove('hidden');
     alertContainer.innerHTML = `
-        <div class="progress-alert alert-${alertState.type}">
-            <div class="alert-icon">
+        <div class="progress-alert flex items-center gap-4 py-4 px-5 rounded-xl border-l-4 ${s.container}">
+            <div class="shrink-0 w-10 h-10 rounded-full flex items-center justify-center text-xl ${s.icon}">
                 <i class="fa-solid ${alertState.icon}"></i>
             </div>
-            <div class="alert-content">
-                <h4 class="alert-title">${alertState.title}</h4>
-                <p class="alert-message">${alertState.message}</p>
+            <div class="flex-1 min-w-0">
+                <h4 class="m-0 mb-1 text-base font-semibold leading-tight">${alertState.title}</h4>
+                <p class="m-0 text-base leading-relaxed opacity-90">${alertState.message}</p>
             </div>
-            <button class="alert-dismiss" onclick="dismissAlert('${alertState.type}', '${alertState.title}')" aria-label="Dismiss alert">
+            <button class="shrink-0 w-8 h-8 border-none bg-transparent rounded-full cursor-pointer flex items-center justify-center text-base opacity-60 hover:opacity-100 transition-all ${s.dismiss}" onclick="dismissAlert('${alertState.type}', '${alertState.title}')" aria-label="Dismiss alert">
                 <i class="fa-solid fa-xmark"></i>
             </button>
         </div>
@@ -200,7 +221,9 @@ function dismissAlert(type, title) {
     if (alertContainer) {
         const alert = alertContainer.querySelector('.progress-alert');
         if (alert) {
-            alert.classList.add('dismissing');
+            alert.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
+            alert.style.opacity = '0';
+            alert.style.transform = 'translateY(-10px)';
             setTimeout(() => {
                 alertContainer.innerHTML = '';
                 alertContainer.classList.add('hidden');
