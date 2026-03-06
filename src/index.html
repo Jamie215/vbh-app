@@ -23,9 +23,11 @@
 
     <!-- Navbar dynamic states -->
     <style type="text/tailwindcss">
-        /* Base nav link: layout + colors + transitions */
+        /* ── Base nav link: shared by <a> and <button> ── */
         .nav-link {
             @apply flex items-center gap-2 py-2 px-4 text-[#64748b] no-underline text-base font-medium rounded-md transition-all duration-200;
+            font-family: inherit;
+            line-height: 1.5;
         }
         .nav-link:hover {
             @apply text-[#1a1a2e] bg-[#f1f5f9];
@@ -44,6 +46,7 @@
             cursor: pointer;
             border: none;
             background: none;
+            font-family: inherit;
         }
         .nav-chevron {
             font-size: 0.65rem;
@@ -90,11 +93,20 @@
             .nav-dropdown:hover .nav-chevron {
                 transform: rotate(180deg);
             }
+
+            /*
+             * The dropdown wrapper uses padding-bottom to create
+             * an invisible bridge between the toggle and the menu,
+             * so the cursor never leaves :hover while moving down.
+             */
+            .nav-dropdown {
+                padding-bottom: 0.35rem;
+                margin-bottom: -0.35rem;
+            }
             .nav-dropdown-menu {
                 position: absolute;
                 top: 100%;
                 left: 0;
-                margin-top: 0.35rem;
                 background: white;
                 border-radius: 0.5rem;
                 box-shadow: 0 4px 16px rgba(0,0,0,0.1), 0 1px 3px rgba(0,0,0,0.06);
@@ -135,8 +147,16 @@
                 padding-bottom: 0.75rem;
             }
 
-            /* Mobile dropdown: items shown inline, indented */
-            .nav-dropdown { width: 100%; }
+            /* Mobile dropdown: full-width, items indented */
+            .nav-dropdown {
+                width: 100%;
+                padding-bottom: 0;
+                margin-bottom: 0;
+            }
+            .nav-dropdown-toggle {
+                width: 100%;
+                justify-content: flex-start;
+            }
             .nav-dropdown.open .nav-dropdown-menu {
                 display: flex;
             }
