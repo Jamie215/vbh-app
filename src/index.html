@@ -42,6 +42,11 @@
         /* ── Dropdown: shared ── */
         .nav-dropdown { position: relative; }
 
+        /* When dropdown is open/hovered, prevent iframes from stealing mouse events */
+        .dropdown-active iframe {
+            pointer-events: none;
+        }
+
         .nav-dropdown-toggle {
             cursor: pointer;
             border: none;

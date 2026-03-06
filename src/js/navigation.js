@@ -133,6 +133,7 @@ function closeMobileMenu() {
     // Also collapse the dropdown
     const dropdown = document.getElementById('nav-dropdown');
     if (dropdown) dropdown.classList.remove('open');
+    document.body.classList.remove('dropdown-active');
 }
 
 
@@ -437,7 +438,10 @@ function toggleDropdown(event) {
     event.stopPropagation();
 
     const dropdown = document.getElementById('nav-dropdown');
-    if (dropdown) dropdown.classList.toggle('open');
+    if (dropdown) {
+        dropdown.classList.toggle('open');
+        document.body.classList.toggle('dropdown-active', dropdown.classList.contains('open'));
+    }
 }
 
 /** Close dropdown when clicking outside of it (desktop) */
@@ -445,6 +449,7 @@ document.addEventListener('click', function (e) {
     const dropdown = document.getElementById('nav-dropdown');
     if (dropdown && !dropdown.contains(e.target)) {
         dropdown.classList.remove('open');
+        document.body.classList.remove('dropdown-active');
     }
 });
 
@@ -466,8 +471,29 @@ function toggleMobileMenu() {
     }
 }
 
-// Close menu and dropdown when any nav link or dropdown item is clicked
+
+/**
+ * Desktop hover: disable iframe pointer-events while cursor is
+ * anywhere inside .nav-dropdown (toggle + menu).
+ * Also close mobile menu/dropdown when any nav item is clicked.
+ */
 document.addEventListener('DOMContentLoaded', function () {
+    const dropdown = document.getElementById('nav-dropdown');
+
+    // Hover handlers — disable iframe pointer-events while dropdown is active
+    if (dropdown) {
+        dropdown.addEventListener('mouseenter', function () {
+            document.body.classList.add('dropdown-active');
+        });
+        dropdown.addEventListener('mouseleave', function () {
+            // Only remove if not held open via click (.open)
+            if (!dropdown.classList.contains('open')) {
+                document.body.classList.remove('dropdown-active');
+            }
+        });
+    }
+
+    // Close mobile menu and dropdown when any nav link or dropdown item is clicked
     document.querySelectorAll('.nav-link[href], .nav-dropdown-item').forEach(function (link) {
         link.addEventListener('click', function () {
             closeMobileMenu();

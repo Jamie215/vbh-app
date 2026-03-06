@@ -2853,7 +2853,7 @@ button {
     left: 0;
     width: 100%;
     height: calc(100vh - 60px);
-    z-index: 200;
+    z-index: 50;
     display: flex;
     flex-direction: column;
     background: var(--color-bg-page);
