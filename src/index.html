@@ -262,6 +262,27 @@
             background: #fef2f2;
             color: #dc3545;
         }
+
+        /* ── Detail tabs (progress view) ── */
+        .detail-tab {
+            @apply flex-1 py-3 px-4 bg-transparent border-b-2 border-transparent text-base font-medium text-[#64748b] cursor-pointer transition-all duration-200;
+            border-top: none; border-left: none; border-right: none;
+        }
+        .detail-tab:hover {
+            @apply text-[#1a1a2e] bg-[#f8fafc];
+        }
+        .detail-tab.active {
+            @apply text-brand border-brand;
+        }
+
+        /* ── Progress bar fill ── */
+        .program-progress-fill {
+            background: linear-gradient(90deg, #10b981, #059669);
+            transition: width 0.6s ease;
+        }
+        .program-progress-fill.completed {
+            background: linear-gradient(90deg, #7c3aed, #6d28d9);
+        }
     </style>
 
     <link rel="stylesheet" href="css/style.css">
@@ -435,8 +456,8 @@
             </section>
             <div id="progress-alert-container" class="hidden"></div>
             <section id="todays-workout-section">
-                <div class="section-header">
-                    <h2>Today's Workout</h2>
+                <div class="flex items-center gap-3 mb-6">
+                    <h2 class="text-xl font-semibold text-text-primary">Today's Workout</h2>
                 </div>
                 <div class="todays-workout-row">
                     <div id="todays-workout-card"></div>
@@ -450,8 +471,8 @@
                 </div>
             </section>
             <section id="all-workouts-section">
-                <div class="section-header">
-                    <h2>All Workouts</h2>
+                <div class="flex items-center gap-3 mb-6">
+                    <h2 class="text-xl font-semibold text-text-primary">All Workouts</h2>
                 </div>
                 <div id="playlists-grid"></div>
             </section>
@@ -493,57 +514,58 @@
         </main>
 
         <!-- My Progress View (hidden by default) -->
-        <main id="progress-view" class="hidden">
-            <section class="progress-header">
-                <h1>My Progress</h1>
-                <p>Track your fitness journey and see how far you've come.</p>
+        <main id="progress-view" class="hidden max-w-[1200px] mx-auto p-8 max-md:p-4">
+            <section class="mb-8">
+                <h1 class="text-[2rem] font-bold text-text-primary mb-2 max-md:text-2xl">My Progress</h1>
+                <p class="text-text-secondary text-base">Track your fitness journey and see how far you've come.</p>
             </section>
 
             <!-- Summary Stats Cards -->
-            <section class="stats-cards-section">
-                <div class="stats-card">
-                    <div class="stats-icon">
-                        <i class="fa-solid fa-calendar-check"></i>
+            <section class="grid grid-cols-[repeat(auto-fit,minmax(200px,1fr))] gap-6 mb-8 max-md:grid-cols-1">
+                <div class="bg-white rounded-card p-6 flex items-center gap-4 shadow-card border border-border">
+                    <div class="w-[50px] h-[50px] rounded-card bg-gradient-to-br from-[#667eea] to-[#764ba2] flex items-center justify-center shrink-0">
+                        <i class="fa-solid fa-calendar-check text-xl text-white"></i>
                     </div>
-                    <div class="stats-content">
-                        <span class="stats-value" id="total-workout-days">0</span>
-                        <span class="stats-label">Total Workout Days</span>
+                    <div class="flex flex-col">
+                        <span class="text-[2rem] font-bold text-text-primary leading-tight" id="total-workout-days">0</span>
+                        <span class="text-base text-text-secondary font-medium">Total Workout Days</span>
                     </div>
                 </div>
-                <div class="stats-card stats-card-progress">
-                    <div class="stats-icon">
-                        <i class="fa-solid fa-chart-line"></i>
+                <div class="bg-white rounded-card p-6 flex items-center gap-4 shadow-card border border-border">
+                    <div class="w-[50px] h-[50px] rounded-card bg-gradient-to-br from-[#667eea] to-[#764ba2] flex items-center justify-center shrink-0">
+                        <i class="fa-solid fa-chart-line text-xl text-white"></i>
                     </div>
-                    <div class="stats-content">
-                        <span class="stats-label" id="program-progress-label">Program Progress</span>
-                        <div class="program-progress-bar-container">
-                            <div class="program-progress-bar">
-                                <div class="program-progress-fill" id="program-progress-fill"></div>
+                    <div class="flex flex-col flex-1 min-w-0">
+                        <span class="text-base text-text-secondary font-medium" id="program-progress-label">Program Progress</span>
+                        <div class="flex items-center gap-3 mt-2">
+                            <div class="flex-1 h-2.5 bg-gray-200 rounded-full overflow-hidden">
+                                <div class="program-progress-fill h-full rounded-full w-0" id="program-progress-fill"></div>
                             </div>
-                            <span class="program-progress-text" id="program-progress-text">Week 0 of 6</span>
+                            <span class="text-base font-semibold text-text-primary whitespace-nowrap" id="program-progress-text">Week 0 of 6</span>
                         </div>
+                    </div>
                 </div>
             </section>
 
             <!-- Workout History Chart -->
-            <section class="chart-section">
-                <div class="section-header">
-                    <h2><i class="fa-solid fa-chart-bar"></i> Workout History</h2>
+            <section class="mb-8">
+                <div class="flex items-center gap-3 mb-6">
+                    <h2 class="text-xl font-semibold text-text-primary flex items-center gap-2"><i class="fa-solid fa-chart-bar text-brand"></i> Workout History</h2>
                 </div>
-                <div class="chart-layout">
+                <div class="grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-6">
                     <!-- Left: Main stacked bar chart -->
-                    <div class="chart-main">
-                        <div class="chart-container" id="history-chart-container">
+                    <div class="min-w-0">
+                        <div class="chart-container bg-white rounded-card p-6 shadow-card border border-border h-[350px] relative max-md:h-[280px] max-md:p-4 max-[480px]:h-[250px]" id="history-chart-container">
                             <canvas id="workout-history-chart"></canvas>
                         </div>
                     </div>
                     <!-- Right: Detail breakdown panel -->
-                    <div class="chart-detail-panel">
-                        <div class="detail-tabs">
+                    <div class="bg-white rounded-card shadow-card border border-border flex flex-col h-[350px] max-lg:h-[300px] max-md:h-[280px] max-[480px]:h-[260px]">
+                        <div class="flex border-b border-border px-2 pt-2">
                             <button class="detail-tab active" id="tab-day-view" onclick="switchDetailView('day')">Day View</button>
                             <button class="detail-tab" id="tab-all-time" onclick="switchDetailView('alltime')">All Time</button>
                         </div>
-                        <div class="detail-content" id="detail-panel-content">
+                        <div class="detail-content flex-1 p-4 overflow-y-auto flex flex-col" id="detail-panel-content">
                             <!-- Content populated by JavaScript -->
                         </div>
                     </div>
@@ -551,11 +573,11 @@
             </section>
 
             <!-- Recent Activity Feed -->
-            <section class="activity-section">
-                <div class="section-header">
-                    <h2><i class="fa-solid fa-clock-rotate-left"></i> Recent Activity</h2>
+            <section class="mb-8">
+                <div class="flex items-center gap-3 mb-6">
+                    <h2 class="text-xl font-semibold text-text-primary flex items-center gap-2"><i class="fa-solid fa-clock-rotate-left text-teal"></i> Recent Activity</h2>
                 </div>
-                <div class="activity-feed" id="activity-feed">
+                <div class="activity-feed bg-white rounded-card shadow-card border border-border overflow-hidden" id="activity-feed">
                     <!-- Activity items will be populated by JavaScript -->
                 </div>
             </section>

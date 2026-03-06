@@ -383,8 +383,7 @@ function showProgramCompletionModal() {
                 You've officially completed the <strong>6-week HandsUP program</strong>! 
             </p>
             <p class="completion-subtext">
-                You're welcome to keep going with the Advanced exercises at your own pace. 
-                Your progress and streak data will continue to be tracked. Keep up the great work!
+                You're welcome to keep going with the Advanced exercises at your own pace. Keep up the great work!
             </p>
             <button class="completion-btn" onclick="closeProgramCompletionModal()">Okay</button>
         </div>

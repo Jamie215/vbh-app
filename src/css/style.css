@@ -135,14 +135,14 @@ button {
     animation: slideIn 0.3s ease-out;
 }
 
-/* ==================== Section Headers ==================== */
+/* ==================== Section Headers (Tailwind) ==================== */
+/* Most instances converted to inline Tailwind. Base rule kept for JS-generated sections. */
 .section-header {
     display: flex;
     align-items: center;
     gap: 0.75rem;
     margin-bottom: 1.5rem;
 }
-
 .section-header h2 {
     font-size: 1.25rem;
     font-weight: 600;
@@ -1389,121 +1389,8 @@ button {
     color: var(--color-success-dark);
 }
 
-/* ==================== My Progress View ==================== */
-#progress-view {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 2rem;
-}
-
-.progress-header {
-    margin-bottom: 2rem;
-}
-
-.progress-header h1 {
-    font-size: 2rem;
-    font-weight: 700;
-    color: var(--color-text-primary);
-    margin-bottom: 0.5rem;
-}
-
-.progress-header p {
-    color: var(--color-text-secondary);
-    font-size: 1rem;
-}
-
-/* ==================== Stats Cards ==================== */
-.stats-cards-section {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 1.5rem;
-    margin-bottom: 2rem;
-}
-
-.stats-card {
-    background: white;
-    border-radius: var(--radius-lg);
-    padding: 1.5rem;
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-    box-shadow: var(--shadow-sm);
-    border: 1px solid var(--color-border);
-}
-
-.stats-icon {
-    width: 50px;
-    height: 50px;
-    border-radius: var(--radius-lg);
-    background: var(--gradient-purple);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
-}
-
-.stats-icon i {
-    font-size: 1.25rem;
-    color: white;
-}
-
-.stats-content {
-    display: flex;
-    flex-direction: column;
-}
-
-.stats-value {
-    font-size: 2rem;
-    font-weight: 700;
-    color: var(--color-text-primary);
-    line-height: 1.2;
-}
-
-.stats-label {
-    font-size: 1rem;
-    color: var(--color-text-secondary);
-    font-weight: 500;
-}
-
-/* Program Progress Bar (in stats card) */
-.stats-card-progress .stats-content {
-    flex: 1;
-    min-width: 0;
-}
-
-.program-progress-bar-container {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    margin-top: 0.5rem;
-}
-
-.program-progress-bar {
-    flex: 1;
-    height: 10px;
-    background: #e5e7eb;
-    border-radius: 5px;
-    overflow: hidden;
-}
-
-.program-progress-fill {
-    height: 100%;
-    background: linear-gradient(90deg, var(--color-success), var(--color-success-dark));
-    border-radius: 5px;
-    transition: width 0.6s ease;
-    width: 0%;
-}
-
-.program-progress-fill.completed {
-    background: linear-gradient(90deg, var(--color-brand), var(--color-brand-dark));
-}
-
-.program-progress-text {
-    font-size: 1rem;
-    font-weight: 600;
-    color: var(--color-text-primary);
-    white-space: nowrap;
-}
+/* ==================== My Progress View (Tailwind) ==================== */
+/* Layout, header, stats cards, and progress bar styles moved to inline Tailwind in index.html */
 
 /* ==================== Streak Section ==================== */
 .streak-section {
@@ -1575,42 +1462,10 @@ button {
     color: #a16207;
 }
 
-/* ==================== Chart Section ==================== */
-.chart-section {
-    margin-bottom: 2rem;
-}
+/* ==================== Chart Section (Tailwind) ==================== */
+/* Layout, container, and detail panel styles moved to inline Tailwind in index.html */
 
-.chart-section .section-header h2 {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-}
-
-.chart-section .section-header h2 i {
-    color: var(--color-brand);
-}
-
-/* Side-by-side layout */
-.chart-layout {
-    display: grid;
-    grid-template-columns: 1fr 320px;
-    gap: 1.5rem;
-}
-
-.chart-main {
-    min-width: 0;
-}
-
-.chart-container {
-    background: white;
-    border-radius: var(--radius-lg);
-    padding: 1.5rem;
-    box-shadow: var(--shadow-sm);
-    border: 1px solid var(--color-border);
-    height: 350px;
-    position: relative;
-}
-
+/* Chart.js canvas override (must stay in CSS for !important) */
 .chart-container canvas {
     width: 100% !important;
     height: 100% !important;
@@ -1642,53 +1497,8 @@ button {
     max-width: 300px;
 }
 
-/* Detail Panel */
-.chart-detail-panel {
-    background: white;
-    border-radius: var(--radius-lg);
-    box-shadow: var(--shadow-sm);
-    border: 1px solid var(--color-border);
-    display: flex;
-    flex-direction: column;
-    height: 350px;
-}
-
-.detail-tabs {
-    display: flex;
-    border-bottom: 1px solid var(--color-border);
-    padding: 0.5rem 0.5rem 0;
-}
-
-.detail-tab {
-    flex: 1;
-    padding: 0.75rem 1rem;
-    background: transparent;
-    border: none;
-    border-bottom: 2px solid transparent;
-    font-size: 1rem;
-    font-weight: 500;
-    color: var(--color-text-secondary);
-    cursor: pointer;
-    transition: all 0.2s ease;
-}
-
-.detail-tab:hover {
-    color: var(--color-text-primary);
-    background: var(--color-bg-subtle);
-}
-
-.detail-tab.active {
-    color: var(--color-brand);
-    border-bottom-color: var(--color-brand);
-}
-
-.detail-content {
-    flex: 1;
-    padding: 1rem;
-    overflow-y: auto;
-    display: flex;
-    flex-direction: column;
-}
+/* Detail panel, tabs, and content styles moved to Tailwind (index.html)
+   JS-generated content styles (.detail-header, .detail-total, etc.) remain below */
 
 .detail-header {
     display: flex;
@@ -1745,28 +1555,8 @@ button {
     line-height: 1.5;
 }
 
-/* ==================== Activity Feed ==================== */
-.activity-section {
-    margin-bottom: 2rem;
-}
-
-.activity-section .section-header h2 {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-}
-
-.activity-section .section-header h2 i {
-    color: var(--color-teal);
-}
-
-.activity-feed {
-    background: white;
-    border-radius: var(--radius-lg);
-    box-shadow: var(--shadow-sm);
-    border: 1px solid var(--color-border);
-    overflow: hidden;
-}
+/* ==================== Activity Feed (Tailwind) ==================== */
+/* Section and container styles moved to Tailwind. JS-generated item styles remain below. */
 
 .activity-item {
     padding: 1rem 1.5rem;
@@ -2472,14 +2262,6 @@ button {
         flex-direction: row;
         width: fit-content;
     }
-
-    /* Chart */
-    .chart-layout {
-        grid-template-columns: 1fr;
-    }
-    .chart-detail-panel {
-        height: 300px;
-    }
 }
 
 /* --- max-width: 900px --- */
@@ -2569,24 +2351,8 @@ button {
     }
 
     /* My Progress Responsive */
-    #progress-view {
-        padding: 1rem;
-    }
-    .progress-header h1 {
-        font-size: 1.5rem;
-    }
-    .stats-cards-section {
-        grid-template-columns: 1fr;
-    }
     .streak-cards {
         grid-template-columns: 1fr 1fr;
-    }
-    .chart-container {
-        height: 280px;
-        padding: 1rem;
-    }
-    .chart-detail-panel {
-        height: 280px;
     }
     .activity-item {
         flex-direction: column;
@@ -2656,16 +2422,6 @@ button {
     /* General */
     .streak-cards {
         grid-template-columns: 1fr;
-    }
-    .chart-container {
-        height: 250px;
-    }
-    .chart-detail-panel {
-        height: 260px;
-    }
-    .detail-tab {
-        padding: 0.6rem 0.75rem;
-        font-size: 1rem;
     }
 }
 
