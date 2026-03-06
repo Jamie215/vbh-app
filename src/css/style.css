@@ -87,73 +87,21 @@ button {
    ==================== */
 
 
-/* ==================== Main Content ==================== */
-#home-view,
-#playlist-view {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 2rem;
-}
-
-/* ==================== User Greeting Section ==================== */
-#user-greeting-section {
-    margin-bottom: 2rem;
-}
-
-#user-greeting-section h1 {
-    font-size: 2rem;
-    font-weight: 600;
-    color: var(--color-text-primary);
-    margin-bottom: 0.25rem;
-}
-
-#user-greeting-section p {
-    font-size: 1rem;
-    color: var(--color-text-secondary);
-}
-
-#user-greeting-section strong {
-    color: var(--color-text-primary);
-}
-
-/* ==================== Progress Alert (Tailwind) ==================== */
-/* Container spacing + slide-in animation (styles live in alerts.js as Tailwind classes) */
-#progress-alert-container {
-    margin-bottom: 1.5rem;
-}
-
-#progress-alert-container.hidden {
-    display: none;
-}
+/* ==================== Main Content + Home View (Tailwind) ==================== */
+/* Layout containers, greeting, alert container, section headers moved to inline Tailwind */
 
 @keyframes slideIn {
     from { opacity: 0; transform: translateY(-10px); }
     to   { opacity: 1; transform: translateY(0); }
 }
-
 .progress-alert {
     animation: slideIn 0.3s ease-out;
 }
 
-/* ==================== Section Headers (Tailwind) ==================== */
-/* Most instances converted to inline Tailwind. Base rule kept for JS-generated sections. */
-.section-header {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    margin-bottom: 1.5rem;
-}
-.section-header h2 {
-    font-size: 1.25rem;
-    font-weight: 600;
-    color: var(--color-text-primary);
-}
+/* ==================== Today's Workout + Log Past Card (Tailwind) ==================== */
+/* Moved to inline Tailwind in index.html. JS-generated card content styles kept for app.js. */
 
-/* ==================== Today's Workout Section ==================== */
-#todays-workout-section {
-    margin-bottom: 3rem;
-}
-
+/* Today's workout card - populated by JS */
 #todays-workout-card {
     background: white;
     border-radius: var(--radius-lg);
@@ -164,86 +112,6 @@ button {
     gap: 1.5rem;
     align-items: center;
     max-width: 700px;
-}
-
-/* ==================== Today's Workout Row Layout ==================== */
-.todays-workout-row {
-    display: grid;
-    grid-template-columns: 3fr 1fr;
-    gap: 1.5rem;
-    align-items: stretch;
-}
-
-/* Log Past Workout Card */
-.log-past-card {
-    background: white;
-    border-radius: var(--radius-lg);
-    border: 1px solid var(--color-border);
-    padding: 1.5rem;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    text-align: center;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    width: 400px;
-    gap: 0.5rem;
-    box-shadow: var(--shadow-sm);
-}
-
-.log-past-card-icon {
-    width: 44px;
-    height: 44px;
-    border-radius: var(--radius-lg);
-    background: var(--gradient-purple);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin-bottom: 0.25rem;
-}
-
-.log-past-card-icon i {
-    font-size: 1.1rem;
-    color: white;
-}
-
-.log-past-card h3 {
-    font-size: 1rem;
-    font-weight: 600;
-    color: var(--color-text-primary);
-}
-
-.log-past-card p {
-    font-size: 1rem;
-    color: var(--color-text-secondary);
-    line-height: 1.4;
-    margin-bottom: 0.25rem;
-}
-
-.log-past-card-btn {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.4rem;
-    padding: 0.5rem 1.25rem;
-    background: white;
-    color: var(--color-brand);
-    border: 1.5px solid var(--color-brand);
-    border-radius: var(--radius-md);
-    font-size: 0.85rem;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    margin-top: 0.5rem;
-}
-
-.log-past-card-btn:hover {
-    background: var(--color-brand);
-    color: white;
-}
-
-.log-past-card:active {
-    transform: translateY(1px);
 }
 
 .todays-workout-thumbnail {
@@ -278,7 +146,6 @@ button {
     margin-bottom: 1rem;
 }
 
-/* Today's Workout Progress Ring Row */
 .todays-workout-progress {
     display: flex;
     align-items: center;
@@ -314,16 +181,8 @@ button {
     display: block;
 }
 
-/* ==================== All Workouts Section ==================== */
-#all-workouts-section {
-    margin-bottom: 3rem;
-}
-
-#playlists-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-    gap: 1.5rem;
-}
+/* ==================== All Workouts + Playlist Grid (Tailwind) ==================== */
+/* Section spacing and grid layout moved to inline Tailwind */
 
 /* ==================== Playlist Cards ==================== */
 .playlist-card {
@@ -446,74 +305,9 @@ button {
     height: 16px;
 }
 
-/* ==================== Playlist View ==================== */
-.back-button {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.5rem;
-    background: transparent;
-    color: var(--color-text-tertiary);
-    border: none;
-    font-size: 1rem;
-    font-weight: 500;
-    padding: 0.5rem 0;
-    margin-bottom: 1rem;
-    cursor: pointer;
-    transition: color 0.2s ease;
-}
-
-.back-button:hover {
-    color: var(--color-text-primary);
-}
-
-.back-button svg {
-    width: 18px;
-    height: 18px;
-}
-
-/* Playlist Header Row with Progress Ring */
-.playlist-header-row {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    gap: 2rem;
-    margin-bottom: 1.5rem;
-}
-
-.playlist-info {
-    flex: 1;
-}
-
-.playlist-info h1 {
-    font-size: 1.75rem;
-    font-weight: 700;
-    color: var(--color-text-primary);
-    margin-bottom: 0.75rem;
-}
-
-.playlist-info p {
-    color: var(--color-text-tertiary);
-    font-size: 1rem;
-    line-height: 1.6;
-}
-
-.playlist-info p strong {
-    color: var(--color-text-primary);
-}
-
-/* Playlist View Progress Ring */
-.playlist-progress-ring {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 0.5rem;
-    padding: 1rem;
-    background: white;
-    border-radius: var(--radius-lg);
-    box-shadow: var(--shadow-sm);
-    border: 1px solid var(--color-border);
-    min-width: 120px;
-}
+/* ==================== Playlist View (Tailwind) ==================== */
+/* Back button, header row, playlist info, progress ring moved to inline Tailwind.
+   Progress ring .progress-label kept for JS-generated content. */
 
 .playlist-progress-ring .progress-label {
     font-size: 1rem;
@@ -868,7 +662,9 @@ button {
     font-weight: 500;
 }
 
-/* ==================== Video Player Modal ==================== */
+/* ==================== Video Player Modal (Tailwind) ==================== */
+/* Close button, video header, body layout, player section moved to inline Tailwind.
+   Modal base (.modal, .modal-content) kept as shared by manual entry modal. */
 .modal {
     position: fixed;
     top: 0;
@@ -897,76 +693,6 @@ button {
 
 .video-modal {
     width: 100%;
-}
-
-.close-button {
-    position: absolute;
-    top: 1rem;
-    right: 1rem;
-    background: transparent;
-    color: var(--color-text-secondary);
-    font-size: 1.25rem;
-    padding: 0.5rem;
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    border: none;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    line-height: 1;
-}
-
-.close-button:hover {
-    background: rgba(0, 0, 0, 0.05);
-    color: var(--color-text-primary);
-}
-
-/* Video modal header */
-.video-header {
-    margin-bottom: 1.25rem;
-    padding-right: 3rem;
-}
-
-.video-header h2 {
-    font-size: 1.5rem;
-    font-weight: 600;
-    color: var(--color-text-primary);
-    margin-bottom: 0.25rem;
-}
-
-.video-header p {
-    color: var(--color-text-secondary);
-    font-size: 1rem;
-}
-
-/* Video modal body - two column layout */
-.video-modal-body {
-    display: flex;
-    gap: 2rem;
-    align-items: flex-start;
-}
-
-/* Left side - video player (70%) */
-.video-player-section {
-    flex: 7;
-    min-width: 480px;
-}
-
-#player {
-    width: 100%;
-    aspect-ratio: 16/9;
-    background: #000;
-    border-radius: var(--radius-md);
-    overflow: hidden;
-}
-
-/* Right side - set tracking panel (30%) */
-#set-tracking-panel {
-    flex: 3;
-    min-width: 240px;
 }
 
 .tracking-header {
@@ -1141,48 +867,9 @@ button {
     color: white;
 }
 
-/* Old video details - kept for fallback */
-.video-details {
-    margin-top: 1.5rem;
-}
+/* Video details fallback - removed (unused) */
 
-.video-details h2 {
-    color: var(--color-text-primary);
-    font-size: 1.5rem;
-    margin-bottom: 0.5rem;
-}
-
-.video-details p {
-    color: var(--color-text-secondary);
-}
-
-/* Loading Screen */
-#loading-screen {
-    position: fixed;
-    inset: 0;
-    background: var(--color-bg-page);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    z-index: 9999;
-}
-
-#loading-screen .loading-logo {
-    width: 64px;
-    height: 64px;
-    object-fit: contain;
-    margin-bottom: 1rem;
-}
-
-#loading-screen p {
-    color: var(--color-text-secondary);
-    font-size: 1rem;
-}
-
-#loading-screen.hidden {
-    display: none;
-}
+/* Loading Screen - moved to Tailwind */
 
 /* ==================== Auth Page View (Tailwind) ==================== */
 /* All auth styles moved to inline Tailwind in index.html + component rules in <style> block */
@@ -1820,27 +1507,10 @@ button {
     .exercise-table td {
         padding: 1rem;
     }
-    /* Stack playlist header on tablet */
-    .playlist-header-row {
-        flex-direction: column;
-        gap: 1rem;
-    }
-    .playlist-progress-ring {
-        flex-direction: row;
-        width: fit-content;
-    }
 }
 
 /* --- max-width: 900px --- */
 @media (max-width: 900px) {
-
-    /* General */
-    .video-modal-body {
-        flex-direction: column;
-    }
-    #set-tracking-panel {
-        width: 100%;
-    }
     .modal-content {
         padding: 1.5rem;
     }
@@ -1849,42 +1519,6 @@ button {
 /* --- max-width: 768px --- */
 @media (max-width: 768px) {
 
-    /* General */
-    .todays-workout-row {
-        grid-template-columns: 1fr;
-    }
-    .log-past-card {
-        width: 100%;
-        flex-direction: row;
-        padding: 1rem 1.25rem;
-        gap: 1rem;
-        text-align: left;
-        align-items: center;
-        justify-content: flex-start;
-    }
-    .log-past-card-icon {
-        margin-bottom: 0;
-    }
-    .log-past-card p {
-        display: none;
-    }
-    .log-past-card-btn {
-        margin-top: 0;
-        margin-left: auto;
-        white-space:nowrap;
-    }
-
-    /* General */
-    #home-view,
-    #playlist-view {
-        padding: 1rem;
-    }
-    #user-greeting-section h1 {
-        font-size: 1.5rem;
-    }
-    #playlists-grid {
-        grid-template-columns: 1fr;
-    }
     .exercise-table th,
     .exercise-table td {
         padding: 0.75rem;
@@ -1903,9 +1537,6 @@ button {
     .exercise-table th.col-equipment,
     .exercise-table td.col-equipment {
         display: none;
-    }
-    .playlist-info h1 {
-        font-size: 1.25rem;
     }
     .equipment-badge {
         font-size: 1rem;

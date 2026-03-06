@@ -316,9 +316,9 @@
 <body>
     <div id="app">
         <!-- Loading Screen (shown first) -->
-        <div id="loading-screen">
-            <img src="icon.png" alt="HandsUP" class="loading-logo">
-            <p>Loading...</p>
+        <div id="loading-screen" class="fixed inset-0 bg-surface flex flex-col items-center justify-center z-[9999]">
+            <img src="icon.png" alt="HandsUP" class="w-16 h-16 object-contain mb-4">
+            <p class="text-text-secondary text-base">Loading...</p>
         </div>
 
         <!-- Navigation Bar (hidden by default) -->
@@ -473,50 +473,50 @@
         </main>
 
         <!-- Home View (hidden by default) -->
-        <main id="home-view" class="hidden">
-            <section id="user-greeting-section">
-                <h1>Hello, <span id="user-name">there</span></h1>
-                <p>You've reached <strong>Week <span id="user-week">1</span></strong>. Keep it up!</p>
+        <main id="home-view" class="hidden max-w-[1200px] mx-auto p-8 max-md:p-4">
+            <section class="mb-8">
+                <h1 class="text-[2rem] font-semibold text-text-primary mb-1 max-md:text-2xl">Hello, <span id="user-name">there</span></h1>
+                <p class="text-base text-text-secondary">You've reached <strong class="text-text-primary">Week <span id="user-week">1</span></strong>. Keep it up!</p>
             </section>
             <div id="progress-alert-container" class="hidden"></div>
-            <section id="todays-workout-section">
+            <section class="mb-12">
                 <div class="flex items-center gap-3 mb-6">
                     <h2 class="text-xl font-semibold text-text-primary">Today's Workout</h2>
                 </div>
-                <div class="todays-workout-row">
+                <div class="grid grid-cols-[3fr_1fr] gap-6 items-stretch max-md:grid-cols-1">
                     <div id="todays-workout-card"></div>
-                    <div class="log-past-card" onclick="openManualEntryModal()">
-                        <div class="log-past-card-icon">
-                            <i class="fa-solid fa-clock-rotate-left"></i>
+                    <div class="bg-white rounded-card border border-border p-6 flex flex-col items-center justify-center text-center cursor-pointer transition-all duration-200 w-[400px] gap-2 shadow-card max-md:w-full max-md:flex-row max-md:p-4 max-md:gap-4 max-md:text-left max-md:items-center max-md:justify-start active:translate-y-px" onclick="openManualEntryModal()">
+                        <div class="w-11 h-11 rounded-card bg-gradient-to-br from-[#667eea] to-[#764ba2] flex items-center justify-center mb-1 max-md:mb-0">
+                            <i class="fa-solid fa-clock-rotate-left text-[1.1rem] text-white"></i>
                         </div>
-                        <h3>Missed logging a session? You can log it here to keep your progress up to date.</h3>
-                        <button class="log-past-card-btn" onclick="openManualEntryModal()"><i class="fa-solid fa-plus"></i> Log Past Workout</button>
+                        <h3 class="text-base font-semibold text-text-primary max-md:hidden">Missed logging a session? You can log it here to keep your progress up to date.</h3>
+                        <button class="inline-flex items-center gap-1.5 py-2 px-5 bg-white text-brand border-[1.5px] border-brand rounded-lg text-sm font-semibold cursor-pointer transition-all duration-200 mt-2 hover:bg-brand hover:text-white max-md:mt-0 max-md:ml-auto max-md:whitespace-nowrap" onclick="openManualEntryModal()"><i class="fa-solid fa-plus"></i> Log Past Workout</button>
                     </div>
                 </div>
             </section>
-            <section id="all-workouts-section">
+            <section class="mb-12">
                 <div class="flex items-center gap-3 mb-6">
                     <h2 class="text-xl font-semibold text-text-primary">All Workouts</h2>
                 </div>
-                <div id="playlists-grid"></div>
+                <div id="playlists-grid" class="grid grid-cols-[repeat(auto-fill,minmax(300px,1fr))] gap-6 max-md:grid-cols-1"></div>
             </section>
         </main>
 
         <!-- Playlist View (hidden by default) -->
-        <main id="playlist-view" class="hidden">
-            <button class="back-button" onclick="showHome()"><i class="fa-solid fa-arrow-left"></i> Go Back</button>
+        <main id="playlist-view" class="hidden max-w-[1200px] mx-auto p-8 max-md:p-4">
+            <button class="inline-flex items-center gap-2 bg-transparent text-text-tertiary border-none text-base font-medium py-2 px-0 mb-4 cursor-pointer transition-colors hover:text-text-primary" onclick="showHome()"><i class="fa-solid fa-arrow-left"></i> Go Back</button>
             
             <!-- Playlist Header with Progress Ring -->
-            <div class="playlist-header-row">
-                <div class="playlist-info">
-                    <h1 id="playlist-title">Beginner 3-6 Exercises</h1>
-                    <p id="playlist-description">
-                        <strong><u>Instructions</u></strong>: Go through the below exercises at your own pace. 
+            <div class="flex justify-between items-start gap-8 mb-6 max-lg:flex-col max-lg:gap-4">
+                <div class="flex-1">
+                    <h1 id="playlist-title" class="text-[1.75rem] font-bold text-text-primary mb-3 max-md:text-xl">Beginner 3-6 Exercises</h1>
+                    <p id="playlist-description" class="text-text-tertiary text-base leading-relaxed">
+                        <strong class="text-text-primary"><u>Instructions</u></strong>: Go through the below exercises at your own pace. 
                         Click to watch the videos to see how each exercise is done. 
                         Tap 'Save Progress' to keep your place in the workout.
                     </p>
                 </div>
-                <div id="playlist-progress-ring" class="playlist-progress-ring">
+                <div id="playlist-progress-ring" class="flex flex-col items-center gap-2 p-4 bg-white rounded-card shadow-card border border-border min-w-[120px] max-lg:flex-row max-lg:w-fit">
                     <!-- Progress ring will be inserted here by JavaScript -->
                 </div>
             </div>
@@ -615,7 +615,7 @@
         <!-- Manual Entry Modal -->
         <div id="manual-entry-modal" class="modal hidden">
             <div class="modal-content manual-entry-modal">
-                <button class="close-button" onclick="closeManualEntryModal()"><i class="fa-solid fa-xmark"></i></button>
+                <button class="absolute top-4 right-4 bg-transparent text-text-secondary text-xl p-2 w-10 h-10 rounded-full border-none flex items-center justify-center cursor-pointer transition-all leading-none hover:bg-black/5 hover:text-text-primary" onclick="closeManualEntryModal()"><i class="fa-solid fa-xmark"></i></button>
                 
                 <div class="manual-entry-header">
                     <div class="manual-entry-icon">
@@ -672,19 +672,19 @@
         <!-- Video Player Modal -->
         <div id="video-player-modal" class="modal hidden">
             <div class="modal-content video-modal">
-                <button class="close-button" onclick="closeVideo()"><i class="fa-solid fa-xmark"></i></button>
+                <button class="absolute top-4 right-4 bg-transparent text-text-secondary text-xl p-2 w-10 h-10 rounded-full border-none flex items-center justify-center cursor-pointer transition-all leading-none hover:bg-black/5 hover:text-text-primary" onclick="closeVideo()"><i class="fa-solid fa-xmark"></i></button>
                 <!-- Video header with title and recommendation -->
-                <div class="video-header">
-                    <h2 id="current-video-title">Exercise col-name</h2>
-                    <p id="current-video-description">Recommended: 3 sets of 8 reps</p>
+                <div class="mb-5 pr-12">
+                    <h2 id="current-video-title" class="text-2xl font-semibold text-text-primary mb-1">Exercise col-name</h2>
+                    <p id="current-video-description" class="text-text-secondary text-base">Recommended: 3 sets of 8 reps</p>
                 </div>
                 <!-- Two-column layout: video + tracking panel -->
-                 <div class="video-modal-body">
-                    <div class="video-player-section">
-                        <div id="player"></div>
+                <div class="flex gap-8 items-start max-[900px]:flex-col">
+                    <div class="flex-[7] min-w-[480px] max-[900px]:min-w-0 max-[900px]:w-full">
+                        <div id="player" class="w-full aspect-video bg-black rounded-lg overflow-hidden"></div>
                     </div>
-                    <div id="set-tracking-panel"></div>
-                 </div>
+                    <div id="set-tracking-panel" class="flex-[3] min-w-[240px] max-[900px]:w-full"></div>
+                </div>
             </div>
         </div>
     </div>
