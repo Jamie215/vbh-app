@@ -98,10 +98,9 @@ button {
     animation: slideIn 0.3s ease-out;
 }
 
-/* ==================== Today's Workout + Log Past Card (Tailwind) ==================== */
-/* Moved to inline Tailwind in index.html. JS-generated card content styles kept for app.js. */
+/* ==================== Today's Workout Card (Tailwind) ==================== */
+/* Card container kept for JS population. Interior content styles moved to app.js Tailwind. */
 
-/* Today's workout card - populated by JS */
 #todays-workout-card {
     background: white;
     border-radius: var(--radius-lg);
@@ -114,67 +113,6 @@ button {
     max-width: 700px;
 }
 
-.todays-workout-thumbnail {
-    width: 200px;
-    height: 140px;
-    border-radius: var(--radius-md);
-    overflow: hidden;
-    flex-shrink: 0;
-    position: relative;
-}
-
-.todays-workout-thumbnail img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-}
-
-.todays-workout-info {
-    flex: 1;
-}
-
-.todays-workout-info h3 {
-    font-size: 1.25rem;
-    font-weight: 600;
-    color: var(--color-text-primary);
-    margin-bottom: 0.5rem;
-}
-
-.todays-workout-info > p {
-    color: var(--color-text-secondary);
-    font-size: 1rem;
-    margin-bottom: 1rem;
-}
-
-.todays-workout-progress {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    margin-bottom: 1rem;
-}
-
-.todays-workout-progress .progress-label {
-    font-size: 1rem;
-    color: var(--color-text-tertiary);
-    font-weight: 500;
-}
-
-.start-workout-btn {
-    background: var(--color-teal);
-    color: white;
-    border: none;
-    padding: 0.75rem 1.5rem;
-    font-size: 1rem;
-    font-weight: 600;
-    border-radius: var(--radius-sm);
-    cursor: pointer;
-    transition: background 0.2s ease;
-}
-
-.start-workout-btn:hover {
-    background: var(--color-teal-dark);
-}
-
 /* ==================== Progress Ring Styles (Chart.js) ==================== */
 #todays-progress-ring,
 #playlist-view-progress-ring {
@@ -184,137 +122,11 @@ button {
 /* ==================== All Workouts + Playlist Grid (Tailwind) ==================== */
 /* Section spacing and grid layout moved to inline Tailwind */
 
-/* ==================== Playlist Cards ==================== */
-.playlist-card {
-    background: white;
-    border-radius: var(--radius-lg);
-    overflow: hidden;
-    box-shadow: var(--shadow-sm);
-    border: 1px solid var(--color-border);
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
-    cursor: pointer;
-}
-
-.playlist-card:hover {
-    transform: translateY(-4px);
-    box-shadow: var(--shadow-lg);
-}
-
-.playlist-thumbnail-wrapper {
-    height: 180px;
-    position: relative;
-    overflow: hidden;
-}
-
-.playlist-thumbnail-wrapper img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-}
-
-.playlist-overlay {
-    position: absolute;
-    inset: 0;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    font-weight: 600;
-    text-align: center;
-    padding: 1rem;
-}
-
-.playlist-overlay .week-label {
-    font-size: 1.5rem;
-    line-height: 1.3;
-}
-
-.playlist-overlay.beginner {
-    background: linear-gradient(135deg, rgba(135, 206, 250, 0.95) 0%, rgba(173, 216, 230, 0.95) 100%);
-    color: #1e3a5f;
-}
-
-.playlist-overlay.advanced {
-    background: linear-gradient(135deg, rgba(30, 58, 95, 0.95) 0%, rgba(21, 94, 117, 0.95) 100%);
-    color: white;
-}
-
-.playlist-card-content {
-    padding: 1.25rem;
-}
-
-.playlist-card-content h3 {
-    font-size: 1.1rem;
-    font-weight: 600;
-    color: var(--color-text-primary);
-    margin-bottom: 0.25rem;
-}
-
-.playlist-card-content > p {
-    color: var(--color-text-secondary);
-    font-size: 1rem;
-    margin-bottom: 0.75rem;
-}
-
-.completion-status {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    margin-bottom: 0.75rem;
-}
-
-.completion-status .checkmark {
-    width: 20px;
-    height: 20px;
-    background: var(--color-success);
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
-}
-
-.completion-status .checkmark svg {
-    width: 12px;
-    height: 12px;
-    stroke: white;
-}
-
-.completion-status span {
-    font-size: 1rem;
-    color: var(--color-success);
-    font-weight: 500;
-}
-
-.go-to-workout-link {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.25rem;
-    color: #1e3a5f;
-    font-size: 1rem;
-    font-weight: 600;
-    text-decoration: none;
-}
-
-.go-to-workout-link:hover {
-    color: var(--color-brand);
-}
-
-.go-to-workout-link svg {
-    width: 16px;
-    height: 16px;
-}
+/* ==================== Playlist Cards (Tailwind) ==================== */
+/* All playlist card styles moved to inline Tailwind in app.js createPlaylistCard() */
 
 /* ==================== Playlist View (Tailwind) ==================== */
-/* Back button, header row, playlist info, progress ring moved to inline Tailwind.
-   Progress ring .progress-label kept for JS-generated content. */
-
-.playlist-progress-ring .progress-label {
-    font-size: 1rem;
-    color: var(--color-text-tertiary);
-    font-weight: 500;
-    text-align: center;
-}
+/* All playlist view styles moved to inline Tailwind */
 
 /* ==================== Exercise Table - Updated Layout ==================== */
 .exercise-table-container {
@@ -890,207 +702,8 @@ button {
 /* All progress view JS-generated styles (chart-empty, detail-header, detail-empty,
    activity-item, activity-empty) moved to inline Tailwind in progress.js */
 
-/* ==================== Final Session Modal (Week 6 Completion) ==================== */
-.final-session-modal-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0, 0, 0, 0.6);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 1000;
-    opacity: 0;
-    transition: opacity 0.3s ease;
-}
-
-.final-session-modal-overlay.visible {
-    opacity: 1;
-}
-
-.final-session-modal-overlay.dismissing {
-    opacity: 0;
-}
-
-.final-session-modal {
-    background: #fff;
-    border-radius: var(--radius-xl);
-    padding: 2.5rem 2rem;
-    max-width: 440px;
-    width: 90%;
-    text-align: center;
-    transform: scale(0.9);
-    transition: transform 0.3s ease;
-    box-shadow: var(--shadow-xl);
-}
-
-.final-session-modal-overlay.visible .final-session-modal {
-    transform: scale(1);
-}
-
-.final-session-modal-overlay.dismissing .final-session-modal {
-    transform: scale(0.9);
-}
-
-.final-session-icon {
-    width: 64px;
-    height: 64px;
-    background: radial-gradient(ellipse farthest-corner at right bottom, #FEDB37 0%, #FDB931 8%, #9f7928 30%, #8A6E2F 40%, transparent 80%), radial-gradient(ellipse farthest-corner at left top, #FFFFFF 0%, #FFFFAC 8%, #D1B464 25%, #5d4a1f 62.5%, #5d4a1f 100%);
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin: 0 auto 1.25rem;
-}
-
-.final-session-icon i {
-    font-size: 1.75rem;
-    color: #fff;
-}
-
-.final-session-modal h2 {
-    font-size: 1.5rem;
-    font-weight: 700;
-    color: var(--color-text-primary);
-    margin: 0 0 0.75rem;
-}
-
-.final-session-modal p {
-    font-size: 1rem;
-    color: #4a5568;
-    line-height: 1.6;
-    margin: 0 0 0.5rem;
-}
-
-.final-session-subtext {
-    font-size: 1rem !important;
-    color: #718096 !important;
-    margin-bottom: 1.5rem !important;
-}
-
-.final-session-btn {
-    background: linear-gradient(135deg, var(--color-success), var(--color-success-dark));
-    color: #fff;
-    border: none;
-    padding: 0.75rem 2.5rem;
-    border-radius: var(--radius-md);
-    font-size: 1rem;
-    font-weight: 600;
-    cursor: pointer;
-    transition: transform 0.15s ease, box-shadow 0.15s ease;
-}
-
-.final-session-btn:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
-}
-
-.final-session-btn:active {
-    transform: translateY(0);
-}
-
-/* ==================== Program Completion Modal (6-Week Done) ==================== */
-.completion-modal-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0, 0, 0, 0.6);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 1000;
-    opacity: 0;
-    transition: opacity 0.3s ease;
-}
-
-.completion-modal-overlay.visible {
-    opacity: 1;
-}
-
-.completion-modal-overlay.dismissing {
-    opacity: 0;
-}
-
-.completion-modal {
-    background: #fff;
-    border-radius: var(--radius-xl);
-    padding: 2.5rem 2rem;
-    max-width: 440px;
-    width: 90%;
-    text-align: center;
-    transform: scale(0.9);
-    transition: transform 0.3s ease;
-    box-shadow: var(--shadow-xl);
-}
-
-.completion-modal-overlay.visible .completion-modal {
-    transform: scale(1);
-}
-
-.completion-modal-overlay.dismissing .completion-modal {
-    transform: scale(0.9);
-}
-
-.completion-icon {
-    width: 72px;
-    height: 72px;
-    background: radial-gradient(ellipse farthest-corner at right bottom, #FEDB37 0%, #FDB931 8%, #9f7928 30%, #8A6E2F 40%, transparent 80%), radial-gradient(ellipse farthest-corner at left top, #FFFFFF 0%, #FFFFAC 8%, #D1B464 25%, #5d4a1f 62.5%, #5d4a1f 100%);
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin: 0 auto 1.25rem;
-}
-
-.completion-icon i {
-    font-size: 2rem;
-    color: #fff;
-}
-
-.completion-modal h2 {
-    font-size: 1.5rem;
-    font-weight: 700;
-    color: var(--color-text-primary);
-    margin: 0 0 0.75rem;
-}
-
-.completion-modal p {
-    font-size: 1rem;
-    color: #4a5568;
-    line-height: 1.6;
-    margin: 0 0 0.5rem;
-}
-
-.completion-subtext {
-    font-size: 1rem !important;
-    color: #718096 !important;
-    margin-bottom: 1.5rem !important;
-}
-
-.completion-btn {
-    background: var(--gradient-brand);
-    color: #fff;
-    border: none;
-    padding: 0.75rem 2.5rem;
-    border-radius: var(--radius-md);
-    font-size: 1rem;
-    font-weight: 600;
-    cursor: pointer;
-    transition: transform 0.15s ease, box-shadow 0.15s ease;
-}
-
-.completion-btn:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(124, 58, 237, 0.3);
-}
-
-.completion-btn:active {
-    transform: translateY(0);
-}
+/* ==================== Final Session + Completion Modals (Tailwind) ==================== */
+/* Both celebration modals moved to inline Tailwind in app.js */
 
 /* ==================== Manual Entry Modal ==================== */
 .manual-entry-modal {
@@ -1499,10 +1112,6 @@ button {
         flex-direction: column;
         max-width: 100%;
     }
-    .todays-workout-thumbnail {
-        width: 100%;
-        height: 180px;
-    }
     .exercise-table th,
     .exercise-table td {
         padding: 1rem;
@@ -1541,11 +1150,6 @@ button {
     .equipment-badge {
         font-size: 1rem;
         padding: 0.3rem 0.6rem;
-    }
-    /* Adjust today's workout progress for mobile */
-    .todays-workout-progress {
-        flex-direction: column;
-        align-items: flex-start;
     }
 
     /* General */

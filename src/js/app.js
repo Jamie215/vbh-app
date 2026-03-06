@@ -299,37 +299,40 @@ function showFinalSessionModal() {
 
     const overlay = document.createElement('div');
     overlay.id = 'final-session-modal';
-    overlay.className = 'final-session-modal-overlay';
+    overlay.className = 'fixed inset-0 bg-black/60 flex items-center justify-center z-[1000] opacity-0 transition-opacity duration-300';
     overlay.innerHTML = `
-        <div class="final-session-modal">
-            <div class="final-session-icon">
-                <i class="fa-solid fa-star"></i>
+        <div class="bg-white rounded-2xl py-10 px-8 max-w-[440px] w-[90%] text-center scale-90 transition-transform duration-300" style="box-shadow: 0 20px 60px rgba(0,0,0,0.15);">
+            <div class="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-5" style="background: radial-gradient(ellipse farthest-corner at right bottom, #FEDB37 0%, #FDB931 8%, #9f7928 30%, #8A6E2F 40%, transparent 80%), radial-gradient(ellipse farthest-corner at left top, #FFFFFF 0%, #FFFFAC 8%, #D1B464 25%, #5d4a1f 62.5%, #5d4a1f 100%);">
+                <i class="fa-solid fa-star text-[1.75rem] text-white"></i>
             </div>
-            <h2>You're Almost at the Finish Line!</h2>
-            <p>
+            <h2 class="text-2xl font-bold text-text-primary mb-3">You're Almost at the Finish Line!</h2>
+            <p class="text-base text-[#4a5568] leading-relaxed mb-2">
                 This is your <strong>final session</strong> of the 6-week program. 
             </p>
-            <p class="final-session-subtext">
+            <p class="text-base text-[#718096] mb-6">
                 Complete today's workout and you'll have officially finished the entire program. Let's make it count! 💪
             </p>
-            <button class="final-session-btn" onclick="closeFinalSessionModal()">Let's Go!</button>
+            <button class="text-white border-none py-3 px-10 rounded-lg text-base font-semibold cursor-pointer transition-all hover:-translate-y-px" style="background: linear-gradient(135deg, #10b981, #059669); box-shadow: none;" onmouseenter="this.style.boxShadow='0 4px 12px rgba(16,185,129,0.3)'" onmouseleave="this.style.boxShadow='none'" onclick="closeFinalSessionModal()">Let's Go!</button>
         </div>
     `;
 
     document.getElementById('app').appendChild(overlay);
 
     // Animate in
-    requestAnimationFrame(() => overlay.classList.add('visible'));
+    requestAnimationFrame(() => {
+        overlay.style.opacity = '1';
+        overlay.querySelector('div').style.transform = 'scale(1)';
+    });
 }
-
 /**
  * Closes the final session modal and marks it as dismissed for this session.
  */
 function closeFinalSessionModal() {
     const modal = document.getElementById('final-session-modal');
     if (modal) {
-        modal.classList.add('dismissing');
-        modal.classList.remove('visible');
+        modal.style.opacity = '0';
+        const inner = modal.querySelector('div');
+        if (inner) inner.style.transform = 'scale(0.9)';
         setTimeout(() => modal.remove(), 300);
     }
     sessionStorage.setItem('dismissedFinalSessionModal', 'true');
@@ -372,26 +375,29 @@ function showProgramCompletionModal() {
 
     const overlay = document.createElement('div');
     overlay.id = 'program-completion-modal';
-    overlay.className = 'completion-modal-overlay';
+    overlay.className = 'fixed inset-0 bg-black/60 flex items-center justify-center z-[1000] opacity-0 transition-opacity duration-300';
     overlay.innerHTML = `
-        <div class="completion-modal">
-            <div class="completion-icon">
-                <i class="fa-solid fa-trophy"></i>
+        <div class="bg-white rounded-2xl py-10 px-8 max-w-[440px] w-[90%] text-center scale-90 transition-transform duration-300" style="box-shadow: 0 20px 60px rgba(0,0,0,0.15);">
+            <div class="w-[72px] h-[72px] rounded-full flex items-center justify-center mx-auto mb-5" style="background: radial-gradient(ellipse farthest-corner at right bottom, #FEDB37 0%, #FDB931 8%, #9f7928 30%, #8A6E2F 40%, transparent 80%), radial-gradient(ellipse farthest-corner at left top, #FFFFFF 0%, #FFFFAC 8%, #D1B464 25%, #5d4a1f 62.5%, #5d4a1f 100%);">
+                <i class="fa-solid fa-trophy text-[2rem] text-white"></i>
             </div>
-            <h2>Congratulations! 🎉</h2>
-            <p>
+            <h2 class="text-2xl font-bold text-text-primary mb-3">Congratulations! 🎉</h2>
+            <p class="text-base text-[#4a5568] leading-relaxed mb-2">
                 You've officially completed the <strong>6-week HandsUP program</strong>! 
             </p>
-            <p class="completion-subtext">
+            <p class="text-base text-[#718096] mb-6">
                 You're welcome to keep going with the Advanced exercises at your own pace. Keep up the great work!
             </p>
-            <button class="completion-btn" onclick="closeProgramCompletionModal()">Okay</button>
+            <button class="text-white border-none py-3 px-10 rounded-lg text-base font-semibold cursor-pointer transition-all hover:-translate-y-px" style="background: linear-gradient(135deg, #7c3aed, #6d28d9); box-shadow: none;" onmouseenter="this.style.boxShadow='0 4px 12px rgba(124,58,237,0.3)'" onmouseleave="this.style.boxShadow='none'" onclick="closeProgramCompletionModal()">Okay</button>
         </div>
     `;
 
     document.getElementById('app').appendChild(overlay);
 
-    requestAnimationFrame(() => overlay.classList.add('visible'));
+    requestAnimationFrame(() => {
+        overlay.style.opacity = '1';
+        overlay.querySelector('div').style.transform = 'scale(1)';
+    });
 }
 
 /**
@@ -400,8 +406,9 @@ function showProgramCompletionModal() {
 function closeProgramCompletionModal() {
     const modal = document.getElementById('program-completion-modal');
     if (modal) {
-        modal.classList.add('dismissing');
-        modal.classList.remove('visible');
+        modal.style.opacity = '0';
+        const inner = modal.querySelector('div');
+        if (inner) inner.style.transform = 'scale(0.9)';
         setTimeout(() => modal.remove(), 300);
     }
     sessionStorage.setItem('dismissedCompletionModal', 'true');
@@ -677,11 +684,13 @@ function loadPlaylists() {
 
 function createPlaylistCard(playlist) {
     const card = document.createElement('div');
-    card.className = 'playlist-card';
+    card.className = 'bg-white rounded-card overflow-hidden shadow-card border border-border transition-all duration-200 cursor-pointer hover:-translate-y-1 hover:shadow-heavy';
     card.onclick = () => showPlaylist(playlist.id);
 
     const isAdvanced = playlist.id.includes('advanced');
-    const overlayClass = isAdvanced ? 'advanced' : 'beginner';
+    const overlayBg = isAdvanced
+        ? 'background: linear-gradient(135deg, rgba(30,58,95,0.95) 0%, rgba(21,94,117,0.95) 100%); color: white;'
+        : 'background: linear-gradient(135deg, rgba(135,206,250,0.95) 0%, rgba(173,216,230,0.95) 100%); color: #1e3a5f;';
     const weekText = isAdvanced ? 'Advanced<br>Weeks 4-6 Workout' : 'Beginner<br>Weeks 0-3 Workout';
 
     const completion = getPlaylistLastCompletion(playlist.id);
@@ -689,46 +698,30 @@ function createPlaylistCard(playlist) {
     
     if (completion) {
         const dateStr = formatCompletionDate(completion.date);
-        if (dateStr === 'today') {
-            completionHTML = `
-            <div class="completion-status">
-                <div class="checkmark">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
-                        <path d="M20 6L9 17l-5-5"/>
-                    </svg>
+        const dateLabel = dateStr === 'today' ? dateStr : `on ${dateStr}`;
+        completionHTML = `
+            <div class="flex items-center gap-2 mb-3">
+                <div class="w-5 h-5 bg-success rounded-full flex items-center justify-center shrink-0">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" class="w-3 h-3"><path d="M20 6L9 17l-5-5"/></svg>
                 </div>
-                <span>You completed ${completion.completedExercises}/${completion.totalExercises} exercises ${dateStr}</span>
+                <span class="text-base text-success font-medium">You completed ${completion.completedExercises}/${completion.totalExercises} exercises ${dateLabel}</span>
             </div>
         `;
-        } else {
-            completionHTML = `
-                <div class="completion-status">
-                    <div class="checkmark">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
-                            <path d="M20 6L9 17l-5-5"/>
-                        </svg>
-                    </div>
-                    <span>You completed ${completion.completedExercises}/${completion.totalExercises} exercises on ${dateStr}</span>
-                </div>
-            `;
-        }
     }
     
     card.innerHTML = `
-        <div class="playlist-thumbnail-wrapper">
-            <div class="playlist-overlay ${overlayClass}">
-                <span class="week-label">${weekText}</span>
+        <div class="h-[180px] relative overflow-hidden">
+            <div class="absolute inset-0 flex flex-col items-center justify-center font-semibold text-center p-4" style="${overlayBg}">
+                <span class="text-2xl leading-tight">${weekText}</span>
             </div>
         </div>
-        <div class="playlist-card-content">
-            <h3>${playlist.title}</h3>
-            <p>${playlist.description}</p>
+        <div class="p-5">
+            <h3 class="text-[1.1rem] font-semibold text-text-primary mb-1">${playlist.title}</h3>
+            <p class="text-text-secondary text-base mb-3">${playlist.description}</p>
             ${completionHTML}
-            <a href="/exercises/${playlist.id}" class="go-to-workout-link" onclick="event.stopPropagation(); showPlaylist('${playlist.id}'); return false;">
+            <a href="/exercises/${playlist.id}" class="inline-flex items-center gap-1 text-[#1e3a5f] text-base font-semibold no-underline hover:text-brand" onclick="event.stopPropagation(); showPlaylist('${playlist.id}'); return false;">
                 Go to Workout 
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M5 12h14M12 5l7 7-7 7"/>
-                </svg>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-4 h-4"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
             </a>
         </div>
     `;
@@ -744,26 +737,28 @@ function loadTodaysWorkout() {
     if (!suggested) return;
 
     const isAdvanced = suggested.id.includes('advanced');
-    const overlayClass = isAdvanced ? 'advanced' : 'beginner';
+    const overlayBg = isAdvanced
+        ? 'background: linear-gradient(135deg, rgba(30,58,95,0.95) 0%, rgba(21,94,117,0.95) 100%); color: white;'
+        : 'background: linear-gradient(135deg, rgba(135,206,250,0.95) 0%, rgba(173,216,230,0.95) 100%); color: #1e3a5f;';
     const weekText = isAdvanced ? 'Advanced<br>Weeks 4-6 Workout' : 'Beginner<br>Weeks 0-3 Workout';
     
     // Calculate progress for the suggested workout (today only)
     const progress = calculatePlaylistProgress(suggested.id, true);
     
     container.innerHTML = `
-        <div class="todays-workout-thumbnail">
-            <div class="playlist-overlay ${overlayClass}">
-                <span class="week-label">${weekText}</span>
+        <div class="w-[200px] h-[140px] rounded-lg overflow-hidden shrink-0 relative max-lg:w-full max-lg:h-[180px]">
+            <div class="absolute inset-0 flex flex-col items-center justify-center font-semibold text-center p-4" style="${overlayBg}">
+                <span class="text-2xl leading-tight">${weekText}</span>
             </div>
         </div>
-        <div class="todays-workout-info">
-            <h3>${suggested.title}</h3>
-            <p>Your suggested workout for today</p>
-            <div class="todays-workout-progress">
+        <div class="flex-1">
+            <h3 class="text-xl font-semibold text-text-primary mb-2">${suggested.title}</h3>
+            <p class="text-text-secondary text-base mb-4">Your suggested workout for today</p>
+            <div class="flex items-center gap-3 mb-4 max-md:flex-col max-md:items-start">
                 <canvas id="todays-progress-ring"></canvas>
-                <span class="progress-label">${progress.completed}/${progress.total} exercises done</span>
+                <span class="text-base text-text-tertiary font-medium">${progress.completed}/${progress.total} exercises done</span>
             </div>
-            <button class="start-workout-btn" onclick="showPlaylist('${suggested.id}')">Start Workout</button>
+            <button class="bg-teal text-white border-none py-3 px-6 text-base font-semibold rounded-md cursor-pointer transition-colors hover:bg-teal-dark" onclick="showPlaylist('${suggested.id}')">Start Workout</button>
         </div>
     `;
 
@@ -832,7 +827,7 @@ function updatePlaylistProgressRing() {
     // Update the container HTML with canvas and label
     progressContainer.innerHTML = `
         <canvas id="playlist-view-progress-ring"></canvas>
-        <span class="progress-label">${progress.completed}/${progress.total} exercises</span>
+        <span class="text-base text-text-tertiary font-medium text-center">${progress.completed}/${progress.total} exercises</span>
     `;
 
     // Destroy existing chart if it exists

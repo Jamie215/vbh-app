@@ -307,6 +307,11 @@
         .form-message.success {
             @apply bg-emerald-100 text-emerald-700;
         }
+
+        /* ── JS-generated greeting text ── */
+        #user-greeting-section strong {
+            @apply text-text-primary;
+        }
     </style>
 
     <link rel="stylesheet" href="/css/style.css">
@@ -474,12 +479,12 @@
 
         <!-- Home View (hidden by default) -->
         <main id="home-view" class="hidden max-w-[1200px] mx-auto p-8 max-md:p-4">
-            <section class="mb-8">
+            <section id="user-greeting-section" class="mb-8">
                 <h1 class="text-[2rem] font-semibold text-text-primary mb-1 max-md:text-2xl">Hello, <span id="user-name">there</span></h1>
                 <p class="text-base text-text-secondary">You've reached <strong class="text-text-primary">Week <span id="user-week">1</span></strong>. Keep it up!</p>
             </section>
             <div id="progress-alert-container" class="hidden"></div>
-            <section class="mb-12">
+            <section id="todays-workout-section" class="mb-12">
                 <div class="flex items-center gap-3 mb-6">
                     <h2 class="text-xl font-semibold text-text-primary">Today's Workout</h2>
                 </div>
@@ -494,7 +499,7 @@
                     </div>
                 </div>
             </section>
-            <section class="mb-12">
+            <section id="all-workouts-section" class="mb-12">
                 <div class="flex items-center gap-3 mb-6">
                     <h2 class="text-xl font-semibold text-text-primary">All Workouts</h2>
                 </div>
