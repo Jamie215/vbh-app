@@ -130,9 +130,11 @@ function closeMobileMenu() {
             icon.classList.add('fa-bars');
         }
     }
-    // Also collapse the dropdown
+    // Also collapse the dropdown and profile menu
     const dropdown = document.getElementById('nav-dropdown');
     if (dropdown) dropdown.classList.remove('open');
+    const profile = document.getElementById('user-info');
+    if (profile) profile.classList.remove('open');
     document.body.classList.remove('dropdown-active');
 }
 
@@ -442,6 +444,10 @@ function toggleDropdown(event) {
         dropdown.classList.toggle('open');
         document.body.classList.toggle('dropdown-active', dropdown.classList.contains('open'));
     }
+
+    // Close profile dropdown if open
+    const profile = document.getElementById('user-info');
+    if (profile) profile.classList.remove('open');
 }
 
 /** Close dropdown when clicking outside of it (desktop) */
@@ -451,7 +457,31 @@ document.addEventListener('click', function (e) {
         dropdown.classList.remove('open');
         document.body.classList.remove('dropdown-active');
     }
+
+    const profile = document.getElementById('user-info');
+    if (profile && !profile.contains(e.target)) {
+        profile.classList.remove('open');
+    }
 });
+
+
+// ==================== Profile Dropdown ====================
+
+/** Toggle the profile/avatar dropdown */
+function toggleProfileDropdown(event) {
+    event.preventDefault();
+    event.stopPropagation();
+
+    const profile = document.getElementById('user-info');
+    if (profile) profile.classList.toggle('open');
+
+    // Close nav dropdown if open
+    const navDropdown = document.getElementById('nav-dropdown');
+    if (navDropdown) {
+        navDropdown.classList.remove('open');
+        document.body.classList.remove('dropdown-active');
+    }
+}
 
 
 // ==================== Mobile Hamburger Menu ====================

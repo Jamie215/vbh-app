@@ -177,6 +177,74 @@
                 background: #f5f3ff;
             }
         }
+
+        /* ── Profile dropdown ── */
+        .profile-toggle {
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            cursor: pointer;
+            background: none;
+            border: none;
+            padding: 0.25rem;
+            border-radius: 0.5rem;
+            transition: all 0.15s ease;
+            font-family: inherit;
+        }
+        .profile-toggle:hover {
+            background: #f1f5f9;
+        }
+
+        .profile-dropdown-menu {
+            display: none;
+            position: absolute;
+            top: 100%;
+            right: 0;
+            margin-top: 0.35rem;
+            min-width: 160px;
+            background: white;
+            border-radius: 0.5rem;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.1), 0 1px 3px rgba(0,0,0,0.06);
+            border: 1px solid #e9ecef;
+            padding: 0.35rem 0;
+            z-index: 200;
+            flex-direction: column;
+        }
+        #user-info.open .profile-dropdown-menu {
+            display: flex;
+        }
+
+        .profile-dropdown-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.6rem 1rem;
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: #64748b;
+            text-decoration: none;
+            background: none;
+            border: none;
+            width: 100%;
+            cursor: pointer;
+            transition: all 0.15s ease;
+            font-family: inherit;
+            white-space: nowrap;
+            border-radius: 0.25rem;
+            margin: 0 0.25rem;
+            box-sizing: border-box;
+        }
+        .profile-dropdown-item:hover {
+            background: #f1f5f9;
+            color: #1a1a2e;
+        }
+        .profile-dropdown-item.text-danger {
+            color: #dc3545;
+        }
+        .profile-dropdown-item.text-danger:hover {
+            background: #fef2f2;
+            color: #dc3545;
+        }
     </style>
 
     <link rel="stylesheet" href="css/style.css">
@@ -222,15 +290,21 @@
                         <a href="/education" class="nav-link" onclick="showEducation(); return false;">Education</a>
                     </div>
                 </div>
-                <!-- Right: user info + sign out + hamburger -->
+                <!-- Right: profile dropdown + hamburger -->
                 <div class="flex items-center gap-4 max-lg:gap-3">
-                    <div id="user-info" class="hidden flex items-center gap-3">
-                        <span id="user-name-display" class="font-medium text-[#1a1a2e] text-base max-lg:hidden"></span>
-                        <div id="user-avatar" class="w-10 h-10 rounded-full flex items-center justify-center text-white font-semibold text-base" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
-                            <span id="user-initial"></span>
+                    <div id="user-info" class="hidden relative">
+                        <button class="profile-toggle" onclick="toggleProfileDropdown(event)">
+                            <span id="user-name-display" class="font-medium text-[#1a1a2e] text-base max-lg:hidden"></span>
+                            <div id="user-avatar" class="w-10 h-10 rounded-full flex items-center justify-center text-white font-semibold text-base shrink-0" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                                <span id="user-initial"></span>
+                            </div>
+                        </button>
+                        <div id="profile-dropdown-menu" class="profile-dropdown-menu">
+                            <button id="signout-button" class="profile-dropdown-item text-danger" onclick="signOut()">
+                                <i class="fa-solid fa-right-from-bracket"></i> Sign Out
+                            </button>
                         </div>
                     </div>
-                    <button id="signout-button" class="hidden bg-transparent text-danger border-2 border-danger py-2 px-5 text-base font-medium rounded-md cursor-pointer transition-all duration-200 hover:bg-danger hover:text-white max-lg:text-sm max-lg:py-1 max-lg:px-2.5" onclick="signOut()">Sign Out</button>
                     <button id="hamburger-btn" class="lg:hidden flex items-center justify-center bg-transparent border-none cursor-pointer text-lg text-[#64748b] p-2 rounded-md transition-all duration-200 hover:bg-[#f1f5f9] hover:text-[#1a1a2e] leading-none" onclick="toggleMobileMenu()" aria-label="Toggle menu">
                         <i class="fa-solid fa-bars" id="hamburger-icon"></i>
                     </button>
