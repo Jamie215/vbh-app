@@ -309,15 +309,15 @@
         }
     </style>
 
-    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="/css/style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css">
-    <link rel="icon" type="image/png" href="icon.png">
+    <link rel="icon" type="image/png" href="/icon.png">
 </head>
 <body>
     <div id="app">
         <!-- Loading Screen (shown first) -->
         <div id="loading-screen" class="fixed inset-0 bg-surface flex flex-col items-center justify-center z-[9999]">
-            <img src="icon.png" alt="HandsUP" class="w-16 h-16 object-contain mb-4">
+            <img src="/icon.png" alt="HandsUP" class="w-16 h-16 object-contain mb-4">
             <p class="text-text-secondary text-base">Loading...</p>
         </div>
 
@@ -327,7 +327,7 @@
                 <!-- Left: logo + nav links -->
                 <div class="flex items-center gap-12">
                     <div class="flex items-center gap-2 cursor-pointer" onclick="showHome()">
-                        <img src="icon.png" alt="HandsUP" class="w-8 h-8 object-contain">
+                        <img src="/icon.png" alt="HandsUP" class="w-8 h-8 object-contain">
                         <span class="text-xl font-bold text-[#1a1a2e]">HandsUP</span>
                     </div>
                     <div class="flex items-center gap-2" id="nav-links">
@@ -378,7 +378,7 @@
         <main id="auth-view" class="hidden min-h-screen flex items-center justify-center bg-surface p-8">
             <div class="bg-white rounded-2xl shadow-elevated py-12 px-16 w-full max-w-[560px] max-[540px]:py-8 max-[540px]:px-6">
                 <div class="flex items-center gap-3 mb-10">
-                    <img src="icon.png" alt="HandsUP" class="w-8 h-8 object-contain">
+                    <img src="/icon.png" alt="HandsUP" class="w-8 h-8 object-contain">
                     <span class="text-xl font-semibold text-brand">HandsUP Exercise Program</span>
                 </div>
                 
@@ -695,30 +695,30 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
     
     <!-- 2. Supabase client & data -->
-    <script src="js/playlists.js"></script>
+    <script src="/js/playlists.js"></script>
 
     <!-- 3. Shared utilities & state -->
-    <script src="js/utility.js"></script>
+    <script src="/js/utility.js"></script>
 
     <!-- 4. Alerts module -->
-    <script src="js/alerts.js"></script>
+    <script src="/js/alerts.js"></script>
     
     <!-- 5. Navigation controller -->
-    <script src="js/navigation.js"></script>
+    <script src="/js/navigation.js"></script>
     
     <!-- 6. Auth module -->
-    <script src="js/auth.js"></script>
+    <script src="/js/auth.js"></script>
     
     <!-- 7. Videos module -->
-    <script src="js/videos.js"></script>
+    <script src="/js/videos.js"></script>
     
     <!-- 8. Progress module -->
-    <script src="js/progress.js"></script>
+    <script src="/js/progress.js"></script>
 
     <!-- 9. Manual entry module -->
-    <script src="js/manual_entry.js"></script>
+    <script src="/js/manual_entry.js"></script>
     
     <!-- 10. Main app -->
-    <script src="js/app.js"></script>
+    <script src="/js/app.js"></script>
 </body>
 </html>
