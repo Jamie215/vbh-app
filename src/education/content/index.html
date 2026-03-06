@@ -132,7 +132,9 @@
         try {
           var saved = window.parent.eduProgress;
           if (saved && typeof saved === 'object' && saved.lessons) {
-            return saved;
+            var copy = JSON.parse(JSON.stringify(saved));
+            delete copy.currentLesson;
+            return copy;
           }
         } catch(e) {}
         return defaults;
