@@ -183,7 +183,7 @@ function renderProgressAlert() {
 
     alertContainer.classList.remove('hidden');
     alertContainer.innerHTML = `
-        <div class="progress-alert flex items-center gap-4 py-4 px-5 rounded-xl border-l-4 ${s.container}">
+        <div class="progress-alert flex items-center gap-4 py-4 px-5 mb-8 rounded-xl border-l-4 ${s.container}">
             <div class="shrink-0 w-10 h-10 rounded-full flex items-center justify-center text-xl ${s.icon}">
                 <i class="fa-solid ${alertState.icon}"></i>
             </div>
