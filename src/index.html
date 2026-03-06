@@ -4,6 +4,68 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>HandsUP</title>
+
+    <!-- Tailwind CSS (CDN) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand:   { DEFAULT: '#7c3aed', dark: '#6d28d9' },
+                        teal:    { DEFAULT: '#0d9488', dark: '#0f766e' },
+                        danger:  { DEFAULT: '#dc3545', light: '#ef4444' },
+                    }
+                }
+            }
+        }
+    </script>
+
+    <!-- Navbar dynamic states (JS-toggled classes that are awkward as pure utilities) -->
+    <style type="text/tailwindcss">
+        /* Base nav link: layout + colors + transitions */
+        .nav-link {
+            @apply flex items-center gap-2 py-2 px-4 text-[#64748b] no-underline text-base font-medium rounded-md transition-all duration-200;
+        }
+        .nav-link:hover {
+            @apply text-[#1a1a2e] bg-[#f1f5f9];
+        }
+
+        /* Desktop: active link gets a purple underline */
+        .nav-link.active {
+            @apply text-brand border-b-2 border-brand rounded-none;
+            padding-bottom: calc(0.5rem - 2px);
+        }
+
+        /* Mobile (≤1023px): nav-links hidden by default, shown when .open */
+        @media (max-width: 1023px) {
+            #nav-links {
+                display: none;
+                flex-direction: column;
+                width: 100%;
+                order: 10;
+                gap: 0;
+                padding-top: 0.5rem;
+                border-top: 1px solid #e9ecef;
+                margin-top: 0.5rem;
+            }
+            #nav-links.open {
+                display: flex;
+            }
+            .nav-link {
+                @apply w-full py-3 px-4 rounded-md text-base;
+            }
+            .nav-link:hover {
+                @apply bg-[#f8fafc];
+            }
+            /* Override: active link on mobile uses bg instead of underline */
+            .nav-link.active {
+                @apply border-b-0 rounded-md bg-violet-50 text-brand;
+                padding-bottom: 0.75rem;
+            }
+        }
+    </style>
+
     <link rel="stylesheet" href="css/style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css">
     <link rel="icon" type="image/png" href="icon.png">
@@ -17,29 +79,31 @@
         </div>
 
         <!-- Navigation Bar (hidden by default) -->
-        <nav id="navbar" class="navbar hidden">
-            <div class="nav-container">
-                <div class="nav-left">
-                    <div class="logo" onclick="showHome()" style="cursor: pointer;">
-                        <img src="icon.png" alt="HandsUP" class="logo-icon">
-                        <span class="logo-text">HandsUP</span>
+        <nav id="navbar" class="bg-white sticky top-0 z-[100] shadow-sm border-b border-[#e9ecef] hidden">
+            <div class="max-w-[1400px] mx-auto py-3 px-8 flex justify-between items-center max-lg:px-4 max-lg:flex-wrap">
+                <!-- Left: logo + nav links -->
+                <div class="flex items-center gap-12 max-lg:gap-4">
+                    <div class="flex items-center gap-2 cursor-pointer" onclick="showHome()">
+                        <img src="icon.png" alt="HandsUP" class="w-8 h-8 object-contain">
+                        <span class="text-xl font-bold text-[#1a1a2e]">HandsUP</span>
                     </div>
-                    <div class="nav-links" id="nav-links">
+                    <div class="flex items-center gap-2" id="nav-links">
                         <a href="#" class="nav-link active" onclick="showHome(); return false;">Exercises</a>
                         <a href="#" class="nav-link" onclick="showMyProgress(); return false;">My Progress</a>
                         <a href="#" class="nav-link" onclick="showHowToUse(); return false;">How to Use the Program</a>
                         <a href="#" class="nav-link" onclick="showEducation(); return false;">Education</a>
                     </div>
                 </div>
-                <div class="nav-right">
-                    <div id="user-info" class="hidden">
-                        <span id="user-name-display"></span>
-                        <div id="user-avatar">
+                <!-- Right: user info + sign out + hamburger -->
+                <div class="flex items-center gap-4 max-lg:gap-3">
+                    <div id="user-info" class="hidden flex items-center gap-3">
+                        <span id="user-name-display" class="font-medium text-[#1a1a2e] text-base max-lg:hidden"></span>
+                        <div id="user-avatar" class="w-10 h-10 rounded-full flex items-center justify-center text-white font-semibold text-base" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
                             <span id="user-initial"></span>
                         </div>
                     </div>
-                    <button id="signout-button" class="hidden" onclick="signOut()">Sign Out</button>
-                    <button class="hamburger-btn" id="hamburger-btn" onclick="toggleMobileMenu()" aria-label="Toggle menu">
+                    <button id="signout-button" class="hidden bg-transparent text-danger border-2 border-danger py-2 px-5 text-base font-medium rounded-md cursor-pointer transition-all duration-200 hover:bg-danger hover:text-white max-lg:text-sm max-lg:py-1 max-lg:px-2.5" onclick="signOut()">Sign Out</button>
+                    <button id="hamburger-btn" class="lg:hidden flex items-center justify-center bg-transparent border-none cursor-pointer text-lg text-[#64748b] p-2 rounded-md transition-all duration-200 hover:bg-[#f1f5f9] hover:text-[#1a1a2e] leading-none" onclick="toggleMobileMenu()" aria-label="Toggle menu">
                         <i class="fa-solid fa-bars" id="hamburger-icon"></i>
                     </button>
                 </div>
