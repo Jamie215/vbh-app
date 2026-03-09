@@ -39,8 +39,8 @@ function openManualEntryModal() {
     const exerciseArea = document.getElementById('manual-entry-exercises');
     if (exerciseArea) {
         exerciseArea.innerHTML = `
-            <div class="manual-entry-empty-state">
-                <p>Select a date and workout to log your exercises</p>
+            <div class="text-center py-12 px-4 text-text-muted">
+                <p class="text-base">Select a date and workout to log your exercises</p>
             </div>
         `;
     }
@@ -165,8 +165,8 @@ function renderManualEntryExercises() {
             const setData = videoProgress[`set${i}`] || { reps: video.reps, completed: false };
             
             setsHTML += `
-                <div class="manual-set-row">
-                    <span class="manual-set-label">Set ${i}</span>
+                <div class="flex items-center gap-3">
+                    <span class="w-10 text-base font-medium text-text-tertiary">Set ${i}</span>
                     <div class="rep-counter">
                         <button type="button" class="rep-btn" onclick="manualDecrementReps('${video.id}', ${i})">
                             <i class="fa-solid fa-minus"></i>
@@ -210,22 +210,22 @@ function renderManualEntryExercises() {
         }
 
         html += `
-            <div class="manual-exercise-card">
-                <div class="manual-exercise-header">
-                    <div class="manual-exercise-info">
-                        <span class="manual-exercise-number">${index + 1}</span>
+            <div class="bg-subtle border border-border-light rounded-[10px] p-4 px-5 mb-3">
+                <div class="mb-3">
+                    <div class="flex items-start gap-3 max-md:flex-col">
+                        <span class="w-7 h-7 rounded-full bg-gradient-to-br from-[#667eea] to-[#764ba2] text-white text-base font-bold flex items-center justify-center shrink-0 mt-0.5 max-md:mt-0">${index + 1}</span>
                         <div class="manual-exercise-thumb-wrapper" id="manual-preview-${video.id}" onclick="toggleVideoPreview('${video.id}')">
-                            <img src="${video.thumbnail}" alt="${video.title}" class="manual-exercise-thumb">
-                            <span class="manual-exercise-play"><i class="fa-solid fa-play"></i></span>
+                            <img src="${video.thumbnail}" alt="${video.title}" class="w-full h-full object-cover block">
+                            <span class="absolute inset-0 flex items-center justify-center bg-black/35 transition-colors hover:bg-black/50"><i class="fa-solid fa-play text-white text-base"></i></span>
                         </div>
                         <div>
-                            <h4>${video.title}</h4>
-                            <p class="manual-exercise-rec">Recommended: ${video.sets} sets of ${video.reps} reps${video.needsEachSide ? ' (each side)' : ''}</p>
-                            ${equipmentHTML ? `<div class="manual-exercise-equipment">${equipmentHTML}</div>` : ''}
+                            <h4 class="text-base font-semibold text-text-primary mb-0.5">${video.title}</h4>
+                            <p class="text-base text-text-secondary">Recommended: ${video.sets} sets of ${video.reps} reps${video.needsEachSide ? ' (each side)' : ''}</p>
+                            ${equipmentHTML ? `<div class="mt-1 flex items-center gap-1 flex-wrap">${equipmentHTML}</div>` : ''}
                         </div>
                     </div>
                 </div>
-                <div class="manual-sets-container">
+                <div class="flex flex-col gap-2 pl-10 max-md:pl-0">
                     ${setsHTML}
                 </div>
             </div>
@@ -261,14 +261,14 @@ function toggleVideoPreview(videoId) {
     wrapper.onclick = null; // Remove click handler while embed is active
     wrapper.classList.add('preview-active');
     wrapper.innerHTML = `
-        <div class="manual-preview-container">
+        <div class="relative w-full h-full">
             <iframe 
                 src="https://www.youtube.com/embed/${videoId}?autoplay=1&mute=1&loop=1&playlist=${videoId}&controls=0&modestbranding=1&rel=0&playsinline=1"
                 frameborder="0"
                 allow="autoplay"
-                class="manual-preview-iframe">
+                class="w-full h-full block rounded-md">
             </iframe>
-            <button type="button" class="manual-preview-close" onclick="event.stopPropagation(); closeVideoPreview();" title="Close preview">
+            <button type="button" class="absolute top-1 right-1 w-[22px] h-[22px] rounded-full bg-black/60 text-white border-none text-base flex items-center justify-center cursor-pointer transition-colors z-[1] hover:bg-black/85" onclick="event.stopPropagation(); closeVideoPreview();" title="Close preview">
                 <i class="fa-solid fa-xmark"></i>
             </button>
         </div>
@@ -287,8 +287,8 @@ function closeVideoPreview() {
     if (wrapper && video) {
         wrapper.classList.remove('preview-active');
         wrapper.innerHTML = `
-            <img src="${video.thumbnail}" alt="${video.title}" class="manual-exercise-thumb">
-            <span class="manual-exercise-play"><i class="fa-solid fa-play"></i></span>
+            <img src="${video.thumbnail}" alt="${video.title}" class="w-full h-full object-cover block">
+            <span class="absolute inset-0 flex items-center justify-center bg-black/35 transition-colors hover:bg-black/50"><i class="fa-solid fa-play text-white text-base"></i></span>
         `;
         wrapper.onclick = () => toggleVideoPreview(videoId);
     }
@@ -392,9 +392,15 @@ function showManualEntryToast(message, icon = 'fa-circle-info', type = 'info') {
 
     const toast = document.createElement('div');
     toast.id = 'manual-entry-toast';
-    toast.className = `manual-entry-toast toast-${type}`;
+    
+    const bgStyle = type === 'advance' 
+        ? 'background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);'
+        : 'background: linear-gradient(135deg, #f59e0b 0%, #f97316 100%);';
+    
+    toast.className = 'fixed bottom-8 left-1/2 flex items-center gap-3 py-3.5 px-6 rounded-[10px] text-base font-medium text-white z-[2000] max-w-[90vw] opacity-0 transition-all duration-300';
+    toast.style.cssText = `transform: translateX(-50%) translateY(20px); box-shadow: 0 8px 24px rgba(0,0,0,0.15); ${bgStyle}`;
     toast.innerHTML = `
-        <i class="fa-solid ${icon}"></i>
+        <i class="fa-solid ${icon} text-[1.1rem] shrink-0"></i>
         <span>${message}</span>
     `;
 
@@ -402,12 +408,14 @@ function showManualEntryToast(message, icon = 'fa-circle-info', type = 'info') {
 
     // Animate in
     requestAnimationFrame(() => {
-        toast.classList.add('visible');
+        toast.style.opacity = '1';
+        toast.style.transform = 'translateX(-50%) translateY(0)';
     });
 
     // Auto-dismiss after 10 seconds
     setTimeout(() => {
-        toast.classList.remove('visible');
+        toast.style.opacity = '0';
+        toast.style.transform = 'translateX(-50%) translateY(20px)';
         setTimeout(() => toast.remove(), 300);
     }, 10000);
 }
