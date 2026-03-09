@@ -89,9 +89,9 @@ function renderSetTrackingPanel() {
         const setData = currentVideoProgress[`set${i}`] || { reps: currentVideo.reps, completed: false };
         
         setsHTML += `
-            <div class="set-row">
-                <span class="set-label">Set ${i}</span>
-                <div class="rep-counter">
+            <div class="flex items-center gap-3">
+                <span class="w-[45px] text-base font-medium text-text-tertiary">Set ${i}</span>
+                <div class="flex items-center border border-border-light rounded-md overflow-hidden">
                     <button type="button" class="rep-btn" onclick="decrementReps(${i})">
                         <i class="fa-solid fa-minus"></i>
                     </button>
@@ -106,8 +106,8 @@ function renderSetTrackingPanel() {
                         <i class="fa-solid fa-plus"></i>
                     </button>
                 </div>
-                <span class="reps-label">reps</span>
-                <label class="set-checkbox-wrapper">
+                <span class="text-base text-text-secondary -ml-1">reps</span>
+                <label class="relative flex items-center justify-center cursor-pointer ml-auto">
                     <input type="checkbox" 
                            class="set-checkbox" 
                            id="completed_set${i}"
@@ -120,11 +120,11 @@ function renderSetTrackingPanel() {
     }
     
     panel.innerHTML = `
-        <div class="tracking-header">
-            <h3>How many reps and sets did you do?</h3>
-            <p>Tap the plus or minus to change the number of reps you did. Check the box if you completed the set.</p>
+        <div class="mb-5">
+            <h3 class="text-[1.1rem] font-semibold text-text-primary mb-2 leading-tight">How many reps and sets did you do?</h3>
+            <p class="text-base text-text-secondary leading-relaxed">Tap the plus or minus to change the number of reps you did. Check the box if you completed the set.</p>
         </div>
-        <div class="sets-list">
+        <div class="flex flex-col gap-3 mb-6">
             ${setsHTML}
         </div>
         <button type="button" class="done-btn" id="done-btn" onclick="saveVideoProgress()">Done</button>

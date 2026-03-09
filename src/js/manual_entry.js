@@ -167,7 +167,7 @@ function renderManualEntryExercises() {
             setsHTML += `
                 <div class="flex items-center gap-3">
                     <span class="w-10 text-base font-medium text-text-tertiary">Set ${i}</span>
-                    <div class="rep-counter">
+                    <div class="flex items-center border border-border-light rounded-md overflow-hidden">
                         <button type="button" class="rep-btn" onclick="manualDecrementReps('${video.id}', ${i})">
                             <i class="fa-solid fa-minus"></i>
                         </button>
@@ -182,8 +182,8 @@ function renderManualEntryExercises() {
                             <i class="fa-solid fa-plus"></i>
                         </button>
                     </div>
-                    <span class="reps-label">reps</span>
-                    <label class="set-checkbox-wrapper">
+                    <span class="text-base text-text-secondary -ml-1">reps</span>
+                    <label class="relative flex items-center justify-center cursor-pointer ml-auto">
                         <input type="checkbox" 
                                class="set-checkbox" 
                                id="manual_completed_${video.id}_set${i}"

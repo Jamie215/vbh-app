@@ -352,131 +352,10 @@ button {
     font-style: italic;
 }
 
-/* ==================== Save Progress Button - Bottom Right ==================== */
-.save-progress-container {
-    display: flex;
-    justify-content: flex-end;
-    margin-top: 1.5rem;
-}
-
-.save-progress-btn {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.5rem;
-    background: var(--color-teal);
-    color: white;
-    padding: 0.75rem 1.5rem;
-    font-size: 1rem;
-    font-weight: 600;
-    white-space: nowrap;
-    border: none;
-    border-radius: var(--radius-md);
-    cursor: pointer;
-    transition: all 0.2s ease;
-}
-
-.save-progress-btn i {
-    font-size: 1rem;
-}
-
-.save-progress-btn:hover {
-    background: var(--color-teal-dark);
-    transform: translateY(-1px);
-}
-
-.save-progress-btn:disabled {
-    background: var(--color-text-muted);
-    cursor: not-allowed;
-    transform: none;
-}
-
-.save-progress-btn.saved {
-    background: var(--color-success);
-}
-
-/* ==================== Set Counter (kept for potential future use) ==================== */
-.sets-counter {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-}
-
-.counter-btn {
-    width: 36px;
-    height: 36px;
-    border: 2px solid;
-    background: white;
-    border-radius: var(--radius-sm);
-    font-size: 1.25rem;
-    font-weight: bold;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: all 0.2s ease;
-    padding: 0;
-}
-
-.counter-btn:hover:not(:disabled) {
-    transform: scale(1.05);
-}
-
-.counter-btn:disabled {
-    opacity: 0.4;
-    cursor: not-allowed;
-}
-
-.minus-btn {
-    border-color: var(--color-danger-light);
-    color: var(--color-danger-light);
-}
-
-.minus-btn:hover:not(:disabled) {
-    background: var(--color-danger-light);
-    color: white;
-}
-
-.plus-btn {
-    border-color: var(--color-success);
-    color: var(--color-success);
-}
-
-.plus-btn:hover:not(:disabled) {
-    background: var(--color-success);
-    color: white;
-}
-
-.sets-input {
-    width: 50px;
-    height: 36px;
-    text-align: center;
-    border: 2px solid var(--color-border-light);
-    border-radius: var(--radius-sm);
-    font-size: 1rem;
-    font-weight: 600;
-    color: var(--color-text-primary);
-    background: var(--color-bg-subtle);
-}
-
-.sets-input::-webkit-inner-spin-button,
-.sets-input::-webkit-outer-spin-button {
-    -webkit-appearance: none;
-    margin: 0;
-}
-
-.sets-input[type=number] {
-    -moz-appearance: textfield;
-}
-
-.sets-label {
-    color: var(--color-text-secondary);
-    font-size: 1rem;
-    font-weight: 500;
-}
-
 /* ==================== Video Player Modal (Tailwind) ==================== */
-/* Close button, video header, body layout, player section moved to inline Tailwind.
-   Modal base (.modal, .modal-content) kept as shared by manual entry modal. */
+/* Tracking header, sets-list, set-row, set-label, rep-counter, reps-label,
+   set-checkbox-wrapper all moved to inline Tailwind in videos.js + manual_entry.js.
+   Modal base, shared controls, and done button kept below. */
 .modal {
     position: fixed;
     top: 0;
@@ -507,54 +386,7 @@ button {
     width: 100%;
 }
 
-.tracking-header {
-    margin-bottom: 1.25rem;
-}
-
-.tracking-header h3 {
-    font-size: 1.1rem;
-    font-weight: 600;
-    color: var(--color-text-primary);
-    margin-bottom: 0.5rem;
-    line-height: 1.3;
-}
-
-.tracking-header p {
-    font-size: 1rem;
-    color: var(--color-text-secondary);
-    line-height: 1.5;
-}
-
-/* Sets list */
-.sets-list {
-    display: flex;
-    flex-direction: column;
-    gap: 0.75rem;
-    margin-bottom: 1.5rem;
-}
-
-.set-row {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-}
-
-.set-label {
-    width: 45px;
-    font-size: 1rem;
-    font-weight: 500;
-    color: var(--color-text-tertiary);
-}
-
-/* Rep counter controls */
-.rep-counter {
-    display: flex;
-    align-items: center;
-    border: 1px solid var(--color-border-light);
-    border-radius: var(--radius-sm);
-    overflow: hidden;
-}
-
+/* Rep button (shared: videos.js + manual_entry.js) */
 .rep-btn {
     width: 32px;
     height: 32px;
@@ -568,20 +400,15 @@ button {
     justify-content: center;
     transition: all 0.15s ease;
 }
-
-.rep-btn i {
-    font-size: 1rem;
-}
-
 .rep-btn:hover {
     background: var(--color-border-subtle);
     color: var(--color-text-primary);
 }
-
 .rep-btn:active {
     background: var(--color-border-light);
 }
 
+/* Rep input (shared) */
 .rep-input {
     width: 40px;
     height: 32px;
@@ -594,33 +421,16 @@ button {
     color: var(--color-text-primary);
     background: white;
 }
-
 .rep-input::-webkit-inner-spin-button,
 .rep-input::-webkit-outer-spin-button {
     -webkit-appearance: none;
     margin: 0;
 }
-
 .rep-input[type=number] {
     -moz-appearance: textfield;
 }
 
-.reps-label {
-    font-size: 1rem;
-    color: var(--color-text-secondary);
-    margin-left: -0.25rem;
-}
-
-/* Checkbox styling */
-.set-checkbox-wrapper {
-    position: relative;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    margin-left: auto;
-}
-
+/* Checkbox (shared) */
 .set-checkbox {
     position: absolute;
     opacity: 0;
@@ -628,7 +438,6 @@ button {
     height: 0;
     width: 0;
 }
-
 .checkmark-box {
     width: 22px;
     height: 22px;
@@ -639,24 +448,20 @@ button {
     justify-content: center;
     transition: all 0.15s ease;
 }
-
 .checkmark-box i {
     color: white;
     font-size: 1rem;
     opacity: 0;
     transition: opacity 0.15s ease;
 }
-
 .set-checkbox:checked + .checkmark-box {
     background: var(--color-brand);
     border-color: var(--color-brand);
 }
-
 .set-checkbox:checked + .checkmark-box i {
     opacity: 1;
 }
-
-.set-checkbox-wrapper:hover .checkmark-box {
+label:hover .checkmark-box {
     border-color: var(--color-brand);
 }
 
@@ -673,15 +478,10 @@ button {
     cursor: pointer;
     transition: all 0.2s ease;
 }
-
 .done-btn:hover {
     background: var(--color-brand);
     color: white;
 }
-
-/* Video details fallback - removed (unused) */
-
-/* Loading Screen - moved to Tailwind */
 
 /* ==================== Auth Page View (Tailwind) ==================== */
 /* All auth styles moved to inline Tailwind in index.html + component rules in <style> block */
