@@ -80,16 +80,6 @@ button {
 }
 
 
-/* ==================== Navigation ====================
-   Navbar styles moved to Tailwind utility classes.
-   See index.html <nav> element + <style> block for
-   dynamic states (.nav-link.active, .nav-links.open).
-   ==================== */
-
-
-/* ==================== Main Content + Home View (Tailwind) ==================== */
-/* Layout containers, greeting, alert container, section headers moved to inline Tailwind */
-
 @keyframes slideIn {
     from { opacity: 0; transform: translateY(-10px); }
     to   { opacity: 1; transform: translateY(0); }
@@ -117,239 +107,6 @@ button {
 #todays-progress-ring,
 #playlist-view-progress-ring {
     display: block;
-}
-
-/* ==================== All Workouts + Playlist Grid (Tailwind) ==================== */
-/* Section spacing and grid layout moved to inline Tailwind */
-
-/* ==================== Playlist Cards (Tailwind) ==================== */
-/* All playlist card styles moved to inline Tailwind in app.js createPlaylistCard() */
-
-/* ==================== Playlist View (Tailwind) ==================== */
-/* All playlist view styles moved to inline Tailwind */
-
-/* ==================== Exercise Table - Updated Layout ==================== */
-.exercise-table-container {
-    background: white;
-    border-radius: var(--radius-lg);
-    overflow: hidden;
-    box-shadow: var(--shadow-sm);
-    border: 1px solid var(--color-border);
-    margin-bottom: 1.5rem;
-}
-
-.exercise-table {
-    width: 100%;
-    border-collapse: collapse;
-}
-
-.exercise-table thead {
-    background: #e3dbec;
-    border-bottom: 1px solid var(--color-border);
-}
-
-.exercise-table th {
-    padding: 1rem 1.5rem;
-    text-align: left;
-    font-weight: 600;
-    color: var(--color-text-tertiary);
-    font-size: 1rem;
-    white-space: nowrap;
-}
-
-.exercise-table th.col-order {
-    width: 100px;
-    text-align: center;
-}
-
-.exercise-table th.col-name {
-    width: 30%;
-}
-
-.exercise-table th.col-sets-reps {
-    width: 260px;
-    text-align: center;
-}
-
-.exercise-table th.col-equipment {
-    width: auto;
-}
-
-.exercise-table td {
-    padding: 1.25rem 1.5rem;
-    border-bottom: 1px solid var(--color-border-subtle);
-    color: var(--color-text-primary);
-    vertical-align: middle;
-}
-
-.exercise-table td.col-order {
-    text-align: center;
-    font-weight: 500;
-    color: var(--color-text-secondary);
-    font-size: 1rem;
-}
-
-.exercise-table td.col-sets-reps {
-    text-align: center;
-}
-
-.exercise-table tbody tr:last-child td {
-    border-bottom: none;
-}
-
-.exercise-table tbody tr:hover {
-    background: #fafbfc;
-}
-
-/* Exercise name cell with thumbnail */
-.exercise-video-cell {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-}
-
-.video-thumbnail-wrapper {
-    position: relative;
-    width: 120px;
-    height: 70px;
-    flex-shrink: 0;
-    cursor: pointer;
-    border-radius: var(--radius-sm);
-    overflow: hidden;
-    background: var(--color-border-light);
-}
-
-.video-thumbnail {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    transition: transform 0.2s ease;
-}
-
-.video-thumbnail-wrapper:hover .video-thumbnail {
-    transform: scale(1.05);
-}
-
-.video-thumbnail-wrapper::after {
-    content: '▶';
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    background: rgba(0, 0, 0, 0.6);
-    color: white;
-    width: 32px;
-    height: 32px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 1rem;
-    padding-left: 2px;
-    transition: background 0.2s ease;
-}
-
-.video-thumbnail-wrapper:hover::after {
-    background: rgba(124, 58, 237, 0.9);
-}
-
-.exercise-name {
-    font-weight: 600;
-    font-size: 1rem;
-    color: var(--color-text-primary);
-}
-
-/* Sets/Reps text */
-.sets-reps-text {
-    color: var(--color-text-tertiary);
-    font-size: 1rem;
-    line-height: 1.4;
-}
-
-.sets-reps-text .each-side {
-    display: block;
-    font-size: 1rem;
-    color: var(--color-text-secondary);
-}
-
-/* ==================== Equipment Badges - New Design ==================== */
-.equipment-badge {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.5rem;
-    padding: 0.4rem 0.85rem;
-    border-radius: 20px;
-    font-size: 1rem;
-    font-weight: 500;
-    white-space: nowrap;
-}
-
-/* Equipment colored dots - strong colors */
-.equipment-dot {
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-    flex-shrink: 0;
-}
-
-.dot-easier {
-    background-color: #22c55e;
-}
-
-.dot-more-challenging {
-    background-color: #f97316;
-}
-
-.dot-challenging {
-    background-color: #f62681;
-}
-
-.dot-neutral {
-    background-color: #3b82f6;
-}
-
-.dot-none {
-    background-color: #9ca3af;
-}
-
-/* Badge backgrounds - lighter/softer colors */
-.equipment-badge.badge-easier {
-    background: #f0fdf4;
-    color: #166534;
-}
-
-.equipment-badge.badge-more-challenging {
-    background: #fffbeb;
-    color: #b45309;
-}
-
-.equipment-badge.badge-challenging {
-    background: #f6268117;
-    color: #8C1946;
-}
-
-.equipment-badge.badge-neutral {
-    background: #eff6ff;
-    color: #1d4ed8;
-}
-
-.equipment-badge.badge-none {
-    background: #f9fafb;
-    color: #6b7280;
-}
-
-/* "or" separator between equipment options */
-.equipment-separator {
-    display: inline-block;
-    margin: 0 0.5rem;
-    color: var(--color-text-muted);
-    font-size: 1rem;
-    font-weight: 400;
-}
-
-.no-equipment {
-    color: var(--color-text-muted);
-    font-style: italic;
 }
 
 /* ==================== Video Player Modal (Tailwind) ==================== */
@@ -483,27 +240,11 @@ label:hover .checkmark-box {
     color: white;
 }
 
-/* ==================== Auth Page View (Tailwind) ==================== */
-/* All auth styles moved to inline Tailwind in index.html + component rules in <style> block */
-
-/* ==================== My Progress View (Tailwind) ==================== */
-/* Layout, header, stats cards, and progress bar styles moved to inline Tailwind in index.html */
-
-/* ==================== Chart Section (Tailwind) ==================== */
-/* Layout, container, and detail panel styles moved to inline Tailwind in index.html */
-
 /* Chart.js canvas override (must stay in CSS for !important) */
 .chart-container canvas {
     width: 100% !important;
     height: 100% !important;
 }
-
-/* ==================== Activity Feed (Tailwind) ==================== */
-/* All progress view JS-generated styles (chart-empty, detail-header, detail-empty,
-   activity-item, activity-empty) moved to inline Tailwind in progress.js */
-
-/* ==================== Final Session + Completion Modals (Tailwind) ==================== */
-/* Both celebration modals moved to inline Tailwind in app.js */
 
 /* ==================== Manual Entry Modal (Tailwind) ==================== */
 /* Static modal HTML and JS-generated exercise cards moved to Tailwind.
@@ -528,23 +269,15 @@ label:hover .checkmark-box {
     border-radius: var(--radius-md);
 }
 
-/* ==================== Toast Notification (Tailwind) ==================== */
-/* Toast styles moved to inline Tailwind + inline styles in manual_entry.js */
-
 /* ============================================================
    RESPONSIVE BREAKPOINTS (consolidated)
    ============================================================ */
 
 /* --- max-width: 1024px --- */
 @media (max-width: 1024px) {
-
     #todays-workout-card {
         flex-direction: column;
         max-width: 100%;
-    }
-    .exercise-table th,
-    .exercise-table td {
-        padding: 1rem;
     }
 }
 
@@ -557,31 +290,6 @@ label:hover .checkmark-box {
 
 /* --- max-width: 768px --- */
 @media (max-width: 768px) {
-
-    .exercise-table th,
-    .exercise-table td {
-        padding: 0.75rem;
-    }
-    .exercise-video-cell {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 0.5rem;
-    }
-    .video-thumbnail-wrapper {
-        width: 100%;
-        max-width: 160px;
-        height: 90px;
-    }
-    /* Hide equipment on mobile, show order and name */
-    .exercise-table th.col-equipment,
-    .exercise-table td.col-equipment {
-        display: none;
-    }
-    .equipment-badge {
-        font-size: 1rem;
-        padding: 0.3rem 0.6rem;
-    }
-
     /* Manual entry preview - mobile */
     .manual-exercise-thumb-wrapper.preview-active {
         width: 100%;
@@ -592,15 +300,6 @@ label:hover .checkmark-box {
     .manual-exercise-thumb-wrapper.preview-active > div {
         position: absolute;
         inset: 0;
-    }
-}
-
-/* --- max-width: 540px --- */
-@media (max-width: 540px) {
-    /* On very small screens, simplify table further */
-    .exercise-table th.col-sets-reps,
-    .exercise-table td.col-sets-reps {
-        display: none;
     }
 }
 

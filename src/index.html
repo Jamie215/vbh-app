@@ -340,6 +340,50 @@
         #manual-entry-modal.visible {
             backdrop-filter: blur(4px);
         }
+
+        /* ── Equipment badges (shared: app.js + manual_entry.js) ── */
+        .equipment-badge {
+            @apply inline-flex items-center gap-2 py-1.5 px-3.5 rounded-full text-base font-medium whitespace-nowrap;
+        }
+        .equipment-dot {
+            @apply w-2 h-2 rounded-full shrink-0;
+        }
+        .dot-easier       { background-color: #22c55e; }
+        .dot-more-challenging { background-color: #f97316; }
+        .dot-challenging   { background-color: #f62681; }
+        .dot-neutral       { background-color: #3b82f6; }
+        .dot-none          { background-color: #9ca3af; }
+
+        .badge-easier          { background: #f0fdf4; color: #166534; }
+        .badge-more-challenging { background: #fffbeb; color: #b45309; }
+        .badge-challenging     { background: #f6268117; color: #8C1946; }
+        .badge-neutral         { background: #eff6ff; color: #1d4ed8; }
+        .badge-none            { background: #f9fafb; color: #6b7280; }
+
+        .equipment-separator {
+            @apply inline-block mx-2 text-text-muted text-base font-normal;
+        }
+
+        /* ── Video thumbnail play overlay ── */
+        .video-thumb {
+            @apply relative w-[120px] h-[70px] shrink-0 cursor-pointer rounded-md overflow-hidden;
+            background: #e2e8f0;
+        }
+        .video-thumb img {
+            @apply w-full h-full object-cover transition-transform duration-200;
+        }
+        .video-thumb:hover img {
+            @apply scale-105;
+        }
+        .video-thumb::after {
+            content: '▶';
+            @apply absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-8 h-8 rounded-full flex items-center justify-center text-white text-base transition-colors duration-200;
+            background: rgba(0,0,0,0.6);
+            padding-left: 2px;
+        }
+        .video-thumb:hover::after {
+            background: rgba(124,58,237,0.9);
+        }
     </style>
 
     <link rel="stylesheet" href="/css/style.css">
@@ -554,14 +598,14 @@
                 </div>
             </div>
 
-            <div class="exercise-table-container">
-                <table class="exercise-table">
-                    <thead>
+            <div class="bg-white rounded-card overflow-hidden shadow-card border border-border mb-6">
+                <table class="w-full border-collapse">
+                    <thead class="bg-[#e3dbec] border-b border-border">
                         <tr>
-                            <th class="col-order">Order of <br>Exercises</th>
-                            <th class="col-name">Name</th>
-                            <th class="col-sets-reps">Recommended <br>Number of Sets/Reps</th>
-                            <th class="col-equipment">Recommended Equipment(s)</th>
+                            <th class="py-4 px-6 text-left font-semibold text-text-tertiary text-base whitespace-nowrap w-[100px] text-center">Order of <br>Exercises</th>
+                            <th class="py-4 px-6 text-left font-semibold text-text-tertiary text-base whitespace-nowrap w-[30%]">Name</th>
+                            <th class="py-4 px-6 text-left font-semibold text-text-tertiary text-base whitespace-nowrap w-[260px] text-center max-[540px]:hidden">Recommended <br>Number of Sets/Reps</th>
+                            <th class="py-4 px-6 text-left font-semibold text-text-tertiary text-base whitespace-nowrap w-auto max-md:hidden">Recommended Equipment(s)</th>
                         </tr>
                     </thead>
                     <tbody id="exercise-table-body">

@@ -871,43 +871,44 @@ function loadExerciseTable() {
 
     currentPlaylist.videos.forEach((video, index) => {
         const row = document.createElement('tr');
+        row.className = 'hover:bg-[#fafbfc] [&:last-child_td]:border-b-0';
         
         // Order column
         const orderCell = document.createElement('td');
-        orderCell.className = 'col-order';
+        orderCell.className = 'py-5 px-6 border-b border-border-subtle align-middle text-center font-medium text-text-secondary text-base max-lg:py-4 max-lg:px-4 max-md:py-3 max-md:px-3';
         orderCell.textContent = index + 1;
         row.appendChild(orderCell);
         
         // Name column (thumbnail + title)
         const nameCell = document.createElement('td');
-        nameCell.className = 'col-name';
+        nameCell.className = 'py-5 px-6 border-b border-border-subtle align-middle text-text-primary max-lg:py-4 max-lg:px-4 max-md:py-3 max-md:px-3';
         nameCell.innerHTML = `
-          <div class="exercise-video-cell">
-            <div class="video-thumbnail-wrapper" onclick="playExerciseVideo('${video.id}')">
-                <img src="${video.thumbnail}" alt="${video.title}" class="video-thumbnail">
+          <div class="flex items-center gap-4 max-md:flex-col max-md:items-start max-md:gap-2">
+            <div class="video-thumb" onclick="playExerciseVideo('${video.id}')">
+                <img src="${video.thumbnail}" alt="${video.title}">
             </div>
-            <span class="exercise-name">${video.title}</span>
+            <span class="font-semibold text-base text-text-primary">${video.title}</span>
           </div>  
         `;
         row.appendChild(nameCell);
 
         // Sets/reps column
         const setsRepsCell = document.createElement('td');
-        setsRepsCell.className = 'col-sets-reps';
+        setsRepsCell.className = 'py-5 px-6 border-b border-border-subtle align-middle text-center max-lg:py-4 max-lg:px-4 max-md:py-3 max-md:px-3 max-[540px]:hidden';
         
         // Handle "each side" notation for single-leg exercises
         const needsEachSide = video.title.toLowerCase().includes('single leg') || 
                              video.title.toLowerCase().includes('hand squeeze');
         const setsRepsText = needsEachSide 
-            ? `${video.sets} sets of ${video.reps} reps<br><span class="each-side">(each side)</span>`
+            ? `${video.sets} sets of ${video.reps} reps<br><span class="block text-base text-text-secondary">(each side)</span>`
             : `${video.sets} sets of ${video.reps} reps`;
         
-        setsRepsCell.innerHTML = `<span class="sets-reps-text">${setsRepsText}</span>`;
+        setsRepsCell.innerHTML = `<span class="text-text-tertiary text-base leading-relaxed">${setsRepsText}</span>`;
         row.appendChild(setsRepsCell);
 
         // Equipment column with colored dots and "or" separators
         const equipmentCell = document.createElement('td');
-        equipmentCell.className = 'col-equipment';
+        equipmentCell.className = 'py-5 px-6 border-b border-border-subtle align-middle max-lg:py-4 max-lg:px-4 max-md:hidden';
         
         if (video.equipment && Array.isArray(video.equipment) && video.equipment.length > 0) {
             const badges = video.equipment.map((item, i) => {
