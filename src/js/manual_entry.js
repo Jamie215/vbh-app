@@ -33,6 +33,7 @@ function openManualEntryModal() {
     const playlistSelect = document.getElementById('manual-entry-playlist');
     if (playlistSelect) {
         playlistSelect.value = '';
+        playlistSelect.disabled = true;
     }
 
     // Clear exercise area
@@ -72,7 +73,7 @@ function closeManualEntryModal() {
     modal.classList.remove('visible');
     setTimeout(() => {
         modal.classList.add('hidden');
-    }, 300);
+    }, 500);
 }
 
 // ==================== Date & Playlist Change Handlers ====================
@@ -100,6 +101,7 @@ async function onManualEntryDateChange() {
 
     // Auto-suggest a playlist based on the date's program week
     if (playlistSelect && !playlistSelect.value) {
+        playlistSelect.disabled = false;
         // Simple heuristic: if user is on week 4+, suggest advanced
         const userWeek = calculateUserWeek();
         if (userWeek >= 4) {
@@ -196,10 +198,9 @@ function renderManualEntryExercises() {
         }
 
         // Check all sets button for this exercise
-        // Check all button for this exercise
         const checkAllBtnHTML = `
             <button class="manual-check-all-btn" onclick="manualCheckAllExerciseSets('${video.id}', ${video.sets})" title="Mark all sets complete">
-                <i class="fa-solid fa-check-double"></i> Check All
+                <i class="fa-solid fa-check-double"></i> Check All Sets
             </button>`;
 
         html += `
