@@ -195,19 +195,12 @@ function renderManualEntryExercises() {
             `;
         }
 
-        // Equipment badges
-        let equipmentHTML = '';
-        if (video.equipment && Array.isArray(video.equipment)) {
-            const badges = video.equipment.map(item => {
-                const difficulty = getEquipmentDifficulty(item);
-                const displayName = getEquipmentDisplayName(item);
-                return `<span class="equipment-badge badge-${difficulty}">
-                    <span class="equipment-dot dot-${difficulty}"></span>
-                    ${displayName}
-                </span>`;
-            });
-            equipmentHTML = badges.join('<span class="equipment-separator">or</span>');
-        }
+        // Check all sets button for this exercise
+        // Check all button for this exercise
+        const checkAllBtnHTML = `
+            <button class="manual-check-all-btn" onclick="manualCheckAllExerciseSets('${video.id}', ${video.sets})" title="Mark all sets complete">
+                <i class="fa-solid fa-check-double"></i> Check All
+            </button>`;
 
         html += `
             <div class="bg-subtle border border-border-light rounded-[10px] p-4 px-5 mb-3">
@@ -221,7 +214,7 @@ function renderManualEntryExercises() {
                         <div>
                             <h4 class="text-base font-semibold text-text-primary mb-0.5">${video.title}</h4>
                             <p class="text-base text-text-secondary">Recommended: ${video.sets} sets of ${video.reps} reps${video.needsEachSide ? ' (each side)' : ''}</p>
-                            ${equipmentHTML ? `<div class="mt-1 flex items-center gap-1 flex-wrap">${equipmentHTML}</div>` : ''}
+                            ${checkAllBtnHTML}
                         </div>
                     </div>
                 </div>
@@ -353,6 +346,16 @@ function manualToggleSet(videoId, setNumber) {
     };
 
     updateManualEntrySaveState();
+}
+
+function manualCheckAllExerciseSets(videoId, totalSets) {
+    for (let i = 1; i <= totalSets; i++) {
+        const checkbox = document.getElementById(`manual_completed_${videoId}_set${i}`);
+        if (checkbox) {
+            checkbox.checked = true;
+            manualToggleSet(videoId, i);
+        }
+    }
 }
 
 // ==================== Save State Management ====================
