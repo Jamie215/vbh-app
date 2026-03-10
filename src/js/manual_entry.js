@@ -41,7 +41,7 @@ function openManualEntryModal() {
     if (exerciseArea) {
         exerciseArea.innerHTML = `
             <div class="text-center py-12 px-4 text-text-muted">
-                <p class="text-base">Select a date and workout to log your exercises</p>
+                <p class="text-base">Select a date then workout to log your exercises</p>
             </div>
         `;
     }
