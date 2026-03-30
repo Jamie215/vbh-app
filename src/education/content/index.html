@@ -7,16 +7,22 @@
 
     <title>Hands Up: Bone Health Program for Osteoporosis</title>
     <link rel="stylesheet" href="lib/sandbox/4adfab46.css">
+    <script type="text/javascript" src="lib/lzwcompress.js"></script>
 
     <!-- Resize Hack -->
     <script type="text/javascript">
       window.resizeTo(screen.width, screen.height);
     </script>
     
-    <script type="application/json" id="__CONFIG__">
-      {"remoteManifest":{"learn_distribution_frontend":{".js":["learn_dist/entry.js"]},"mondrian":{".js":["mondrian/entry.js"]}},"assetTargetPrefixes":{"media":"assets","font":"lib/fonts"}}
-    </script>
     <script src="lib/dist/d81a059f.js"></script>
+
+    <script id="__ENTRY__" type="application/json">
+      {".js":["rise/5775ef58.js"],".css":["sandbox/c77685df.css"]}
+    </script>
+
+    <script id="__REMOTE_ENTRIES__" type="application/json">
+      {"learn_distribution_frontend":{".js":["learn_dist/entry.js"]},"mondrian":{".js":["mondrian/entry.js"]}}
+    </script>
 
     <script>
       (function() {
@@ -62,6 +68,13 @@
           return Promise.all(p)
         }
 
+        function deserialize(str) {
+          const buffer = Uint8Array.from(atob(str), c => c.charCodeAt(0))
+          const json = new TextDecoder().decode(buffer)
+          const result = JSON.parse(json)
+          return result
+        }
+
         function __preventLoad() {
           let appDiv = document.getElementById('app')
           let errMsgSpan = document.createElement('span')
@@ -98,12 +111,6 @@
     <script type="text/javascript">
       (function(root) {
         window.partnerContent = [];
-
-          function deserialize(str) {
-            const buffer = Uint8Array.from(atob(str), c => c.charCodeAt(0))
-            const json = new TextDecoder().decode(buffer)
-            return JSON.parse(json)
-        }
 
         function isExport() {
           return true;
@@ -168,8 +175,7 @@
     </script>
 
     
-    <script src="lib/rise/5775ef58.js"></script>
-    <script src="lib/sandbox/c77685df.js"></script>
+    <script>__loadEntry()</script>
 
   </body>
 </html>
