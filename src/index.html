@@ -408,22 +408,22 @@
                         <span class="text-xl font-bold text-[#1a1a2e]">HandsUP</span>
                     </div>
                     <div class="flex items-center gap-2" id="nav-links">
+                        <!-- Standalone:Home -->
+                        <a href="/" class="nav-link" onclick="showHome(); return false;">Home</a>
+
                         <!-- Dropdown: Exercise Program -->
                         <div class="nav-dropdown" id="nav-dropdown">
-                            <button class="nav-link nav-dropdown-toggle active" onclick="toggleDropdown(event)">
+                            <button class="nav-link nav-dropdown-toggle" onclick="toggleDropdown(event)">
                                 Exercise Program <i class="fa-solid fa-chevron-down nav-chevron"></i>
                             </button>
                             <div class="nav-dropdown-menu">
-                                <a href="/" class="nav-dropdown-item" onclick="showHome(); return false;">
-                                    <i class="fa-solid fa-house"></i> Home
-                                </a>
                                 <a href="/exercises" class="nav-dropdown-item" onclick="showExercises(); return false;">
                                     <i class="fa-solid fa-dumbbell"></i> My Exercises
                                 </a>
-                                <a href="/how-to-use" class="nav-dropdown-item" onclick="showHowToUse(); return false;">
+                                <a href="/exercises/how-to-use" class="nav-dropdown-item" onclick="showHowToUse(); return false;">
                                     <i class="fa-solid fa-circle-question"></i> How to Use
                                 </a>
-                                <a href="/progress" class="nav-dropdown-item" onclick="showMyProgress(); return false;">
+                                <a href="/exercises/progress" class="nav-dropdown-item" onclick="showMyProgress(); return false;">
                                     <i class="fa-solid fa-chart-line"></i> My Progress
                                 </a>
                             </div>
@@ -560,8 +560,40 @@
 
         <!-- Home View -->
          <main id="home-view" class="hidden max-w-[1200px] mx-auto p-8 max-md:p-4">
-            <section class="text-center mb-12">
-                <h1 class="text-[2rem] font-bold text-text-primary mb-4 max-md:text-2xl">Welcome to HandsUP Exercise Program</h1>
+            <section class="mb-8">
+                <h1 class="text-[2rem] font-semibold text-text-primary max-md:text-2xl">
+                    Welcome Back, <span id="home-user-name">there</span>
+                </h1>
+            </section>
+
+            <section class="flex items-center justify-between mb-4 max-md:flex-col max-md:items-start max-md:gap-2">
+                <h2 class="text-xl font-semibold text-text-primary">Today's Activities</h2>
+                <button onclick="showHelpModal()" class="flex items-center gap-2 bg-transparent border-none text-brand text-base font-medium cursor-pointer hover:underline">
+                    How do I use this application? <i class="fa-regular fa-circle-question"></i>
+                </button>
+            </section>
+
+            <div id="home-clinic-banner" class="hidden"></div>
+
+            <section class="grid grid-cols-2 gap-6 mb-12 max-md:grid-cols-1">
+                <div class="flex flex-col gap-6">
+                    <div id="home-workouts-remaining" class="bg-white rounded-card shadow-card border border-border p-8 flex flex-col items-center justify-center text-center flex-1"></div>
+                    <div id="home-total-days" class="bg-white rounded-card shadow-card border border-border p-6 flex flex-col items-center text-center"></div>
+                </div>
+                <div class="flex flex-col gap-4">
+                    <div id="home-calendar-strip" class="flex justify-between gap-1 px-2"></div>
+                    <div id="home-today-card" class="bg-brand rounded-2xl p-6 text-white flex-1 min-h-[220px]"></div>
+                </div>
+            </section>
+
+            <section id="home-education-card" class="mb-12"></section>
+
+            <section class="mb-12">
+                <h2 class="text-xl font-semibold text-text-primary mb-4">Resources to Support Return to Work</h2>
+                <ul class="list-disc pl-6 space-y-2">
+                    <li><a href="#" class="text-brand underline hover:text-brand-dark">Link 1 here</a></li>
+                    <li><a href="#" class="text-brand underline hover:text-brand-dark">Link 2 here</a></li>
+                </ul>
             </section>
         </main>
 
@@ -705,6 +737,41 @@
         <main id="education-view" class="hidden">
             <iframe id="education-iframe" class="education-iframe" title="Education Modules"></iframe>
         </main>
+
+        <!-- Sitewide Footer -->
+        <footer id="site-footer" class="hidden bg-brand-dark text-white mt-16">
+            <div class="max-w-[1400px] mx-auto py-10 px-8 grid grid-cols-3 gap-8 max-md:grid-cols-1 max-md:gap-8 max-md:py-8 max-md:px-6">
+                <div class="flex items-center gap-2">
+                    <img src="/icon.png" alt="HandsUP" class="w-8 h-8 brightness-0 invert">
+                    <span class="text-xl font-bold">HandsUP</span>
+                </div>
+                <div class="flex flex-col gap-4">
+                    <div>
+                        <h3 class="font-semibold mb-2">Exercise Program &gt;</h3>
+                        <ul class="space-y-1 text-base opacity-90">
+                            <li><a href="/exercises" onclick="showExercises(); return false;" class="hover:underline">Exercises</a></li>
+                            <li><a href="/exercises/how-to-use" onclick="showHowToUse(); return false;" class="hover:underline">How to Use the Exercise Program</a></li>
+                            <li><a href="/exercises/progress" onclick="showMyProgress(); return false;" class="hover:underline">My Progress</a></li>
+                        </ul>
+                    </div>
+                    <a href="/education" onclick="showEducation(); return false;" class="font-semibold hover:underline">Bone Health e-Learning Program &gt;</a>
+                </div>
+                <div class="flex flex-col gap-5">
+                    <div>
+                        <h3 class="font-semibold mb-2">Contact Us</h3>
+                        <a href="mailto:research.hulc@gmail.com" class="text-base opacity-90 hover:underline"><i class="fa-regular fa-envelope mr-1"></i> research.hulc@gmail.com</a>
+                    </div>
+                    <div>
+                        <h3 class="font-semibold mb-2">Developed in Collaboration With:</h3>
+                        <img src="/hulc_logo.png" alt="HULC" class="w-full h-auto object-contain">
+                        <img src="mskif_logo.png" alt="MSK-IF" class="w-full h-auto object-contain">
+                    </div>
+                </div>
+            </div>
+            <div class="border-t border-white/10 py-4 px-8 text-center text-sm opacity-80">
+                © Hands Up Program 2026. This copyrighted material was developed for free open use and cannot be changed without permission of the developers, and cannot be used for commercial purposes. Please contact research.hulc@gmail.com if you are interested in using this material.
+            </div>
+        </footer>
 
         <!-- Manual Entry Modal -->
         <div id="manual-entry-modal" class="modal hidden">

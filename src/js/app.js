@@ -995,4 +995,234 @@ function updateSetsUI(videoId, currentCount, maxSets) {
     if (minusBtn) minusBtn.disabled = currentCount <= 0;
 }
 
+// Home View
+function loadHomeView() {
+    if (!currentUser) return;
+    renderHomeGreeting();
+    renderClinicBanner();
+    renderWorkoutsRemainingCard();
+    renderTotalDaysCard();
+    renderCalendarStrip();
+    renderTodayCard();
+    renderEducationHomeCard();
+}
+
+function renderHomeGreeting() {
+    const el = document.getElementById('home-user-name');
+    if (!el) return;
+    const name = userProfile?.full_name?.split(' ')[0] || currentUser.email?.split('@')[0] || 'there';
+    el.textContent = name;
+}
+
+// ---------- Date helpers ----------
+function _dateToISO(d) {
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return `${y}-${m}-${day}`;
+}
+
+function _getStartOfCurrentWeekMonday() {
+    const d = new Date();
+    d.setHours(0, 0, 0, 0);
+    const day = d.getDay(); // 0 = Sun
+    const diff = day === 0 ? -6 : 1 - day;
+    d.setDate(d.getDate() + diff);
+    return d;
+}
+
+function _dayHasAnyCompletedExercise(dayProgress) {
+    if (!dayProgress) return false;
+    for (const playlistId of Object.keys(dayProgress)) {
+        const pp = dayProgress[playlistId];
+        for (const videoId of Object.keys(pp)) {
+            const vp = pp[videoId];
+            if (vp && typeof vp === 'object' && !Array.isArray(vp)) {
+                if (Object.keys(vp).some(k => k.startsWith('set') && vp[k]?.completed)) return true;
+            } else if (typeof vp === 'number' && vp > 0) {
+                return true;
+            }
+        }
+    }
+    return false;
+}
+
+// ---------- Clinic reminder banner ----------
+const CLINIC_MILESTONE_DAYS = [21, 42]; // end of week 3, end of week 6
+
+function getActiveClinicMilestone() {
+    if (!completionHistory || Object.keys(completionHistory).length === 0) return null;
+    const firstDate = new Date(Object.keys(completionHistory).sort()[0] + 'T00:00:00');
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const daysSince = Math.floor((today - firstDate) / 86400000);
+    for (const mDay of CLINIC_MILESTONE_DAYS) {
+        if (daysSince >= mDay && daysSince < mDay + 7) {
+            return `week-${Math.floor(mDay / 7)}`;
+        }
+    }
+    return null;
+}
+
+function _getDismissedClinicReminders() {
+    try {
+        const raw = localStorage.getItem('clinicRemindersDismissed');
+        return raw ? JSON.parse(raw) : [];
+    } catch { return []; }
+}
+
+function renderClinicBanner() {
+    const container = document.getElementById('home-clinic-banner');
+    if (!container) return;
+    const milestone = getActiveClinicMilestone();
+    if (!milestone || _getDismissedClinicReminders().includes(milestone)) {
+        container.classList.add('hidden');
+        container.innerHTML = '';
+        return;
+    }
+    container.classList.remove('hidden');
+    container.innerHTML = `
+        <div class="flex items-center gap-3 py-3 px-4 mb-6 bg-white rounded-lg border border-border-light">
+            <i class="fa-solid fa-circle-info text-brand shrink-0"></i>
+            <span class="flex-1 text-base text-text-tertiary">Reminder: Schedule or attend your next clinic visit at Hand and Upper Limb Center</span>
+            <button onclick="dismissClinicReminder()" class="w-7 h-7 rounded-full text-text-muted hover:bg-black/5 flex items-center justify-center bg-transparent border-none cursor-pointer" aria-label="Dismiss">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+        </div>
+    `;
+}
+
+function dismissClinicReminder() {
+    const milestone = getActiveClinicMilestone();
+    if (!milestone) return;
+    const dismissed = _getDismissedClinicReminders();
+    if (!dismissed.includes(milestone)) {
+        dismissed.push(milestone);
+        localStorage.setItem('clinicRemindersDismissed', JSON.stringify(dismissed));
+    }
+    renderClinicBanner();
+}
+
+// ---------- Workouts remaining this week ----------
+function countSessionsThisCalendarWeek() {
+    if (!completionHistory) return 0;
+    const start = _getStartOfCurrentWeekMonday();
+    const end = new Date(start);
+    end.setDate(end.getDate() + 6);
+    const startISO = _dateToISO(start);
+    const endISO = _dateToISO(end);
+    let count = 0;
+    for (const dateStr of Object.keys(completionHistory)) {
+        if (dateStr >= startISO && dateStr <= endISO && _dayHasAnyCompletedExercise(completionHistory[dateStr])) {
+            count++;
+        }
+    }
+    return count;
+}
+
+function renderWorkoutsRemainingCard() {
+    const container = document.getElementById('home-workouts-remaining');
+    if (!container) return;
+    const sessions = countSessionsThisCalendarWeek();
+    const remaining = Math.max(0, 2 - sessions);
+    const message = remaining === 0
+        ? `You've hit your 2 workouts this week! 🎉`
+        : `You need to complete <strong>${remaining} more workout${remaining === 1 ? '' : 's'}</strong> this week`;
+    container.innerHTML = `
+        <p class="text-base text-text-primary mb-5 leading-relaxed">${message}</p>
+        <button onclick="showExercises()" class="py-3 px-8 bg-brand hover:bg-brand-dark text-white rounded-pill text-base font-semibold transition-colors border-none cursor-pointer">Go to Workouts</button>
+    `;
+}
+
+// ---------- Total days card ----------
+function renderTotalDaysCard() {
+    const container = document.getElementById('home-total-days');
+    if (!container) return;
+    const total = completionHistory ? Object.keys(completionHistory).length : 0;
+    container.innerHTML = `
+        <h3 class="text-base font-semibold text-text-primary mb-3">Total Days of Workout</h3>
+        <span class="text-[2.5rem] font-bold text-brand leading-none">${total}</span>
+        <span class="text-base text-text-secondary mt-1">Days</span>
+    `;
+}
+
+// ---------- Calendar strip ----------
+function renderCalendarStrip() {
+    const container = document.getElementById('home-calendar-strip');
+    if (!container) return;
+    const start = _getStartOfCurrentWeekMonday();
+    const todayISO = _dateToISO(new Date());
+    const labels = ['Mon', 'Tues', 'Wed', 'Thurs', 'Fri', 'Sat', 'Sun'];
+    let html = '';
+    for (let i = 0; i < 7; i++) {
+        const d = new Date(start);
+        d.setDate(d.getDate() + i);
+        const iso = _dateToISO(d);
+        const isToday = iso === todayISO;
+        const hasActivity = completionHistory?.[iso] && _dayHasAnyCompletedExercise(completionHistory[iso]);
+        const dayBoxClass = isToday ? 'bg-brand text-white' : 'text-text-primary';
+        html += `
+            <div class="flex-1 flex flex-col items-center gap-1 min-w-0">
+                <span class="text-sm text-text-secondary font-medium">${labels[i]}</span>
+                <div class="w-10 h-10 rounded-full flex items-center justify-center text-base font-semibold ${dayBoxClass}">${d.getDate()}</div>
+                <div class="h-2 flex items-center">${hasActivity ? '<span class="w-1.5 h-1.5 rounded-full bg-green-500"></span>' : ''}</div>
+            </div>
+        `;
+    }
+    container.innerHTML = html;
+}
+
+// ---------- Today purple card ----------
+function countTodaysCompletedExercises() {
+    const todayISO = _dateToISO(new Date());
+    const dayProgress = completionHistory?.[todayISO];
+    if (!dayProgress) return 0;
+    let count = 0;
+    for (const playlistId of Object.keys(dayProgress)) {
+        const pp = dayProgress[playlistId];
+        for (const videoId of Object.keys(pp)) {
+            const vp = pp[videoId];
+            if (vp && typeof vp === 'object' && !Array.isArray(vp)) {
+                if (Object.keys(vp).some(k => k.startsWith('set') && vp[k]?.completed)) count++;
+            } else if (typeof vp === 'number' && vp > 0) {
+                count++;
+            }
+        }
+    }
+    return count;
+}
+
+function renderTodayCard() {
+    const container = document.getElementById('home-today-card');
+    if (!container) return;
+    const today = new Date();
+    const dayName = today.toLocaleDateString('en-US', { weekday: 'long' });
+    const month = today.toLocaleDateString('en-US', { month: 'long' });
+    const date = today.getDate();
+    const count = countTodaysCompletedExercises();
+    container.innerHTML = `
+        <p class="text-lg font-semibold mb-6">Today, ${dayName} ${month} ${date}</p>
+        <p class="text-[3.5rem] font-bold leading-none mb-1">${count}</p>
+        <p class="text-base opacity-90"><i class="fa-solid fa-dumbbell mr-1"></i> Exercises Completed</p>
+    `;
+}
+
+// ---------- Education home card ----------
+function renderEducationHomeCard() {
+    const container = document.getElementById('home-education-card');
+    if (!container) return;
+    container.innerHTML = `
+        <div class="bg-blue-100 rounded-xl p-8 flex items-center gap-8 max-md:flex-col max-md:p-6">
+            <div class="flex-1">
+                <h3 class="text-xl font-semibold text-text-primary mb-4">Review E-learning Module for Bone Health</h3>
+                <p class="text-base text-text-tertiary mb-6 leading-relaxed">Topics include how to maintain your bone health through safe movement, falls prevention, medication management, and lifestyle strategies.</p>
+                <button onclick="showEducation()" class="py-3 px-8 bg-blue-900 hover:bg-blue-950 text-white rounded-lg text-base font-semibold border-none cursor-pointer transition-colors">Go to Modules</button>
+            </div>
+            <div class="shrink-0">
+                <img src="/elearning-laptop.png" alt="E-learning module" class="w-[280px] max-md:w-full h-auto">
+            </div>
+        </div>
+    `;
+}
+
 console.log('App module loaded');

@@ -1,7 +1,4 @@
 // Navigation controller - handles view switching and client-side routing
-// ============================================================
-
-const { type } = require("node:os");
 
 // ==================== Routing Infrastructure ====================
 
@@ -42,6 +39,8 @@ function routeFromURL() {
 
     switch (path) {
         case '/':
+            showHome();
+            break;
         case '/exercises':
             showExercises();
             break;
@@ -96,7 +95,7 @@ function routeAfterAuth() {
     const path = window.location.pathname;
     // If user is on a login/signup page, send them home
     if (path === '/login' || path === '/signup' || path === '/forgot-password' || path === '/reset-password' || path === '/') {
-        showExercises(); // Temp routing
+        showHome();
     } else {
         routeFromURL();
     }
@@ -114,7 +113,7 @@ window.addEventListener('popstate', () => {
 
 /** Hide every top-level view in the app */
 function hideAllViews() {
-    const ids = ['auth-view', 'exercises-view', 'playlist-view', 'progress-view', 'education-view'];
+    const ids = ['auth-view', 'home-view', 'exercises-view', 'playlist-view', 'progress-view', 'education-view'];
     ids.forEach(id => {
         const el = document.getElementById(id);
         if (el) el.classList.add('hidden');
@@ -171,6 +170,8 @@ function showAuthPage() {
     if (navbar) navbar.classList.add('hidden');
 
     unloadEducationIframe();
+
+    setFooterVisibility(false);
 }
 
 function showSignInView() {
@@ -260,15 +261,15 @@ function updateNavActiveState(activeView) {
     });
 
     // Views that live inside the Exercise Program dropdown
-    const dropdownViews = ['my-exercises', 'progress', 'how-to-use'];
+    const dropdownViews = ['exercises', 'progress', 'how-to-use'];
     const parentToggle = document.querySelector('.nav-dropdown-toggle');
 
-    if (dropdownViews.includes(activeView)) {
-        // Highlight the parent "Exercise Program" toggle
+    if (activeView === 'home') {
+        const homeLink = document.querySelector('.nav-link[href="/"]');
+        if (homeLink) homeLink.classList.add('active');
+    } else if (dropdownViews.includes(activeView)) {
         if (parentToggle) parentToggle.classList.add('active');
-
-        // Highlight the specific child item
-        const hrefMap = { 'my-exercises': '/exercises', 'progress': '/progress', 'how-to-use': '/how-to-use' };
+        const hrefMap = { 'exercises': '/exercises', 'progress': '/exercises/progress', 'how-to-use': '/exercises/how-to-use' };
         const child = document.querySelector(`.nav-dropdown-item[href="${hrefMap[activeView]}"]`);
         if (child) child.classList.add('active');
     } else if (activeView === 'education') {
@@ -293,8 +294,8 @@ function showHome() {
     if (navbar) navbar.classList.remove('hidden');
 
     updateNavActiveState('home');
-    if (typeof loadHomeData === 'function') {
-        loadHomeData();
+    if (typeof loadHomeView === 'function') {
+        loadHomeView();
     }
 }
 
@@ -331,7 +332,7 @@ function showHowToUse() {
         return;
     }
 
-    pushRoute('/how-to-use');
+    pushRoute('/exercises/how-to-use');
     updateNavActiveState('how-to-use');
 
     // Placeholder — replace with actual view when ready
@@ -435,6 +436,8 @@ async function showEducation() {
     }
 
     updateNavActiveState('education');
+
+    setFooterVisibility(false);
 }
 
 function hideEducation() {
@@ -552,5 +555,38 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     });
 });
+
+// Footer 
+function setFooterVisibility(visible) {
+    const footer = document.getElementById('footer');
+    if (footer) footer.classList.toggle('hidden', !visible);
+}
+
+// Help Modal
+function showHelpModal() {
+    const existing = document.getElementById('help-modal');
+    if (existing) existing.remove();
+
+    const overlay = document.createElement('div');
+    overlay.id = 'help-modal';
+    overlay.className = 'fixed inset-0 bg-black/70 flex items-center justify-center z-[1000] p-4';
+    overlay.onclick = (e) => { if (e.target === overlay) closeHelpModal(); };
+    overlay.innerHTML = `
+        <div class="bg-white rounded-xl p-4 max-w-[900px] w-full relative">
+            <button onclick="closeHelpModal()" class="absolute -top-3 -right-3 w-9 h-9 rounded-full bg-white shadow-md flex items-center justify-center text-text-primary border-none cursor-pointer hover:bg-gray-100 z-10" aria-label="Close">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+            <div class="aspect-video w-full rounded-lg overflow-hidden bg-black">
+                <iframe src="https://www.youtube.com/embed/dQw4w9WgXcQ?rel=0&modestbranding=1" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen class="w-full h-full"></iframe>
+            </div>
+        </div>
+    `;
+    document.getElementById('app').appendChild(overlay);
+}
+
+function closeHelpModal() {
+    const modal = document.getElementById('help-modal');
+    if (modal) modal.remove();
+}
 
 console.log('Navigation module loaded');
