@@ -1,6 +1,8 @@
 // Navigation controller - handles view switching and client-side routing
 // ============================================================
 
+const { type } = require("node:os");
+
 // ==================== Routing Infrastructure ====================
 
 // When true, show* functions skip history.pushState (used during popstate)
@@ -19,7 +21,7 @@ function pushRoute(path, state = {}) {
 /**
  * Central router — reads the current URL and activates the matching view.
  * Called:
- *   1. After auth resolves on page load (replaces the old showHome() call)
+ *   1. After auth resolves on page load
  *   2. On popstate (browser back / forward)
  */
 function routeFromURL() {
@@ -33,7 +35,7 @@ function routeFromURL() {
         if (typeof showPlaylist === 'function') {
             showPlaylist(playlistId);
         } else {
-            showHome();
+            showExercises();
         }
         return;
     }
@@ -41,13 +43,13 @@ function routeFromURL() {
     switch (path) {
         case '/':
         case '/exercises':
-            showHome();
+            showExercises();
             break;
         case '/progress':
             if (typeof showMyProgress === 'function') {
                 showMyProgress();
             } else {
-                showHome();
+                showExercises();
             }
             break;
         case '/education':
@@ -94,7 +96,7 @@ function routeAfterAuth() {
     const path = window.location.pathname;
     // If user is on a login/signup page, send them home
     if (path === '/login' || path === '/signup' || path === '/forgot-password' || path === '/reset-password' || path === '/') {
-        showHome();
+        showExercises(); // Temp routing
     } else {
         routeFromURL();
     }
@@ -112,7 +114,7 @@ window.addEventListener('popstate', () => {
 
 /** Hide every top-level view in the app */
 function hideAllViews() {
-    const ids = ['auth-view', 'home-view', 'playlist-view', 'progress-view', 'education-view'];
+    const ids = ['auth-view', 'exercises-view', 'playlist-view', 'progress-view', 'education-view'];
     ids.forEach(id => {
         const el = document.getElementById(id);
         if (el) el.classList.add('hidden');
@@ -258,7 +260,7 @@ function updateNavActiveState(activeView) {
     });
 
     // Views that live inside the Exercise Program dropdown
-    const dropdownViews = ['home', 'progress', 'how-to-use'];
+    const dropdownViews = ['my-exercises', 'progress', 'how-to-use'];
     const parentToggle = document.querySelector('.nav-dropdown-toggle');
 
     if (dropdownViews.includes(activeView)) {
@@ -266,7 +268,7 @@ function updateNavActiveState(activeView) {
         if (parentToggle) parentToggle.classList.add('active');
 
         // Highlight the specific child item
-        const hrefMap = { 'home': '/exercises', 'progress': '/progress', 'how-to-use': '/how-to-use' };
+        const hrefMap = { 'my-exercises': '/exercises', 'progress': '/progress', 'how-to-use': '/how-to-use' };
         const child = document.querySelector(`.nav-dropdown-item[href="${hrefMap[activeView]}"]`);
         if (child) child.classList.add('active');
     } else if (activeView === 'education') {
@@ -275,17 +277,14 @@ function updateNavActiveState(activeView) {
     }
 }
 
-
-// ==================== Home View ====================
-
 function showHome() {
     if (!currentUser) {
         showAuthPage();
         return;
     }
 
-    pushRoute('/exercises');
-
+    pushRoute('/');
+    
     hideAllViews();
     const homeView = document.getElementById('home-view');
     const navbar = document.getElementById('navbar');
@@ -294,6 +293,29 @@ function showHome() {
     if (navbar) navbar.classList.remove('hidden');
 
     updateNavActiveState('home');
+    if (typeof loadHomeData === 'function') {
+        loadHomeData();
+    }
+}
+
+// ==================== Exercises View ====================
+
+function showExercises() {
+    if (!currentUser) {
+        showAuthPage();
+        return;
+    }
+
+    pushRoute('/exercises');
+
+    hideAllViews();
+    const exercisesView = document.getElementById('exercises-view');
+    const navbar = document.getElementById('navbar');
+
+    if (exercisesView) exercisesView.classList.remove('hidden');
+    if (navbar) navbar.classList.remove('hidden');
+
+    updateNavActiveState('exercises');
 
     if (typeof loadPlaylists === 'function') {
         loadPlaylists();
@@ -317,8 +339,8 @@ function showHowToUse() {
 
     // Reset since we're not actually navigating to a new view yet
     // Remove these two lines once the real How to Use view exists:
-    updateNavActiveState('home');
-    showHome();
+    updateNavActiveState('exercises');
+    showExercises();
 }
 
 

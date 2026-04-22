@@ -414,7 +414,10 @@
                                 Exercise Program <i class="fa-solid fa-chevron-down nav-chevron"></i>
                             </button>
                             <div class="nav-dropdown-menu">
-                                <a href="/exercises" class="nav-dropdown-item" onclick="showHome(); return false;">
+                                <a href="/" class="nav-dropdown-item" onclick="showHome(); return false;">
+                                    <i class="fa-solid fa-house"></i> Home
+                                </a>
+                                <a href="/exercises" class="nav-dropdown-item" onclick="showExercises(); return false;">
                                     <i class="fa-solid fa-dumbbell"></i> My Exercises
                                 </a>
                                 <a href="/how-to-use" class="nav-dropdown-item" onclick="showHowToUse(); return false;">
@@ -555,8 +558,16 @@
             </div>
         </main>
 
-        <!-- Home View (hidden by default) -->
-        <main id="home-view" class="hidden max-w-[1200px] mx-auto p-8 max-md:p-4">
+        <!-- Home View -->
+         <main id="home-view" class="hidden max-w-[1200px] mx-auto p-8 max-md:p-4">
+            <section class="text-center mb-12">
+                <h1 class="text-[2rem] font-bold text-text-primary mb-4 max-md:text-2xl">Welcome to HandsUP Exercise Program</h1>
+            </section>
+        </main>
+
+
+        <!-- Exercises View (hidden by default) -->
+        <main id="exercises-view" class="hidden max-w-[1200px] mx-auto p-8 max-md:p-4">
             <section id="user-greeting-section" class="mb-8">
                 <h1 class="text-[2rem] font-semibold text-text-primary mb-1 max-md:text-2xl">Hello, <span id="user-name">there</span></h1>
                 <p class="text-base text-text-secondary">You've reached <strong class="text-text-primary">Week <span id="user-week">1</span></strong>. Keep it up!</p>
@@ -587,7 +598,7 @@
 
         <!-- Playlist View (hidden by default) -->
         <main id="playlist-view" class="hidden max-w-[1200px] mx-auto p-8 max-md:p-4">
-            <button class="inline-flex items-center gap-2 bg-transparent text-text-tertiary border-none text-base font-medium py-2 px-0 mb-4 cursor-pointer transition-colors hover:text-text-primary" onclick="showHome()"><i class="fa-solid fa-arrow-left"></i> Go Back</button>
+            <button class="inline-flex items-center gap-2 bg-transparent text-text-tertiary border-none text-base font-medium py-2 px-0 mb-4 cursor-pointer transition-colors hover:text-text-primary" onclick="showExercises()"><i class="fa-solid fa-arrow-left"></i> Go Back</button>
             
             <!-- Playlist Header with Progress Ring -->
             <div class="flex justify-between items-start gap-8 mb-6 max-lg:flex-col max-lg:gap-4">
