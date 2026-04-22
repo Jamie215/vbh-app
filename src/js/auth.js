@@ -24,6 +24,7 @@ function markInitialSessionHandled() {
 // Sign up new user
 async function signUp() {
     const name = document.getElementById('signup-name').value.trim();
+    const clinic = document.getElementById('signup-clinic').value.trim(); // Optional
     const email = document.getElementById('signup-email').value.trim();
     const password = document.getElementById('signup-password').value;
 
@@ -50,7 +51,8 @@ async function signUp() {
             password: password,
             options: {
                 data: {
-                    full_name: name
+                    full_name: name,
+                    clinic_name: clinic || null // Store clinic name if provided, otherwise null
                 }
             }
         });
@@ -62,6 +64,7 @@ async function signUp() {
             
             // Clear form
             document.getElementById('signup-name').value = '';
+            document.getElementById('signup-clinic').value = '';
             document.getElementById('signup-email').value = '';
             document.getElementById('signup-password').value = '';
         }
@@ -391,11 +394,18 @@ function initAuthFormListeners() {
     }
     
     const signupName = document.getElementById('signup-name');
+    const signupClinic = document.getElementById('signup-clinic');
     const signupEmail = document.getElementById('signup-email');
     const signupPassword = document.getElementById('signup-password');
     
     if (signupName) {
         signupName.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') signUp();
+        });
+    }
+
+    if (signupClinic) {
+        signupClinic.addEventListener('keypress', (e) => {
             if (e.key === 'Enter') signUp();
         });
     }
