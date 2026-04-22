@@ -633,7 +633,7 @@ function loadRecentActivity() {
     if (!completionHistory || Object.keys(completionHistory).length === 0) {
         activityFeed.innerHTML = `
             <div class="py-12 text-center text-text-secondary">
-                <i class="fa-solid fa-dumbbell text-4xl text-border-medium mb-4 block"></i>
+                <i class="fa-solid fa-dumbbell text-4xl text-border-medium mb-4"></i>
                 <p class="text-base max-w-[300px] mx-auto">No workout activity yet. Start your first workout to see your progress here!</p>
             </div>
         `;
