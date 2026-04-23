@@ -1084,7 +1084,7 @@ function renderClinicBanner() {
     container.innerHTML = `
         <div class="flex items-center gap-3 py-3 px-4 mb-6 bg-white rounded-lg border border-border-light">
             <i class="fa-solid fa-circle-info text-brand shrink-0"></i>
-            <span class="flex-1 text-base text-text-tertiary">Reminder: Schedule or attend your next clinic visit at Hand and Upper Limb Center</span>
+            <span class="flex-1 text-base">Reminder: Schedule or attend your next clinic visit at Hand and Upper Limb Center</span>
             <button onclick="dismissClinicReminder()" class="w-7 h-7 rounded-full text-text-muted hover:bg-black/5 flex items-center justify-center bg-transparent border-none cursor-pointer" aria-label="Dismiss">
                 <i class="fa-solid fa-xmark"></i>
             </button>
@@ -1203,7 +1203,7 @@ function renderTodayCard() {
     container.innerHTML = `
         <p class="text-lg font-semibold mb-6">Today, ${dayName} ${month} ${date}</p>
         <p class="text-[3.5rem] font-bold leading-none mb-1">${count}</p>
-        <p class="text-base opacity-90"><i class="fa-solid fa-dumbbell mr-1"></i> Exercises Completed</p>
+        <p class="text-base opacity-90"><i class="fa-solid fa-dumbbell fa-rotate-by mr-1" style="--fa-rotate-angle: 135deg;"></i> Exercises Completed</p>
     `;
 }
 
