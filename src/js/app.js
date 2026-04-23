@@ -643,26 +643,26 @@ function loadPlaylists() {
 
     if (programCompleted) {
         if (greetingP) {
-            greetingP.innerHTML = `You've completed the <strong>6-week program</strong>! Feel free to continue the exercises at your own pace.`;
+            greetingP.innerHTML = `${userName}, you've completed the <strong>6-week program</strong>! Feel free to continue the exercises at your own pace.`;
         }
     } else {
         if (greetingP) {
             if (userWeek === 0) {
-                greetingP.innerHTML = `Welcome to the program! Start with <strong>Week 0</strong> and take it from there. Let's get started!`;
+                greetingP.innerHTML = `${userName}, welcome to the program! Start with <strong>Week 0</strong> and take it from there. Let's get started!`;
             } else if (userWeek >= 4 && userWeek < 6) {
                 const sessionsLeft = 2 - state.sessionsInCurrentWeek;
                 if (sessionsLeft > 0) {
-                    greetingP.innerHTML = `You're on <strong>Week ${userWeek}</strong>. ${sessionsLeft === 1 ? '1 more session' : '2 sessions'} to go this week to advance — keep it up!`;
+                    greetingP.innerHTML = `${userName}, you've on <strong>Week ${userWeek}</strong>. ${sessionsLeft === 1 ? '1 more session' : '2 sessions'} to go this week to advance — keep it up!`;
                 } else {
-                    greetingP.innerHTML = `You've reached <strong>Week ${userWeek}</strong> and completed your sessions for this week. Well done!`;
+                    greetingP.innerHTML = `${userName}, you've reached <strong>Week ${userWeek}</strong> and completed your sessions for this week. Well done!`;
                 }
             } else if (userWeek === 6) {
                 const sessionsLeft = 2 - state.sessionsInCurrentWeek;
                 if (sessionsLeft > 0) {
-                    greetingP.innerHTML = `You're on the <strong>final week</strong>! ${sessionsLeft === 1 ? '1 more session' : '2 sessions'} to go to complete the program — you've got this!`;
+                    greetingP.innerHTML = `${userName}, you're on the <strong>final week</strong>! ${sessionsLeft === 1 ? '1 more session' : '2 sessions'} to go to complete the program — you've got this!`;
                 }
             } else {
-                greetingP.innerHTML = `You've reached <strong>Week ${userWeek}</strong>. Keep it up!`;
+                greetingP.innerHTML = `${userName}, you've reached <strong>Week ${userWeek}</strong>. Keep it up!`;
             }
         }
     }
@@ -746,6 +746,7 @@ function loadTodaysWorkout() {
     const progress = calculatePlaylistProgress(suggested.id, true);
     
     container.innerHTML = `
+        <h2 class="text-xl font-semibold text-text-primary">Today's Workout</h2>
         <div class="w-[200px] h-[140px] rounded-lg overflow-hidden shrink-0 relative max-lg:w-full max-lg:h-[180px]">
             <div class="absolute inset-0 flex flex-col items-center justify-center font-semibold text-center p-4" style="${overlayBg}">
                 <span class="text-2xl leading-tight">${weekText}</span>

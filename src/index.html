@@ -601,14 +601,10 @@
         <!-- Exercises View (hidden by default) -->
         <main id="exercises-view" class="hidden max-w-[1200px] mx-auto p-8 max-md:p-4">
             <section id="user-greeting-section" class="mb-8">
-                <h1 class="text-[2rem] font-semibold text-text-primary mb-1 max-md:text-2xl">Hello, <span id="user-name">there</span></h1>
                 <p class="text-base text-text-secondary">You've reached <strong class="text-text-primary">Week <span id="user-week">1</span></strong>. Keep it up!</p>
             </section>
             <div id="progress-alert-container" class="hidden"></div>
             <section id="todays-workout-section" class="mb-12">
-                <div class="flex items-center gap-3 mb-6">
-                    <h2 class="text-xl font-semibold text-text-primary">Today's Workout</h2>
-                </div>
                 <div class="grid grid-cols-[3fr_1fr] gap-6 items-stretch max-md:grid-cols-1">
                     <div id="todays-workout-card"></div>
                     <div class="bg-white rounded-card border border-border p-6 flex flex-col items-center justify-center text-center cursor-pointer transition-all duration-200 w-[400px] gap-2 shadow-card max-md:w-full max-md:flex-row max-md:p-4 max-md:gap-4 max-md:text-left max-md:items-center max-md:justify-start active:translate-y-px" onclick="openManualEntryModal()">
