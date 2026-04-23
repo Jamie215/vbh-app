@@ -1082,8 +1082,8 @@ function renderClinicBanner() {
     }
     container.classList.remove('hidden');
     container.innerHTML = `
-        <div class="flex items-center gap-3 py-3 px-4 mb-6 bg-white rounded-lg border border-border-light">
-            <i class="fa-solid fa-circle-info text-brand shrink-0"></i>
+        <div class="flex items-center gap-3 py-3 px-4 mb-6 bg-white rounded-lg border border-border-light border-brand-dark">
+            <i class="fa-solid fa-circle-info text-brand-dark shrink-0"></i>
             <span class="flex-1 text-base">Reminder: Schedule or attend your next clinic visit at Hand and Upper Limb Center</span>
             <button onclick="dismissClinicReminder()" class="w-7 h-7 rounded-full text-text-muted hover:bg-black/5 flex items-center justify-center bg-transparent border-none cursor-pointer" aria-label="Dismiss">
                 <i class="fa-solid fa-xmark"></i>
@@ -1160,7 +1160,7 @@ function renderCalendarStrip() {
         const iso = _dateToISO(d);
         const isToday = iso === todayISO;
         const hasActivity = completionHistory?.[iso] && _dayHasAnyCompletedExercise(completionHistory[iso]);
-        const dayBoxClass = isToday ? 'bg-brand text-white' : 'text-text-primary';
+        const dayBoxClass = isToday ? 'bg-brand-dark text-white' : 'text-text-primary';
         html += `
             <div class="flex-1 flex flex-col items-center gap-1 min-w-0">
                 <span class="text-sm text-text-secondary font-medium">${labels[i]}</span>
