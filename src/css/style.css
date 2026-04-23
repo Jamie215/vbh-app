@@ -4,7 +4,7 @@
 :root {
     /* Brand Colors */
     --color-brand: #7c3aed;
-    --color-brand-dark: #6d28d9;
+    --color-brand-dark: #563b82;
 
     /* Text Colors */
     --color-text-primary: #1a1a2e;
@@ -32,7 +32,7 @@
 
     /* Gradients */
     --gradient-purple: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    --gradient-brand: linear-gradient(135deg, #7c3aed, #6d28d9);
+    --gradient-brand: linear-gradient(135deg, #7c3aed, #563b82);
 
     /* Shadows */
     --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.08);
