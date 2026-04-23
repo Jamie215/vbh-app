@@ -293,6 +293,8 @@ function showHome() {
     if (homeView) homeView.classList.remove('hidden');
     if (navbar) navbar.classList.remove('hidden');
 
+    setFooterVisibility(true);
+
     updateNavActiveState('home');
     if (typeof loadHomeView === 'function') {
         loadHomeView();
@@ -315,6 +317,8 @@ function showExercises() {
 
     if (exercisesView) exercisesView.classList.remove('hidden');
     if (navbar) navbar.classList.remove('hidden');
+
+    setFooterVisibility(true);
 
     updateNavActiveState('exercises');
 
