@@ -1011,7 +1011,19 @@ function renderHomeGreeting() {
     const el = document.getElementById('home-user-name');
     if (!el) return;
     const name = userProfile?.full_name?.split(' ')[0] || currentUser.email?.split('@')[0] || 'there';
-    el.textContent = name;
+
+    const hour = new Date().getHours();
+    let prefix;
+    if (hour < 12)      prefix = 'Good morning,';
+    else if (hour < 17) prefix = 'Good afternoon,';
+    else                prefix = 'Good evening,';
+
+    const h1 = el.closest('h1');
+    if (h1) {
+        h1.innerHTML = `${prefix} <span id="home-user-name">${name}</span>`;
+    } else {
+        el.textContent = name;
+    }
 }
 
 // ---------- Date helpers ----------
