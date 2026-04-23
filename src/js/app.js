@@ -1202,8 +1202,13 @@ function renderTodayCard() {
     const count = countTodaysCompletedExercises();
     container.innerHTML = `
         <p class="text-lg font-semibold mb-6">Today, ${dayName} ${month} ${date}</p>
-        <p class="text-[3.5rem] font-bold leading-none mb-1">${count}</p>
-        <p class="text-base opacity-90"><i class="fa-solid fa-dumbbell fa-rotate-by mr-1" style="--fa-rotate-angle: 135deg;"></i> Exercises Completed</p>
+        <div class="flex flex-row gap-4">
+            <div class="flex flex-col">
+                <p class="text-[3.5rem] font-bold leading-none mb-1">${count}</p>
+                <p class="text-base opacity-90"><i class="fa-solid fa-dumbbell fa-rotate-by mr-1" style="--fa-rotate-angle: 135deg;"></i> Exercises Completed</p>
+            </div>
+            <i class="fa-solid fa-person-running" style="color: rgb(255, 255, 255);"></i>
+        </div>
     `;
 }
 
