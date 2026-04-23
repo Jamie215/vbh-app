@@ -1130,7 +1130,7 @@ function renderWorkoutsRemainingCard() {
         : `You need to complete <strong>${remaining} more workout${remaining === 1 ? '' : 's'}</strong> this week`;
     container.innerHTML = `
         <p class="text-base text-text-primary mb-5 leading-relaxed">${message}</p>
-        <button onclick="showExercises()" class="py-3 px-8 bg-brand hover:bg-brand-dark text-white rounded-pill text-base font-semibold transition-colors border-none cursor-pointer">Go to Workouts</button>
+        <button onclick="showExercises()" class="py-3 px-8 bg-brand hover:bg-brand-dark text-white rounded-md text-base font-semibold transition-colors border-none cursor-pointer">Go to Workouts</button>
     `;
 }
 
@@ -1141,7 +1141,7 @@ function renderTotalDaysCard() {
     const total = completionHistory ? Object.keys(completionHistory).length : 0;
     container.innerHTML = `
         <h3 class="text-base font-semibold text-text-primary mb-3">Total Days of Workout</h3>
-        <span class="text-[2.5rem] font-bold text-brand leading-none">${total}</span>
+        <span class="text-[2.5rem] font-bold text-brand-dark leading-none">${total}</span>
         <span class="text-base text-text-secondary mt-1">Days</span>
     `;
 }
