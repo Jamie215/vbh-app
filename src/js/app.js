@@ -747,8 +747,8 @@ function loadTodaysWorkout() {
     
     container.innerHTML = `
         <h2 class="text-xl font-semibold text-text-primary">Today's Workout</h2>
-        <div class="flex flex-row gap-6 w-full items-center">
-            <div class="w-[200px] h-[140px] rounded-lg overflow-hidden shrink-0 relative max-lg:w-full max-lg:h-[180px]">
+        <div class="flex flex-row gap-12 w-full items-center">
+            <div class="w-[220px] h-[165px] rounded-lg overflow-hidden shrink-0 relative max-lg:h-[180px]">
                 <div class="absolute inset-0 flex flex-col items-center justify-center font-semibold text-center p-4" style="${overlayBg}">
                     <span class="text-2xl leading-tight">${weekText}</span>
                 </div>
