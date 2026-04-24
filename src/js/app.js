@@ -689,8 +689,8 @@ function createPlaylistCard(playlist) {
 
     const isAdvanced = playlist.id.includes('advanced');
     const thumbnail = isAdvanced
-        ? '<img src="/assets/img/advanced_playlist_thumbnail.jpg" alt="Advanced Workout" class="absolute inset-0 w-full h-full object-cover">'
-        : '<img src="/assets/img/beginner_playlist_thumbnail.jpg" alt="Beginner Workout" class="absolute inset-0 w-full h-full object-cover">';
+        ? '<img src="/assets/img/advanced_playlist_thumbnail.png" alt="Advanced Workout" class="absolute inset-0 w-full h-full object-cover">'
+        : '<img src="/assets/img/beginner_playlist_thumbnail.png" alt="Beginner Workout" class="absolute inset-0 w-full h-full object-cover">';
     const weekText = isAdvanced ? 'Advanced<br>Weeks 4-6 Workout' : 'Beginner<br>Weeks 0-3 Workout';
 
     const completion = getPlaylistLastCompletion(playlist.id);
@@ -736,8 +736,8 @@ function loadTodaysWorkout() {
 
     const isAdvanced = suggested.id.includes('advanced');
     const thumbnail = isAdvanced
-        ? '<img src="/assets/img/advanced_playlist_thumbnail.jpg" alt="Advanced Workout" class="absolute inset-0 w-full h-full object-cover">'
-        : '<img src="/assets/img/beginner_playlist_thumbnail.jpg" alt="Beginner Workout" class="absolute inset-0 w-full h-full object-cover">';
+        ? '<img src="/assets/img/advanced_playlist_thumbnail.png" alt="Advanced Workout" class="absolute inset-0 w-full h-full object-cover">'
+        : '<img src="/assets/img/beginner_playlist_thumbnail.png" alt="Beginner Workout" class="absolute inset-0 w-full h-full object-cover">';
     
     // Calculate progress for the suggested workout (today only)
     const progress = calculatePlaylistProgress(suggested.id, true);
