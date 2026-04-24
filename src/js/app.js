@@ -670,6 +670,20 @@ function loadPlaylists() {
     const userWeek = state.programWeek;
     const programCompleted = isProgramCompleted();
 
+    const existingWsl = document.getElementById('week-start-label');
+    if (existingWsl) existingWsl.remove();
+
+    if (!programCompleted && userWeek > 0 && greetingSection) {
+        const weekStartLabel = getExerciseWeekStartLabel(state);
+        if (weekStartLabel) {
+            const wsl = document.createElement('p');
+            wsl.id = 'week-start-label';
+            wsl.className = 'text-sm text-text-muted mt-1.5';
+            wsl.innerHTML = `<i class="fa-regular fa-calendar mr-1.5"></i>Exercise Week ${userWeek} ${weekStartLabel}`;
+            greetingSection.appendChild(wsl);
+        }
+    }
+
     // Update greeting message
     const greetingP = document.querySelector('#user-greeting-section p');
 
@@ -767,8 +781,8 @@ function loadTodaysWorkout() {
 
     const isAdvanced = suggested.id.includes('advanced');
     const thumbnail = isAdvanced
-        ? '<img src="/assets/img/advanced_playlist_thumbnail.png" alt="Advanced Workout" class="w-full h-full block max-md:hidden">'
-        : '<img src="/assets/img/beginner_playlist_thumbnail.png" alt="Beginner Workout" class="w-full h-full block max-md:hidden">';
+        ? '<img src="/assets/img/advanced_playlist_thumbnail.png" alt="Advanced Workout" class="w-full h-full block">'
+        : '<img src="/assets/img/beginner_playlist_thumbnail.png" alt="Beginner Workout" class="w-full h-full block">';
     
     // Calculate progress for the suggested workout (today only)
     const progress = calculatePlaylistProgress(suggested.id, true);
@@ -778,7 +792,7 @@ function loadTodaysWorkout() {
     
     container.innerHTML = `
         <h2 class="text-xl font-semibold text-text-primary mb-4">Today's Workout</h2>
-        <div class="flex flex-row gap-8 w-full items-center max-md:flex-col max-md:gap-4 max-md:items-start">
+        <div class="flex flex-row gap-8 w-full items-center max-md:flex-col max-md:gap-4 max-md:items-center">
             <div class="h-[180px] rounded-lg overflow-hidden relative">
                 ${thumbnail}
             </div>
