@@ -688,9 +688,9 @@ function createPlaylistCard(playlist) {
     card.onclick = () => showPlaylist(playlist.id);
 
     const isAdvanced = playlist.id.includes('advanced');
-    const overlayBg = isAdvanced
-        ? 'background: linear-gradient(135deg, rgba(30,58,95,0.95) 0%, rgba(21,94,117,0.95) 100%); color: white;'
-        : 'background: linear-gradient(135deg, rgba(135,206,250,0.95) 0%, rgba(173,216,230,0.95) 100%); color: #1e3a5f;';
+    const thumbnail = isAdvanced
+        ? '<img src="/assets/img/advanced_playlist_thumbnail.jpg" alt="Advanced Workout" class="absolute inset-0 w-full h-full object-cover">'
+        : '<img src="/assets/img/beginner_playlist_thumbnail.jpg" alt="Beginner Workout" class="absolute inset-0 w-full h-full object-cover">';
     const weekText = isAdvanced ? 'Advanced<br>Weeks 4-6 Workout' : 'Beginner<br>Weeks 0-3 Workout';
 
     const completion = getPlaylistLastCompletion(playlist.id);
@@ -711,9 +711,7 @@ function createPlaylistCard(playlist) {
     
     card.innerHTML = `
         <div class="h-[180px] relative overflow-hidden">
-            <div class="absolute inset-0 flex flex-col items-center justify-center font-semibold text-center p-4" style="${overlayBg}">
-                <span class="text-2xl leading-tight">${weekText}</span>
-            </div>
+            ${thumbnail}
         </div>
         <div class="p-5">
             <h3 class="text-[1.1rem] font-semibold text-text-primary mb-1">${playlist.title}</h3>
@@ -738,9 +736,8 @@ function loadTodaysWorkout() {
 
     const isAdvanced = suggested.id.includes('advanced');
     const thumbnail = isAdvanced
-        ? '<img src="/assets/img/advanced-playlist-thumbnail.jpg" alt="Advanced Workout" class="absolute inset-0 w-full h-full object-cover">'
-        : '<img src="/assets/img/beginner-playlist-thumbnail.jpg" alt="Beginner Workout" class="absolute inset-0 w-full h-full object-cover">';
-    const weekText = isAdvanced ? 'Advanced<br>Weeks 4-6 Workout' : 'Beginner<br>Weeks 0-3 Workout';
+        ? '<img src="/assets/img/advanced_playlist_thumbnail.jpg" alt="Advanced Workout" class="absolute inset-0 w-full h-full object-cover">'
+        : '<img src="/assets/img/beginner_playlist_thumbnail.jpg" alt="Beginner Workout" class="absolute inset-0 w-full h-full object-cover">';
     
     // Calculate progress for the suggested workout (today only)
     const progress = calculatePlaylistProgress(suggested.id, true);
