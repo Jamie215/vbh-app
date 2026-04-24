@@ -420,14 +420,14 @@ function closeProgramCompletionModal() {
 }
 
 /**
- * Returns a human-readable label for when the current exercise week began.
- * Used in the greeting section to reduce confusion about week transitions.
+ * Returns a human-readable phrase for when the user's current exercise week began,
+ * suitable for embedding in a sentence (e.g., "this Wednesday", "on Apr 15").
+ * Returns null if there's no session history or the user is in a reset state.
  * @param {object} state - result of getProgramWeekState()
  */
-function getExerciseWeekStartLabel(state) {
-    if (!state || state.programWeek === 0) return null;
+function getExerciseWeekStartPhrase(state) {
+    if (!state || state.programWeek === 0 || state.wasReset) return null;
     if (!completionHistory || Object.keys(completionHistory).length === 0) return null;
-    if (state.wasReset) return null;
 
     const allDates = Object.keys(completionHistory).sort();
     if (!allDates.length) return null;
@@ -446,14 +446,13 @@ function getExerciseWeekStartLabel(state) {
 
     const diff = Math.floor((today - weekStartDate) / 86400000);
     const dayName = weekStartDate.toLocaleDateString('en-US', { weekday: 'long' });
-    const dateFormatted = weekStartDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
 
     if (diff < 0)   return null;
-    if (diff === 0) return `starting today`;
-    if (diff === 1) return `starting yesterday (${dayName})`;
-    if (diff < 7)   return `starting this ${dayName}`;
-    if (diff < 14)  return `starting last ${dayName}`;
-    return `starting ${dateFormatted}`;
+    if (diff === 0) return 'today';
+    if (diff === 1) return `yesterday (${dayName})`;
+    if (diff < 7)   return `this ${dayName}`;
+    if (diff < 14)  return `last ${dayName}`;
+    return `on ${weekStartDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}`;
 }
 
 function getSuggestedWorkout() {
@@ -675,47 +674,36 @@ function loadPlaylists() {
     const userNameEl = document.getElementById('user-name');
     if (userNameEl) userNameEl.textContent = userName;
 
-    // Update week display and greeting
+    // Compute program week state
     const state = getProgramWeekState();
     const userWeek = state.programWeek;
     const programCompleted = isProgramCompleted();
 
-    const existingWsl = document.getElementById('week-start-label');
-    if (existingWsl) existingWsl.remove();
-
-    if (!programCompleted && userWeek > 0 && greetingSection) {
-        const weekStartLabel = getExerciseWeekStartLabel(state);
-        if (weekStartLabel) {
-            const wsl = document.createElement('p');
-            wsl.id = 'week-start-label';
-            wsl.className = 'text-sm text-text-muted mt-1.5';
-            wsl.innerHTML = `<i class="fa-regular fa-calendar mr-1.5"></i>Exercise Week ${userWeek} ${weekStartLabel}`;
-            greetingSection.appendChild(wsl);
-        }
-    }
-
     // Update greeting message
     const greetingP = document.querySelector('#user-greeting-section p');
-    if (programCompleted) {
-        greetingP.innerHTML = `${userName}, you've completed the <strong>6-week program</strong>! Feel free to continue the exercises at your own pace.`;
-    } else if (state.wasReset) {
-        greetingP.innerHTML = `Welcome back, ${userName}! It's been a while — you're restarting at <strong>Week 4</strong>. Log a session to pick up where you left off.`;
-    } else if (userWeek === 0) {
-        greetingP.innerHTML = `${userName}, welcome to the program. Let's get started!`;
-    } else if (userWeek >= 4 && userWeek < 6) {
-        const sessionsLeft = 2 - state.sessionsInCurrentWeek;
-        if (sessionsLeft > 0) {
-            greetingP.innerHTML = `${userName}, you're on <strong>Week ${userWeek}</strong>. ${sessionsLeft === 1 ? '1 more session' : '2 sessions'} to go this week to advance — keep it up!`;
+    const weekStartPhrase = getExerciseWeekStartPhrase(state);
+    const weekStartSuffix = weekStartPhrase ? `, which began ${weekStartPhrase}` : '';
+
+    if (greetingP) {
+        if (programCompleted) {
+            greetingP.innerHTML = `${userName}, you've completed the <strong>6-week program</strong>! Feel free to continue the exercises at your own pace.`;
+        } else if (state.wasReset) {
+            greetingP.innerHTML = `Welcome back, ${userName}! It's been a while — you're restarting at <strong>Week 4</strong>. Log a session to pick up where you left off.`;
+        } else if (userWeek === 0) {
+            greetingP.innerHTML = `${userName}, welcome to the program! Start with <strong>Week 0</strong> and take it from there. Let's get started!`;
+        } else if (userWeek >= 4 && userWeek < 6) {
+            const sessionsLeft = 2 - state.sessionsInCurrentWeek;
+            if (sessionsLeft > 0) {
+                greetingP.innerHTML = `${userName}, you're on <strong>Week ${userWeek}</strong>${weekStartSuffix}. ${sessionsLeft === 1 ? '1 more session' : '2 sessions'} to go this week to advance — keep it up!`;
+            } else {
+                greetingP.innerHTML = `${userName}, you've reached <strong>Week ${userWeek}</strong>${weekStartSuffix} and already completed your sessions for this week. Well done!`;
+            }
+        } else if (userWeek === 6) {
+            const sessionsLeft = 2 - state.sessionsInCurrentWeek;
+            greetingP.innerHTML = `${userName}, you're on the <strong>final week</strong>${weekStartSuffix}! ${sessionsLeft === 1 ? '1 more session' : '2 sessions'} to go to complete the program — you've got this!`;
         } else {
-            greetingP.innerHTML = `${userName}, you've reached <strong>Week ${userWeek}</strong> and completed your sessions for this week. Well done!`;
+            greetingP.innerHTML = `${userName}, you've reached <strong>Week ${userWeek}</strong>${weekStartSuffix}. Keep it up!`;
         }
-    } else if (userWeek === 6) {
-        // sessionsLeft <= 0 on week 6 is caught by programCompleted above
-        const sessionsLeft = 2 - state.sessionsInCurrentWeek;
-        greetingP.innerHTML = `${userName}, you're on the <strong>final week</strong>! ${sessionsLeft === 1 ? '1 more session' : '2 sessions'} to go to complete the program — you've got this!`;
-    } else {
-        // Weeks 1-3: calendar-based, no session gating
-        greetingP.innerHTML = `${userName}, you've reached <strong>Week ${userWeek}</strong>. Keep it up!`;
     }
 
     if (typeof renderProgressAlert === 'function') {
