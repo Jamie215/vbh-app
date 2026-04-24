@@ -748,7 +748,7 @@ function loadTodaysWorkout() {
     container.innerHTML = `
         <div class="flex flex-row items-center justify-between mb-4 max-lg:flex-col max-lg:items-start">
             <h2 class="text-xl font-semibold text-text-primary">Today's Workout</h2>
-            <div class="flex flex-col gap-4">
+            <div class="flex flex-row gap-4">
                 <div class="w-[200px] h-[140px] rounded-lg overflow-hidden shrink-0 relative max-lg:w-full max-lg:h-[180px]">
                     <div class="absolute inset-0 flex flex-col items-center justify-center font-semibold text-center p-4" style="${overlayBg}">
                         <span class="text-2xl leading-tight">${weekText}</span>
@@ -763,8 +763,6 @@ function loadTodaysWorkout() {
                     </div>
                     <button class="bg-teal text-white border-none py-3 px-6 text-base font-semibold rounded-md cursor-pointer transition-colors hover:bg-teal-dark" onclick="showPlaylist('${suggested.id}')">Start Workout</button>
                 </div>
-            </div>
-        </div>
     `;
 
     // Destroy existing chart if it exists
