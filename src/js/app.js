@@ -684,26 +684,36 @@ function loadPlaylists() {
     const weekStartPhrase = getExerciseWeekStartPhrase(state);
     const weekStartSuffix = weekStartPhrase ? `, which began ${weekStartPhrase}` : '';
 
-    if (greetingP) {
-        if (programCompleted) {
-            greetingP.innerHTML = `${userName}, you've completed the <strong>6-week program</strong>! Feel free to continue the exercises at your own pace.`;
-        } else if (state.wasReset) {
-            greetingP.innerHTML = `Welcome back, ${userName}! It's been a while — you're restarting at <strong>Week 4</strong>. Log a session to pick up where you left off.`;
-        } else if (userWeek === 0) {
-            greetingP.innerHTML = `${userName}, welcome to the program! Start with <strong>Week 0</strong> and take it from there. Let's get started!`;
-        } else if (userWeek >= 4 && userWeek < 6) {
-            const sessionsLeft = 2 - state.sessionsInCurrentWeek;
-            if (sessionsLeft > 0) {
-                greetingP.innerHTML = `${userName}, you're on <strong>Week ${userWeek}</strong>${weekStartSuffix}. ${sessionsLeft === 1 ? '1 more session' : '2 sessions'} to go this week to advance — keep it up!`;
-            } else {
-                greetingP.innerHTML = `${userName}, you've reached <strong>Week ${userWeek}</strong>${weekStartSuffix} and already completed your sessions for this week. Well done!`;
-            }
-        } else if (userWeek === 6) {
-            const sessionsLeft = 2 - state.sessionsInCurrentWeek;
-            greetingP.innerHTML = `${userName}, you're on the <strong>final week</strong>${weekStartSuffix}! ${sessionsLeft === 1 ? '1 more session' : '2 sessions'} to go to complete the program — you've got this!`;
+    // Week-start context line (shown for all non-completed, non-reset states with a valid phrase)
+    const existingWsl = document.getElementById('week-start-label');
+    if (existingWsl) existingWsl.remove();
+
+    if (weekStartPhrase && greetingSection) {
+        const wsl = document.createElement('p');
+        wsl.id = 'week-start-label';
+        wsl.className = 'text-sm text-text-muted mt-1.5';
+        wsl.innerHTML = `<i class="fa-regular fa-calendar mr-1.5"></i>Week ${userWeek} began ${weekStartPhrase}`;
+        greetingSection.appendChild(wsl);
+    }
+
+    if (programCompleted) {
+        greetingP.innerHTML = `${userName}, you've completed the <strong>6-week program</strong>! Feel free to continue the exercises at your own pace.`;
+    } else if (state.wasReset) {
+        greetingP.innerHTML = `Welcome back, ${userName}! It's been a while — you're restarting at <strong>Week 4</strong>. Log a session to pick up where you left off.`;
+    } else if (userWeek === 0) {
+        greetingP.innerHTML = `${userName}, welcome to the program! Start with <strong>Week 0</strong> and take it from there. Let's get started!`;
+    } else if (userWeek >= 4 && userWeek < 6) {
+        const sessionsLeft = 2 - state.sessionsInCurrentWeek;
+        if (sessionsLeft > 0) {
+            greetingP.innerHTML = `${userName}, you're on <strong>Week ${userWeek}</strong>. ${sessionsLeft === 1 ? '1 more session' : '2 sessions'} to go this week to advance — keep it up!`;
         } else {
-            greetingP.innerHTML = `${userName}, you've reached <strong>Week ${userWeek}</strong>${weekStartSuffix}. Keep it up!`;
+            greetingP.innerHTML = `${userName}, you've reached <strong>Week ${userWeek}</strong> and already completed your sessions for this week. Well done!`;
         }
+    } else if (userWeek === 6) {
+        const sessionsLeft = 2 - state.sessionsInCurrentWeek;
+        greetingP.innerHTML = `${userName}, you're on the <strong>final week</strong>! ${sessionsLeft === 1 ? '1 more session' : '2 sessions'} to go to complete the program — you've got this!`;
+    } else {
+        greetingP.innerHTML = `${userName}, you've reached <strong>Week ${userWeek}</strong>. Keep it up!`;
     }
 
     if (typeof renderProgressAlert === 'function') {
