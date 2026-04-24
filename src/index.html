@@ -605,14 +605,14 @@
             </section>
             <div id="progress-alert-container" class="hidden"></div>
             <section id="todays-workout-section" class="mb-12">
-                <div class="grid grid-cols-[3fr_1fr] gap-4 items-stretch max-md:grid-cols-1">
+                <div class="grid grid-cols-[3fr_1fr] gap-2 max-md:gap-4 items-stretch max-md:grid-cols-1">
                     <div id="todays-workout-card" class="bg-white rounded-card shadow-card border border-border p-6 flex flex-col w-full"></div>
-                    <div class="bg-white rounded-card border border-border p-6 flex flex-col justify-center text-center cursor-pointer transition-all duration-200 gap-2 shadow-card max-md:w-full max-md:p-5 active:translate-y-px">
+                    <div class="bg-white rounded-card border border-border p-6 flex flex-col justify-center md:items-center text-center cursor-pointer transition-all duration-200 gap-2 shadow-card max-md:w-full max-md:p-5 active:translate-y-px">
                         <div class="w-11 h-11 rounded-card bg-gradient-to-br from-[#667eea] to-[#764ba2] flex items-center justify-center mb-1 max-md:hidden">
                             <i class="fa-solid fa-clock-rotate-left text-[1.1rem] text-white"></i>
                         </div>
                         <h3 class="text-base font-semibold text-text-primary">Missed logging a session? You can log it here to keep your progress up to date.</h3>
-                        <button class="inline-flex items-center gap-1.5 py-2 px-5 bg-white text-brand border-[1.5px] border-brand rounded-lg text-sm font-semibold cursor-pointer transition-all duration-200 mt-2 hover:bg-brand hover:text-white max-md:mt-0 max-md:text-center max-md:whitespace-nowrap" onclick="openManualEntryModal()"><i class="fa-solid fa-plus"></i> Log Past Workout</button>
+                        <button class="inline-flex items-center gap-1.5 py-2 px-5 bg-white text-brand border-[1.5px] border-brand rounded-lg text-sm font-semibold cursor-pointer transition-all duration-200 mt-2 hover:bg-brand hover:text-white max-md:mt-0 max-md:w-full max-md:justify-center max-md:whitespace-nowrap" onclick="openManualEntryModal()"><i class="fa-solid fa-plus"></i> Log Past Workout</button>
                     </div>
                 </div>
             </section>
