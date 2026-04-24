@@ -148,6 +148,7 @@ function getAdvancedSessionDates() {
  *   - If session 2 falls outside the window → advance the day after session 2.
  *   - New window starts on the advance date.
  *   - 14+ days of inactivity → reset to week 4.
+ *   - When resetted, the windor anchor resets to the date of resumed activity.
  */
 function getProgramWeekState() {
     const empty = { programWeek: 0, calendarWeek: 0, windowAnchor: null, sessionsInCurrentWeek: 0 };
@@ -157,32 +158,44 @@ function getProgramWeekState() {
     const allDates = Object.keys(completionHistory).sort();
     if (allDates.length === 0) return empty;
 
-    const firstDate = new Date(allDates[0] + 'T00:00:00');
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
-    const diffDays = Math.floor((today - firstDate) / (1000 * 60 * 60 * 24));
+    // Find the "effective" first date: the most recent resume after a 14+ day gap,
+    // or the original first session if no such gap exists.
+    // Pre-gap sessions don't count toward post-reset progression.
+    const sessionDates = allDates.map(d => new Date(d + 'T00:00:00'));
+    let effectiveFirstIdx = 0;
+    for (let i = 1; i < sessionDates.length; i++) {
+        const gapDays = Math.floor((sessionDates[i] - sessionDates[i - 1]) / 86400000);
+        if (gapDays >= 14) effectiveFirstIdx = i;
+    }
+    const effectiveFirstDate = sessionDates[effectiveFirstIdx];
+    const effectiveDates = allDates.slice(effectiveFirstIdx);
+
+    const diffDays = Math.floor((today - effectiveFirstDate) / 86400000);
     const calendarWeek = Math.min(Math.floor(diffDays / 7), 6);
 
-    // Weeks 0-3: purely calendar-based
+    // Weeks 0-3: purely calendar-based from effective start
     if (calendarWeek <= 3) {
         return { programWeek: calendarWeek, calendarWeek, windowAnchor: null, sessionsInCurrentWeek: 0 };
     }
 
-    // Check 14-day inactivity reset
+    // Check 14-day inactivity reset (measured from today against most recent session)
     const mostRecentDate = new Date(allDates[allDates.length - 1] + 'T00:00:00');
-    const daysSinceLastActivity = Math.floor((today - mostRecentDate) / (1000 * 60 * 60 * 24));
+    const daysSinceLastActivity = Math.floor((today - mostRecentDate) / 86400000);
 
     if (daysSinceLastActivity >= 14) {
         return { programWeek: 4, calendarWeek, windowAnchor: null, sessionsInCurrentWeek: 0, wasReset: true };
     }
 
-    // Weeks 4+: session-gated progression
-    const advancedSessions = getAdvancedSessionDates();
+    // Weeks 4+: session-gated progression, anchored to effective start
+    const advancedSessions = getAdvancedSessionDates().filter(dateStr => {
+        return new Date(dateStr + 'T00:00:00') >= effectiveFirstDate;
+    });
 
     let programWeek = 4;
-    // Initial window anchor: day 28 from first-ever session (start of calendar week 4)
-    let windowAnchor = new Date(firstDate);
+    let windowAnchor = new Date(effectiveFirstDate);
     windowAnchor.setDate(windowAnchor.getDate() + 28);
 
     let sessionsInCurrentWeek = 0;
@@ -190,22 +203,18 @@ function getProgramWeekState() {
     for (const sessionDateStr of advancedSessions) {
         const sessionDate = new Date(sessionDateStr + 'T00:00:00');
 
-        // Skip sessions before the current program week's window
         if (sessionDate < windowAnchor) continue;
 
         sessionsInCurrentWeek++;
 
         if (sessionsInCurrentWeek >= 2) {
-            // Determine advance date based on whether session 2 is within the window
             const windowEnd = new Date(windowAnchor);
             windowEnd.setDate(windowEnd.getDate() + 7);
 
             let advanceDate;
             if (sessionDate < windowEnd) {
-                // Both sessions within the 7-day window → advance when window expires
                 advanceDate = new Date(windowEnd);
             } else {
-                // Session 2 spilled outside the window → advance day after session 2
                 advanceDate = new Date(sessionDate);
                 advanceDate.setDate(advanceDate.getDate() + 1);
             }
@@ -214,21 +223,17 @@ function getProgramWeekState() {
                 programWeek++;
                 if (programWeek >= 6) {
                     windowAnchor = advanceDate;
-                    // Count any remaining sessions that fall on/after the new anchor
                     sessionsInCurrentWeek = (sessionDate >= advanceDate) ? 1 : 0;
                     break;
                 }
                 windowAnchor = advanceDate;
-                // Does this session also count toward the new program week?
                 sessionsInCurrentWeek = (sessionDate >= advanceDate) ? 1 : 0;
             } else {
-                // Prerequisite met but advance date not yet reached
                 break;
             }
         }
     }
 
-    // If we reached week 6, recount sessions from the anchor point
     if (programWeek === 6 && windowAnchor) {
         sessionsInCurrentWeek = 0;
         const anchorTime = windowAnchor.getTime();
@@ -422,28 +427,33 @@ function closeProgramCompletionModal() {
 function getExerciseWeekStartLabel(state) {
     if (!state || state.programWeek === 0) return null;
     if (!completionHistory || Object.keys(completionHistory).length === 0) return null;
- 
+    if (state.wasReset) return null;
+
     const allDates = Object.keys(completionHistory).sort();
     if (!allDates.length) return null;
-  
-    // Session-gated: window anchor marks the start of this program week
-    const weekStartDate = state.windowAnchor ? new Date(state.windowAnchor) : null;
- 
-    if (!weekStartDate) return null;
- 
+
+    // Start of the user's current exercise week.
+    // windowAnchor (weeks 4-6) is post-reset-aware via getProgramWeekState.
+    // Weeks 1-3 fall back to calendar week offset from their first session.
+    const firstDate = new Date(allDates[0] + 'T00:00:00');
+    const weekStartDate = state.windowAnchor
+        ? new Date(state.windowAnchor)
+        : new Date(firstDate.getTime() + state.programWeek * 7 * 86400000);
+
     const today = new Date();
     today.setHours(0, 0, 0, 0);
     weekStartDate.setHours(0, 0, 0, 0);
+
     const diff = Math.floor((today - weekStartDate) / 86400000);
     const dayName = weekStartDate.toLocaleDateString('en-US', { weekday: 'long' });
     const dateFormatted = weekStartDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
- 
-    if (diff < 0) return null;
-    if (diff === 0) return `started today`;
-    if (diff === 1) return `started yesterday (${dayName})`;
-    if (diff < 7)  return `started this ${dayName}`;
-    if (diff < 14) return `started last ${dayName}`;
-    return `started ${dateFormatted}`;
+
+    if (diff < 0)   return null;
+    if (diff === 0) return `starting today`;
+    if (diff === 1) return `starting yesterday (${dayName})`;
+    if (diff < 7)   return `starting this ${dayName}`;
+    if (diff < 14)  return `starting last ${dayName}`;
+    return `starting ${dateFormatted}`;
 }
 
 function getSuggestedWorkout() {
