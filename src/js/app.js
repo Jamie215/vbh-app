@@ -763,6 +763,8 @@ function loadTodaysWorkout() {
                     </div>
                     <button class="bg-teal text-white border-none py-3 px-6 text-base font-semibold rounded-md cursor-pointer transition-colors hover:bg-teal-dark" onclick="showPlaylist('${suggested.id}')">Start Workout</button>
                 </div>
+            </div>
+        </div>
     `;
 
     // Destroy existing chart if it exists
