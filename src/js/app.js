@@ -746,21 +746,23 @@ function loadTodaysWorkout() {
     const progress = calculatePlaylistProgress(suggested.id, true);
     
     container.innerHTML = `
-        <h2 class="text-xl font-semibold text-text-primary">Today's Workout</h2>
-        <div class="flex flex-row gap-4">
-            <div class="w-[200px] h-[140px] rounded-lg overflow-hidden shrink-0 relative max-lg:w-full max-lg:h-[180px]">
-                <div class="absolute inset-0 flex flex-col items-center justify-center font-semibold text-center p-4" style="${overlayBg}">
-                    <span class="text-2xl leading-tight">${weekText}</span>
+        <div class="flex flex-col items-start justify-between mb-4 max-lg:flex-col max-lg:items-start">
+            <h2 class="text-xl font-semibold text-text-primary">Today's Workout</h2>
+            <div class="flex flex-row gap-4">
+                <div class="w-[200px] h-[140px] rounded-lg overflow-hidden shrink-0 relative max-lg:w-full max-lg:h-[180px]">
+                    <div class="absolute inset-0 flex flex-col items-center justify-center font-semibold text-center p-4" style="${overlayBg}">
+                        <span class="text-2xl leading-tight">${weekText}</span>
+                    </div>
                 </div>
-            </div>
-            <div class="flex-1">
-                <h3 class="text-xl font-semibold text-text-primary mb-2">${suggested.title}</h3>
-                <p class="text-text-secondary text-base mb-4">Your suggested workout for today</p>
-                <div class="flex items-center gap-3 mb-4 max-md:flex-col max-md:items-start">
-                    <canvas id="todays-progress-ring"></canvas>
-                    <span class="text-base text-text-tertiary font-medium">${progress.completed}/${progress.total} exercises done</span>
+                <div class="flex-1">
+                    <h3 class="text-xl font-semibold text-text-primary mb-2">${suggested.title}</h3>
+                    <p class="text-text-secondary text-base mb-4">Your suggested workout for today</p>
+                    <div class="flex items-center gap-3 mb-4 max-md:flex-col max-md:items-start">
+                        <canvas id="todays-progress-ring"></canvas>
+                        <span class="text-base text-text-tertiary font-medium">${progress.completed}/${progress.total} exercises done</span>
+                    </div>
+                    <button class="bg-teal text-white border-none py-3 px-6 text-base font-semibold rounded-md cursor-pointer transition-colors hover:bg-teal-dark" onclick="showPlaylist('${suggested.id}')">Start Workout</button>
                 </div>
-                <button class="bg-teal text-white border-none py-3 px-6 text-base font-semibold rounded-md cursor-pointer transition-colors hover:bg-teal-dark" onclick="showPlaylist('${suggested.id}')">Start Workout</button>
             </div>
         </div>
     `;
