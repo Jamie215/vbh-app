@@ -792,13 +792,13 @@ function loadTodaysWorkout() {
     
     container.innerHTML = `
         <h2 class="text-xl font-semibold text-text-primary mb-4">Today's Workout</h2>
-        <div class="flex flex-row gap-8 w-full items-center max-md:flex-col max-md:gap-4 max-md:items-center">
+        <div class="flex flex-row gap-8 w-full max-md:flex-col max-md:gap-4">
             <div class="h-[180px] rounded-lg overflow-hidden relative">
                 ${thumbnail}
             </div>
             <div class="flex-1 min-w-200">
-                <h3 class="text-xl font-semibold text-text-primary mb-2">${suggested.title}</h3>
                 <p class="text-text-secondary text-base mb-4">Your suggested workout for today</p>
+                <h3 class="text-xl font-semibold text-text-primary mb-2">${suggested.title}</h3>
                 <div class="flex items-center gap-3 mb-4 max-md:flex-col max-md:items-start">
                     <canvas id="todays-progress-ring"></canvas>
                     <span class="text-base text-text-tertiary font-medium">${progress.completed}/${progress.total} exercises done</span>
