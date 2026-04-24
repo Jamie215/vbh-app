@@ -689,9 +689,8 @@ function createPlaylistCard(playlist) {
 
     const isAdvanced = playlist.id.includes('advanced');
     const thumbnail = isAdvanced
-        ? '<img src="/assets/img/advanced_playlist_thumbnail.png" alt="Advanced Workout" class="absolute inset-0 w-full h-full object-cover">'
-        : '<img src="/assets/img/beginner_playlist_thumbnail.png" alt="Beginner Workout" class="absolute inset-0 w-full h-full object-cover">';
-    const weekText = isAdvanced ? 'Advanced<br>Weeks 4-6 Workout' : 'Beginner<br>Weeks 0-3 Workout';
+        ? '<img src="/assets/img/advanced_playlist_thumbnail.png" alt="Advanced Workout" class="w-full h-full block">'
+        : '<img src="/assets/img/beginner_playlist_thumbnail.png" alt="Beginner Workout" class="w-full h-full block">';
 
     const completion = getPlaylistLastCompletion(playlist.id);
     let completionHTML = '';
@@ -736,8 +735,8 @@ function loadTodaysWorkout() {
 
     const isAdvanced = suggested.id.includes('advanced');
     const thumbnail = isAdvanced
-        ? '<img src="/assets/img/advanced_playlist_thumbnail.png" alt="Advanced Workout" class="absolute inset-0 w-full h-full object-cover">'
-        : '<img src="/assets/img/beginner_playlist_thumbnail.png" alt="Beginner Workout" class="absolute inset-0 w-full h-full object-cover">';
+        ? '<img src="/assets/img/advanced_playlist_thumbnail.png" alt="Advanced Workout" class="w-full h-full block">'
+        : '<img src="/assets/img/beginner_playlist_thumbnail.png" alt="Beginner Workout" class="w-full h-full block">';
     
     // Calculate progress for the suggested workout (today only)
     const progress = calculatePlaylistProgress(suggested.id, true);
@@ -745,7 +744,7 @@ function loadTodaysWorkout() {
     container.innerHTML = `
         <h2 class="text-xl font-semibold text-text-primary">Today's Workout</h2>
         <div class="flex flex-row gap-12 w-full items-center">
-            <div class="w-[220px] h-[165px] rounded-lg overflow-hidden shrink-0 relative max-lg:h-[180px]">
+            <div class="h-[180px] rounded-lg overflow-hidden relative">
                 ${thumbnail}
             </div>
             <div class="flex-1 min-w-0">
