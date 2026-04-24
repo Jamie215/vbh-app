@@ -747,7 +747,7 @@ function loadTodaysWorkout() {
             <div class="h-[180px] rounded-lg overflow-hidden relative">
                 ${thumbnail}
             </div>
-            <div class="flex-1 min-w-0">
+            <div class="flex-1 min-w-200">
                 <h3 class="text-xl font-semibold text-text-primary mb-2">${suggested.title}</h3>
                 <p class="text-text-secondary text-base mb-4">Your suggested workout for today</p>
                 <div class="flex items-center gap-3 mb-4 max-md:flex-col max-md:items-start">
