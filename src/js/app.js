@@ -414,6 +414,38 @@ function closeProgramCompletionModal() {
     sessionStorage.setItem('dismissedCompletionModal', 'true');
 }
 
+/**
+ * Returns a human-readable label for when the current exercise week began.
+ * Used in the greeting section to reduce confusion about week transitions.
+ * @param {object} state - result of getProgramWeekState()
+ */
+function getExerciseWeekStartLabel(state) {
+    if (!state || state.programWeek === 0) return null;
+    if (!completionHistory || Object.keys(completionHistory).length === 0) return null;
+ 
+    const allDates = Object.keys(completionHistory).sort();
+    if (!allDates.length) return null;
+  
+    // Session-gated: window anchor marks the start of this program week
+    const weekStartDate = state.windowAnchor ? new Date(state.windowAnchor) : null;
+ 
+    if (!weekStartDate) return null;
+ 
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    weekStartDate.setHours(0, 0, 0, 0);
+    const diff = Math.floor((today - weekStartDate) / 86400000);
+    const dayName = weekStartDate.toLocaleDateString('en-US', { weekday: 'long' });
+    const dateFormatted = weekStartDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+ 
+    if (diff < 0) return null;
+    if (diff === 0) return `started today`;
+    if (diff === 1) return `started yesterday (${dayName})`;
+    if (diff < 7)  return `started this ${dayName}`;
+    if (diff < 14) return `started last ${dayName}`;
+    return `started ${dateFormatted}`;
+}
+
 function getSuggestedWorkout() {
     const userWeek = calculateUserWeek();
 
@@ -735,15 +767,18 @@ function loadTodaysWorkout() {
 
     const isAdvanced = suggested.id.includes('advanced');
     const thumbnail = isAdvanced
-        ? '<img src="/assets/img/advanced_playlist_thumbnail.png" alt="Advanced Workout" class="w-full h-full block">'
-        : '<img src="/assets/img/beginner_playlist_thumbnail.png" alt="Beginner Workout" class="w-full h-full block">';
+        ? '<img src="/assets/img/advanced_playlist_thumbnail.png" alt="Advanced Workout" class="w-full h-full block max-md:hidden">'
+        : '<img src="/assets/img/beginner_playlist_thumbnail.png" alt="Beginner Workout" class="w-full h-full block max-md:hidden">';
     
     // Calculate progress for the suggested workout (today only)
     const progress = calculatePlaylistProgress(suggested.id, true);
+
+    // Update button label if there is a completed workout
+    const buttonLabel = progress.completed > 0 ? 'Continue Workout' : 'Start Workout';
     
     container.innerHTML = `
-        <h2 class="text-xl font-semibold text-text-primary">Today's Workout</h2>
-        <div class="flex flex-row gap-12 w-full items-center">
+        <h2 class="text-xl font-semibold text-text-primary mb-4">Today's Workout</h2>
+        <div class="flex flex-row gap-8 w-full items-center max-md:flex-col max-md:gap-4 max-md:items-start">
             <div class="h-[180px] rounded-lg overflow-hidden relative">
                 ${thumbnail}
             </div>
@@ -754,7 +789,7 @@ function loadTodaysWorkout() {
                     <canvas id="todays-progress-ring"></canvas>
                     <span class="text-base text-text-tertiary font-medium">${progress.completed}/${progress.total} exercises done</span>
                 </div>
-                <button class="bg-teal text-white border-none py-3 px-6 text-base font-semibold rounded-md cursor-pointer transition-colors hover:bg-teal-dark" onclick="showPlaylist('${suggested.id}')">Start Workout</button>
+                <button class="bg-teal text-white border-none py-3 px-6 text-base font-semibold rounded-md cursor-pointer transition-colors hover:bg-teal-dark" onclick="showPlaylist('${suggested.id}')">${buttonLabel}</button>
             </div>
         </div>
     `;
