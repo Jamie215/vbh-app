@@ -746,14 +746,14 @@ function loadTodaysWorkout() {
     const progress = calculatePlaylistProgress(suggested.id, true);
     
     container.innerHTML = `
-        <h2 class="text-xl font-semibold text-text-primary mb-2">Today's Workout</h2>
-        <div class="flex flex-row gap-4">
+        <h2 class="text-xl font-semibold text-text-primary">Today's Workout</h2>
+        <div class="flex flex-row gap-6 w-full items-center">
             <div class="w-[200px] h-[140px] rounded-lg overflow-hidden shrink-0 relative max-lg:w-full max-lg:h-[180px]">
                 <div class="absolute inset-0 flex flex-col items-center justify-center font-semibold text-center p-4" style="${overlayBg}">
                     <span class="text-2xl leading-tight">${weekText}</span>
                 </div>
             </div>
-            <div class="flex-1">
+            <div class="flex-1 min-w-0">
                 <h3 class="text-xl font-semibold text-text-primary mb-2">${suggested.title}</h3>
                 <p class="text-text-secondary text-base mb-4">Your suggested workout for today</p>
                 <div class="flex items-center gap-3 mb-4 max-md:flex-col max-md:items-start">
