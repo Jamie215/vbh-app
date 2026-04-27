@@ -426,7 +426,7 @@ function closeProgramCompletionModal() {
  * @param {object} state - result of getProgramWeekState()
  */
 function getExerciseWeekStartPhrase(state) {
-    if (!state || state.programWeek === 0 || state.wasReset) return null;
+    if (!state || state.wasReset) return null;
     if (!completionHistory || Object.keys(completionHistory).length === 0) return null;
 
     const allDates = Object.keys(completionHistory).sort();
@@ -434,7 +434,7 @@ function getExerciseWeekStartPhrase(state) {
 
     // Start of the user's current exercise week.
     // windowAnchor (weeks 4-6) is post-reset-aware via getProgramWeekState.
-    // Weeks 1-3 fall back to calendar week offset from their first session.
+    // Weeks 0-3 fall back to calendar week offset from their first session.
     const firstDate = new Date(allDates[0] + 'T00:00:00');
     const weekStartDate = state.windowAnchor
         ? new Date(state.windowAnchor)
@@ -447,11 +447,18 @@ function getExerciseWeekStartPhrase(state) {
     const diff = Math.floor((today - weekStartDate) / 86400000);
     const dayName = weekStartDate.toLocaleDateString('en-US', { weekday: 'long' });
 
-    if (diff < 0)   return null;
+    if (diff < 0) return null;
     if (diff === 0) return 'today';
     if (diff === 1) return `yesterday (${dayName})`;
-    if (diff < 7)   return `this ${dayName}`;
-    if (diff < 14)  return `last ${dayName}`;
+
+    // "this {day}" vs "last {day}" by calendar-week boundaries (Monday-based,
+    // matching the home view's calendar strip).
+    const startOfThisWeek = _getStartOfCurrentWeekMonday();
+    const startOfLastWeek = new Date(startOfThisWeek);
+    startOfLastWeek.setDate(startOfLastWeek.getDate() - 7);
+
+    if (weekStartDate >= startOfThisWeek) return `this ${dayName}`;
+    if (weekStartDate >= startOfLastWeek) return `last ${dayName}`;
     return `on ${weekStartDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}`;
 }
 
