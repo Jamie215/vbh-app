@@ -696,7 +696,7 @@ function loadPlaylists() {
         } else if (state.wasReset) {
             greetingP.innerHTML = `Welcome back, ${userName}! It's been a while — you're restarting at <strong>Week 4</strong>. Log a session to pick up where you left off.`;
         } else if (userWeek === 0) {
-            greetingP.innerHTML = `${userName}, welcome to the program! Let's get started!`;
+            greetingP.innerHTML = `${userName}, welcome to the program. Let's get started!`;
         } else if (userWeek >= 4 && userWeek < 6) {
             const sessionsLeft = 2 - state.sessionsInCurrentWeek;
             if (sessionsLeft > 0) {

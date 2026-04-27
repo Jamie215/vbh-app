@@ -656,12 +656,13 @@ function loadRecentActivity() {
                     <span class="font-semibold text-text-primary text-base">${formattedDate}</span>
                 </div>
                 <div class="flex flex-col gap-1">
-                    ${sessionStats.map(stat => `
-                        <div class="flex items-center gap-3">
-                            <span class="font-medium text-text-tertiary text-base">${stat.playlistName}</span>
-                            <span class="text-success text-base font-medium">${stat.exercisesCompleted}/${stat.totalExercises} exercises</span>
-                        </div>
-                    `).join('')}
+                    ${sessionStats.filter(stat => stat.exercisesCompleted > 0)
+                                    .map(stat => `
+                                    <div class="flex items-center gap-3">
+                                        <span class="font-medium text-text-tertiary text-base">${stat.playlistName}</span>
+                                        <span class="text-success text-base font-medium">${stat.exercisesCompleted}/${stat.totalExercises} exercises</span>
+                                    </div>
+                                    `).join('')}
                 </div>
             </div>
         `;
