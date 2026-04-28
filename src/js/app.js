@@ -428,6 +428,8 @@ function closeProgramCompletionModal() {
 function getExerciseWeekStartPhrase(state) {
     if (!state || state.wasReset) return null;
     if (!completionHistory || Object.keys(completionHistory).length === 0) return null;
+    if (state.programWeek === 6 && state.sessionsInCurrentWeek >= 2) return null; // Completed program - no active week
+    if (state.programWeek > 6) return null; // Post-program state
 
     const allDates = Object.keys(completionHistory).sort();
     if (!allDates.length) return null;
@@ -707,6 +709,8 @@ function loadPlaylists() {
         } else if (userWeek === 6) {
             const sessionsLeft = 2 - state.sessionsInCurrentWeek;
             greetingP.innerHTML = `${userName}, you're on the <strong>final week</strong>! ${sessionsLeft === 1 ? '1 more session' : '2 sessions'} to go to complete the program — you've got this!`;
+        } else if (userWeek > 6) {
+            greetingP.innerHTML = `${userName}, you've completed the 6-week program! Feel free to continue with the advanced exercises at your own pace. Great work!`;
         } else {
             greetingP.innerHTML = `${userName}, you've reached <strong>Week ${userWeek}</strong>. Keep it up!`;
         }
