@@ -316,6 +316,7 @@ function showExercises() {
 
     if (exercisesView) exercisesView.classList.remove('hidden');
     if (navbar) navbar.classList.remove('hidden');
+    setFooterVisibility(true);
 
     updateNavActiveState('exercises');
 
