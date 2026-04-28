@@ -1102,9 +1102,11 @@ function updateSetsUI(videoId, currentCount, maxSets) {
     if (minusBtn) minusBtn.disabled = currentCount <= 0;
 }
 
+let viewedWeekStart = null; // tracks which week the calendar strip is showing
 // Home View
 function loadHomeView() {
     if (!currentUser) return;
+    viewedWeekStart = null; // reset to current week
     renderHomeGreeting();
     renderClinicBanner();
     renderWorkoutsRemainingCard();
@@ -1269,10 +1271,22 @@ function renderTotalDaysCard() {
 function renderCalendarStrip() {
     const container = document.getElementById('home-calendar-strip');
     if (!container) return;
-    const start = _getStartOfCurrentWeekMonday();
+
+    // Ensure state is initialized (e.g., if called before loadHomeView)
+    if (!viewedWeekStart) viewedWeekStart = _getStartOfCurrentWeekMonday();
+
+    const start = new Date(viewedWeekStart);
     const todayISO = _dateToISO(new Date());
-    const labels = ['Mon', 'Tues', 'Wed', 'Thurs', 'Fri', 'Sat', 'Sun'];
-    let html = '';
+    const labels = ['Sun', 'Mon', 'Tues', 'Wed', 'Thurs', 'Fri', 'Sat'];
+
+    // Forward bound: can't navigate past current week
+    const currentWeekStart = _getStartOfCurrentWeekMonday();
+    const canGoForward = start.getTime() < currentWeekStart.getTime();
+
+    // Backward bound: can't navigate before the week containing the first logged session
+    const canGoBack = _canNavigatePreviousWeek(start);
+
+    let daysHTML = '';
     for (let i = 0; i < 7; i++) {
         const d = new Date(start);
         d.setDate(d.getDate() + i);
@@ -1280,7 +1294,7 @@ function renderCalendarStrip() {
         const isToday = iso === todayISO;
         const hasActivity = completionHistory?.[iso] && _dayHasAnyCompletedExercise(completionHistory[iso]);
         const dayBoxClass = isToday ? 'bg-brand-dark text-white' : 'text-text-primary';
-        html += `
+        daysHTML += `
             <div class="flex-1 flex flex-col items-center gap-1 min-w-0">
                 <span class="text-sm text-text-secondary font-medium">${labels[i]}</span>
                 <div class="w-10 h-10 rounded-full flex items-center justify-center text-base font-semibold ${dayBoxClass}">${d.getDate()}</div>
@@ -1288,7 +1302,49 @@ function renderCalendarStrip() {
             </div>
         `;
     }
-    container.innerHTML = html;
+
+    const chevronClass = 'shrink-0 self-center w-8 h-8 rounded-full flex items-center justify-center bg-transparent border-none text-text-secondary cursor-pointer transition-colors hover:bg-[#f1f5f9] hover:text-text-primary disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:bg-transparent disabled:hover:text-text-secondary';
+
+    container.innerHTML = `
+        <button class="${chevronClass}" onclick="navigateCalendarWeek(-1)" ${!canGoBack ? 'disabled' : ''} aria-label="Previous week">
+            <i class="fa-solid fa-chevron-left"></i>
+        </button>
+        ${daysHTML}
+        <button class="${chevronClass}" onclick="navigateCalendarWeek(1)" ${!canGoForward ? 'disabled' : ''} aria-label="Next week">
+            <i class="fa-solid fa-chevron-right"></i>
+        </button>
+    `;
+}
+
+// Returns true if there's at least one logged session in a week earlier than the given week start.
+function _canNavigatePreviousWeek(currentViewedStart) {
+    if (!completionHistory || Object.keys(completionHistory).length === 0) return false;
+    const firstDateStr = Object.keys(completionHistory).sort()[0];
+    const firstDate = new Date(firstDateStr + 'T00:00:00');
+
+    // Find the Monday of the week containing the first logged session
+    const firstWeekStart = new Date(firstDate);
+    firstWeekStart.setHours(0, 0, 0, 0);
+    const day = firstWeekStart.getDay();
+    const diff = day === 0 ? -6 : 1 - day;
+    firstWeekStart.setDate(firstWeekStart.getDate() + diff);
+
+    return currentViewedStart.getTime() > firstWeekStart.getTime();
+}
+
+// direction: -1 = back, +1 = forward
+function navigateCalendarWeek(direction) {
+    if (!viewedWeekStart) viewedWeekStart = _getStartOfCurrentWeekMonday();
+    const newStart = new Date(viewedWeekStart);
+    newStart.setDate(newStart.getDate() + (direction * 7));
+
+    // Re-check bounds defensively (handles rapid clicks)
+    const currentWeekStart = _getStartOfCurrentWeekMonday();
+    if (direction > 0 && newStart.getTime() > currentWeekStart.getTime()) return;
+    if (direction < 0 && !_canNavigatePreviousWeek(viewedWeekStart)) return;
+
+    viewedWeekStart = newStart;
+    renderCalendarStrip();
 }
 
 // ---------- Today purple card ----------
@@ -1336,7 +1392,7 @@ function renderEducationHomeCard() {
     const container = document.getElementById('home-education-card');
     if (!container) return;
     container.innerHTML = `
-        <div class="bg-blue-100 rounded-xl p-8 flex items-center gap-8 max-md:flex-col max-md:p-6">
+        <div class="bg-white rounded-xl p-8 flex items-center gap-8 max-md:flex-col max-md:p-6">
             <div class="flex-1">
                 <h3 class="text-xl font-semibold text-text-primary mb-4">Review E-learning Module for Bone Health</h3>
                 <p class="text-base text-text-tertiary mb-6 leading-relaxed">Topics include how to maintain your bone health through safe movement, falls prevention, medication management, and lifestyle strategies.</p>
