@@ -136,6 +136,47 @@ function getAdvancedSessionDates() {
 }
 
 /**
+ * Replays session-gated progression on a slice of dates and returns true if
+ * the user ever reached week 6 with 2+ sessions logged. Used to lock in
+ * "completed" status so it survives later inactivity, edits, or gaps.
+ */
+function _didEverComplete(advancedSessionDates, fromDate) {
+    if (!advancedSessionDates.length) return false;
+
+    let programWeek = 4;
+    let windowAnchor = new Date(fromDate);
+    windowAnchor.setDate(windowAnchor.getDate() + 28);
+
+    let sessionsInWeek = 0;
+
+    for (const sessionDateStr of advancedSessionDates) {
+        const sessionDate = new Date(sessionDateStr + 'T00:00:00');
+        if (sessionDate < windowAnchor) continue;
+
+        sessionsInWeek++;
+
+        if (sessionsInWeek >= 2) {
+            // Completion: week 6 with 2 sessions
+            if (programWeek === 6) return true;
+
+            // Otherwise advance and continue
+            const windowEnd = new Date(windowAnchor);
+            windowEnd.setDate(windowEnd.getDate() + 7);
+
+            const advanceDate = sessionDate < windowEnd
+                ? new Date(windowEnd)
+                : (() => { const d = new Date(sessionDate); d.setDate(d.getDate() + 1); return d; })();
+
+            programWeek++;
+            windowAnchor = advanceDate;
+            sessionsInWeek = (sessionDate >= advanceDate) ? 1 : 0;
+        }
+    }
+
+    return false;
+}
+
+/**
  * Core function that computes the program week state for weeks 4-6.
  * Returns detailed state used by calculateUserWeek(), alerts, and checkWeek6Activity().
  *
@@ -181,7 +222,24 @@ function getProgramWeekState() {
         return { programWeek: calendarWeek, calendarWeek, windowAnchor: null, sessionsInCurrentWeek: 0 };
     }
 
-    // Check 14-day inactivity reset (measured from today against most recent session)
+    // ── Completion check: did the user already finish the program in this run?
+    // Once true, completion is permanent for this effective period — survives
+    // inactivity, gaps, and stale windowAnchors.
+    const advancedSessionsInRun = getAdvancedSessionDates().filter(dateStr => {
+        return new Date(dateStr + 'T00:00:00') >= effectiveFirstDate;
+    });
+
+    if (_didEverComplete(advancedSessionsInRun, effectiveFirstDate)) {
+        return {
+            programWeek: 6,
+            calendarWeek,
+            windowAnchor: null,
+            sessionsInCurrentWeek: 2,
+            completed: true
+        };
+    }
+
+    // Check 14-day inactivity reset (only for non-completed users)
     const mostRecentDate = new Date(allDates[allDates.length - 1] + 'T00:00:00');
     const daysSinceLastActivity = Math.floor((today - mostRecentDate) / 86400000);
 
@@ -202,9 +260,7 @@ function getProgramWeekState() {
 
     for (const sessionDateStr of advancedSessions) {
         const sessionDate = new Date(sessionDateStr + 'T00:00:00');
-
         if (sessionDate < windowAnchor) continue;
-
         sessionsInCurrentWeek++;
 
         if (sessionsInCurrentWeek >= 2) {
@@ -239,9 +295,7 @@ function getProgramWeekState() {
         const anchorTime = windowAnchor.getTime();
         for (const sessionDateStr of advancedSessions) {
             const sd = new Date(sessionDateStr + 'T00:00:00');
-            if (sd.getTime() >= anchorTime) {
-                sessionsInCurrentWeek++;
-            }
+            if (sd.getTime() >= anchorTime) sessionsInCurrentWeek++;
         }
     }
 
@@ -267,7 +321,7 @@ function calculateUserWeek() {
  */
 function isProgramCompleted() {
     const state = getProgramWeekState();
-    return state.programWeek === 6 && state.sessionsInCurrentWeek >= 2;
+    return state.completed === true || (state.programWeek === 6 && state.sessionsInCurrentWeek >= 2);
 }
 
 /**
