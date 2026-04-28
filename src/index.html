@@ -435,7 +435,7 @@
                         <a href="/education" class="nav-link" onclick="showEducation(); return false;">eLearning Module</a>
                     </div>
                 </div>
-                <!-- Right: profile dropdown + hamburger -->
+                <!-- Right: profile dropdown -->
                 <div class="flex items-center gap-4 max-lg:gap-3">
                     <div id="user-info" class="hidden relative">
                         <button class="profile-toggle" onclick="toggleProfileDropdown(event)">
@@ -443,6 +443,7 @@
                             <div id="user-avatar" class="w-10 h-10 rounded-full flex items-center justify-center text-white font-semibold text-base shrink-0" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
                                 <span id="user-initial"></span>
                             </div>
+                            <i class="fa-solid fa-chevron-down nav-chevron"></i>
                         </button>
                         <div id="profile-dropdown-menu" class="profile-dropdown-menu">
                             <button id="signout-button" class="profile-dropdown-item text-danger" onclick="signOut()">
