@@ -1103,7 +1103,7 @@ function updateSetsUI(videoId, currentCount, maxSets) {
 }
 
 let viewedWeekStart = null; // tracks which week the calendar strip is showing
-let selectedDate = null;
+let selectedHomeDate = null;
 
 // Returns true if the given ISO date is eligible for manual entry
 function _isDateEligibleForManualEntry(isoDate) {
@@ -1119,7 +1119,7 @@ function _isDateEligibleForManualEntry(isoDate) {
 function loadHomeView() {
     if (!currentUser) return;
     viewedWeekStart = null; // reset to current week
-    selectedDate = null; // reset to today
+    selectedHomeDate = null; // reset to today
     renderHomeGreeting();
     renderClinicBanner();
     renderWorkoutsRemainingCard();
@@ -1290,7 +1290,7 @@ function renderCalendarStrip() {
 
     const start = new Date(viewedWeekStart);
     const todayISO = _dateToISO(new Date());
-    const effectiveSelectedISO = selectedDate || todayISO;
+    const effectiveSelectedISO = selectedHomeDate || todayISO;
     const labels = ['S', 'M', 'T', 'W', 'Th', 'F', 'Sa'];
 
     const currentWeekStart = _getStartOfCurrentWeekMonday();
@@ -1377,7 +1377,7 @@ function selectCalendarDay(isoDate) {
     const todayISO = _dateToISO(new Date());
     if (isoDate > todayISO) return; // future dates not selectable
 
-    selectedDate = isoDate === todayISO ? null : isoDate; // toggle if clicking the already selected date
+    selectedHomeDate = isoDate === todayISO ? null : isoDate; // toggle if clicking the already selected date
     renderCalendarStrip();
     renderTodayCard(); // re-render the purple card to show stats for the selected day
 }
@@ -1387,7 +1387,7 @@ function renderTodayCard() {
     if (!container) return;
 
     const todayISO = _dateToISO(new Date());
-    const targetISO = selectedDate || todayISO;
+    const targetISO = selectedHomeDate || todayISO;
     const isToday = targetISO === todayISO;
 
     const target = new Date(targetISO + 'T00:00:00');
