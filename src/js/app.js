@@ -1305,6 +1305,9 @@ function renderCalendarStrip() {
         const isToday = iso === todayISO;
         const isSelected = iso === effectiveSelectedISO;
         const isFuture = d.getTime() > new Date(todayISO + 'T00:00:00').getTime();
+        const isBeforeAccountCreation = d.getTime() < currentUser.created_at ? new Date(currentUser.created_at.split('T')[0] + 'T00:00:00').getTime() : false;
+        const isDisabled = isFuture || isBeforeAccountCreation;
+
         const hasActivity = completionHistory?.[iso] && _dayHasAnyCompletedExercise(completionHistory[iso]);
 
         let dayBoxClass;
@@ -1316,12 +1319,22 @@ function renderCalendarStrip() {
             dayBoxClass = 'text-text-primary hover:bg-[#f1f5f9]';
         }
 
-        const disabledAttr = isFuture ? 'disabled' : '';
-        const cursorClass = isFuture ? 'cursor-not-allowed opacity-40' : 'cursor-pointer';
+        const disabledAttr = isDisabled ? 'disabled' : '';
+        const cursorClass = isDisabled ? 'cursor-not-allowed opacity-40' : 'cursor-pointer';
+
+        const isAccountCreation = currentUser?.created_at && iso === currentUser.created_at.split('T')[0];
+        let tooltipText = '';
+        if (isToday) {
+            tooltipText = "This is today's session";
+        } else if (isAccountCreation) {
+            tooltipText = "You can only log workouts from this date onward — when you created your account";
+        } else if (isBeforeAccount) {
+            tooltipText = "Before your account was created";
+        }
 
         daysHTML += `
             <button type="button" class="flex-1 flex flex-col items-center gap-1 min-w-0 bg-transparent border-none p-0 ${cursorClass}"
-                    onclick="selectCalendarDay('${iso}')" ${disabledAttr} aria-label="View ${iso}">
+                    onclick="selectCalendarDay('${iso}')" ${disabledAttr} aria-label="View ${iso}" ${tooltipText ? `title="${tooltipText}"` : ''}>
                 <span class="text-sm text-text-secondary font-medium max-md:text-xs">${labels[i]}</span>
                 <div class="w-10 h-10 rounded-full flex items-center justify-center text-base font-semibold transition-colors ${dayBoxClass} max-md:w-8 max-md:h-8">${d.getDate()}</div>
                 <div class="h-2 flex items-center">${hasActivity ? '<span class="w-1.5 h-1.5 rounded-full bg-green-500"></span>' : ''}</div>
@@ -1377,6 +1390,8 @@ function selectCalendarDay(isoDate) {
     const todayISO = _dateToISO(new Date());
     if (isoDate > todayISO) return; // future dates not selectable
 
+    if (currentUser?.created_at && isoDate < currentUser.created_at.split('T')[0]) return;
+
     selectedHomeDate = isoDate === todayISO ? null : isoDate; // toggle if clicking the already selected date
     renderCalendarStrip();
     renderTodayCard(); // re-render the purple card to show stats for the selected day
@@ -1389,6 +1404,8 @@ function renderTodayCard() {
     const todayISO = _dateToISO(new Date());
     const targetISO = selectedHomeDate || todayISO;
     const isToday = targetISO === todayISO;
+    const accountCreatedISO = currentUser.created_at.split('T')[0];
+    const isAccountCreationDay = accountCreatedISO && targetISO === accountCreatedISO;
 
     const target = new Date(targetISO + 'T00:00:00');
     const dayName = target.toLocaleDateString('en-US', { weekday: 'long' });
@@ -1430,8 +1447,11 @@ function renderTodayCard() {
         `;
     }
 
+    const accountNote = isAccountCreationDay ? `<p class="text-sm text-text-secondary mt-2">This is the day you created your account.</p>` : '';
+
     container.innerHTML = `
         <p class="text-lg font-semibold mb-6">${headerLabel}</p>
+        ${accoutNote}
         ${bottomContent}
     `;
 }
