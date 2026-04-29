@@ -1333,9 +1333,9 @@ function renderCalendarStrip() {
 
         daysHTML += `
             <button type="button" class="flex-1 flex flex-col items-center gap-1 min-w-0 bg-transparent border-none p-0 ${cursorClass}"
-                    onclick="selectCalendarDay('${iso}')" ${disabledAttr} aria-label="View ${iso}" ${tooltipText ? `title="${tooltipText}"` : ''}>
+                    onclick="selectCalendarDay('${iso}')" ${disabledAttr} aria-label="View ${iso}" ${tooltipText ? `data-tippy-content="${tooltipText}"` : ''}>
                 <span class="text-sm text-text-secondary font-medium max-md:text-xs">${labels[i]}</span>
-                <div class="w-10 h-10 rounded-full flex items-center justify-center text-base font-semibold transition-colors ${dayBoxClass} max-md:w-8 max-md:h-8">${d.getDate()}</div>
+                <div class="w-10 h-10 rounded-full flex items-center justify-center text-base font-semibold transition-colors ${dayBoxClass} max-md:w-6 max-md:h-6">${d.getDate()}</div>
                 <div class="h-2 flex items-center">${hasActivity ? '<span class="w-1.5 h-1.5 rounded-full bg-green-500"></span>' : ''}</div>
             </button>
         `;
@@ -1352,6 +1352,15 @@ function renderCalendarStrip() {
             <i class="fa-solid fa-chevron-right"></i>
         </button>
     `;
+
+    // Attach Tippy tooltips
+    if (typeof tippy === 'function') {
+        tippy('[data-tippy-content]', {
+            theme: 'material',
+            placement: 'top',
+            animation: 'shift-away',
+        });
+    }
 }
 
 // Returns true if there's at least one logged session in a week earlier than the given week start.
@@ -1413,7 +1422,7 @@ function renderTodayCard() {
 
     const headerLabel = isToday
         ? `Today, ${dayName} ${month} ${date}`
-        : `This ${dayName}, ${month} ${date}`;
+        : `${dayName}, ${month} ${date}`;
 
     // Show log-past-workout button only for past dates within manual entry window
     const showLogButton = !isToday && _isDateEligibleForManualEntry(targetISO);
@@ -1445,7 +1454,7 @@ function renderTodayCard() {
         `;
     }
 
-    const accountNote = isAccountCreationDay ? `<p class="text-sm text-base mb-2">This is the day you created your account.</p>` : '';
+    const accountNote = isAccountCreationDay ? `<p class="text-base opacity-90 mb-2">This is the day you created your account.</p>` : '';
 
     container.innerHTML = `
         <p class="text-lg font-semibold mb-6">${headerLabel}</p>
