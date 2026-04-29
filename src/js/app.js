@@ -1595,7 +1595,7 @@ function renderEducationHomeCard() {
         // All lessons complete — bookmark line would be misleading
         headingHTML = `
             <h3 class="text-xl font-semibold text-text-primary mb-2">Hands Up: Bone Health Program for Osteoporosis</h3>
-            <p class="text-sm text-text-muted mb-4">
+            <p class="text-sm text-text-secondary mb-4">
                 <i class="fa-solid fa-circle-check text-green-600 mr-1.5"></i>You've completed all ${stats.total} lessons. Feel free to revisit anytime.
             </p>
         `;
@@ -1604,11 +1604,11 @@ function renderEducationHomeCard() {
         // In progress — show bookmark + stats
         headingHTML = `
             <h3 class="text-xl font-semibold text-text-primary mb-2">Hands Up: Bone Health Program for Osteoporosis</h3>
-            <p class="text-sm text-text-muted mb-1">
+            <p class="text-sm text-text-secondary mb-1">
                 <i class="fa-regular fa-bookmark mr-1.5"></i>Last time you left off on:
-                <strong class="text-text-secondary">${resumeLesson.module} — ${resumeLesson.title}</strong>
+                <strong class="text-text-secondary text-blue-600">${resumeLesson.module} — ${resumeLesson.title}</strong>
             </p>
-            <p class="text-sm text-text-muted mb-4">
+            <p class="text-sm text-text-secondary mb-4">
                 <i class="fa-regular fa-circle-check mr-1.5"></i>${stats.completed} of ${stats.total} lessons completed
             </p>
         `;
