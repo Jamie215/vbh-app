@@ -1493,9 +1493,9 @@ function renderEducationHomeCard() {
     container.innerHTML = `
         <div class="bg-white rounded-xl p-8 flex items-center gap-8 max-md:flex-col max-md:p-6">
             <div class="flex-1">
-                <h3 class="text-xl font-semibold text-text-primary mb-4">Review E-learning Module for Bone Health</h3>
-                <p class="text-base text-text-tertiary mb-6 leading-relaxed">Topics include how to maintain your bone health through safe movement, falls prevention, medication management, and lifestyle strategies.</p>
-                <button onclick="showEducation()" class="py-3 px-8 bg-blue-900 hover:bg-blue-950 text-white rounded-lg text-base font-semibold border-none cursor-pointer transition-colors">Go to Modules</button>
+                <h3 class="text-xl font-semibold text-text-primary mb-4">Hands Up: Bone Health Program for Osteoporosis</h3>
+                <p class="text-base text-text-tertiary mb-6 leading-relaxed">Learn how to maintain your bone health through safe movement, falls prevention, medication management, and lifestyle strategies.</p>
+                <button onclick="showEducation()" class="py-3 px-8 bg-blue-900 hover:bg-blue-950 text-white rounded-lg text-base font-semibold border-none cursor-pointer transition-colors">Start Program</button>
             </div>
             <div class="shrink-0">
                 <img src="/assets/img/elearning-laptop.png" alt="E-learning module" class="w-[280px] max-md:w-full h-auto">
