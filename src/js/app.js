@@ -1328,7 +1328,7 @@ function renderCalendarStrip() {
             tooltipText = "This is today's session";
         } else if (isAccountCreation) {
             tooltipText = "You can only log workouts from this date onward — when you created your account";
-        } else if (isBeforeAccount) {
+        } else if (isBeforeAccountCreation) {
             tooltipText = "Before your account was created";
         }
 
