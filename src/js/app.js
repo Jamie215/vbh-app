@@ -1296,8 +1296,8 @@ function renderCalendarStrip() {
         const dayBoxClass = isToday ? 'bg-brand-dark text-white' : 'text-text-primary';
         daysHTML += `
             <div class="flex-1 flex flex-col items-center gap-1 min-w-0">
-                <span class="text-sm text-text-secondary font-medium">${labels[i]}</span>
-                <div class="w-10 h-10 rounded-full flex items-center justify-center text-base font-semibold ${dayBoxClass}">${d.getDate()}</div>
+                <span class="text-sm text-text-secondary font-medium max-md: text-xs">${labels[i]}</span>
+                <div class="w-10 h-10 rounded-full flex items-center justify-center text-base font-semibold ${dayBoxClass} max-md: w-8 max-md:w-8">${d.getDate()}</div>
                 <div class="h-2 flex items-center">${hasActivity ? '<span class="w-1.5 h-1.5 rounded-full bg-green-500"></span>' : ''}</div>
             </div>
         `;
