@@ -1103,10 +1103,23 @@ function updateSetsUI(videoId, currentCount, maxSets) {
 }
 
 let viewedWeekStart = null; // tracks which week the calendar strip is showing
+let selectedDate = null;
+
+// Returns true if the given ISO date is eligible for manual entry
+function _isDateEligibleForManualEntry(isoDate) {
+    const todayISO = _dateToISO(new Date());
+    if (isoDate > todayISO) return false; // future dates not allowed
+
+    if(!currentUser?.created_at) return false;
+    const accountCreatedISO = currentUser.created_at.split('T')[0];
+    return isoDate >= accountCreatedISO; // only allow dates on or after account creation
+}
+
 // Home View
 function loadHomeView() {
     if (!currentUser) return;
     viewedWeekStart = null; // reset to current week
+    selectedDate = null; // reset to today
     renderHomeGreeting();
     renderClinicBanner();
     renderWorkoutsRemainingCard();
@@ -1277,13 +1290,11 @@ function renderCalendarStrip() {
 
     const start = new Date(viewedWeekStart);
     const todayISO = _dateToISO(new Date());
+    const effectiveSelectedISO = selectedDate || todayISO;
     const labels = ['S', 'M', 'T', 'W', 'Th', 'F', 'Sa'];
 
-    // Forward bound: can't navigate past current week
     const currentWeekStart = _getStartOfCurrentWeekMonday();
     const canGoForward = start.getTime() < currentWeekStart.getTime();
-
-    // Backward bound: can't navigate before the week containing the first logged session
     const canGoBack = _canNavigatePreviousWeek(start);
 
     let daysHTML = '';
@@ -1292,14 +1303,29 @@ function renderCalendarStrip() {
         d.setDate(d.getDate() + i);
         const iso = _dateToISO(d);
         const isToday = iso === todayISO;
+        const isSelected = iso === effectiveSelectedISO;
+        const isFuture = d.getTime() > new Date(todayISO + 'T00:00:00').getTime();
         const hasActivity = completionHistory?.[iso] && _dayHasAnyCompletedExercise(completionHistory[iso]);
-        const dayBoxClass = isToday ? 'bg-brand-dark text-white' : 'text-text-primary';
+
+        let dayBoxClass;
+        if (isSelected) {
+            dayBoxClass = 'bg-brand text-white';
+        } else if (isToday) {
+            dayBoxClass = 'ring-2 ring-brand-dark text-text-primary';
+        } else {
+            dayBoxClass = 'text-text-primary hover:bg-[#f1f5f9]';
+        }
+
+        const disabledAttr = isFuture ? 'disabled' : '';
+        const cursorClass = isFuture ? 'cursor-not-allowed opacity-40' : 'cursor-pointer';
+
         daysHTML += `
-            <div class="flex-1 flex flex-col items-center gap-1 min-w-0">
-                <span class="text-sm text-text-secondary font-medium max-md: text-xs">${labels[i]}</span>
-                <div class="w-10 h-10 rounded-full flex items-center justify-center text-base font-semibold ${dayBoxClass} max-md:w-8 max-md:w-8">${d.getDate()}</div>
+            <button type="button" class="flex-1 flex flex-col items-center gap-1 min-w-0 bg-transparent border-none p-0 ${cursorClass}"
+                    onclick="selectCalendarDay('${iso}')" ${disabledAttr} aria-label="View ${iso}">
+                <span class="text-sm text-text-secondary font-medium max-md:text-xs">${labels[i]}</span>
+                <div class="w-10 h-10 rounded-full flex items-center justify-center text-base font-semibold transition-colors ${dayBoxClass} max-md:w-8 max-md:h-8">${d.getDate()}</div>
                 <div class="h-2 flex items-center">${hasActivity ? '<span class="w-1.5 h-1.5 rounded-full bg-green-500"></span>' : ''}</div>
-            </div>
+            </button>
         `;
     }
 
@@ -1318,12 +1344,12 @@ function renderCalendarStrip() {
 
 // Returns true if there's at least one logged session in a week earlier than the given week start.
 function _canNavigatePreviousWeek(currentViewedStart) {
-    if (!completionHistory || Object.keys(completionHistory).length === 0) return false;
-    const firstDateStr = Object.keys(completionHistory).sort()[0];
-    const firstDate = new Date(firstDateStr + 'T00:00:00');
+    if (!currentUser?.created_at) return false;
+
+    const accountCreatedISO = new Date(currentUser.created_at.split('T')[0] + 'T00:00:00');
 
     // Find the Monday of the week containing the first logged session
-    const firstWeekStart = new Date(firstDate);
+    const firstWeekStart = new Date(accountCreatedISO);
     firstWeekStart.setHours(0, 0, 0, 0);
     const day = firstWeekStart.getDay();
     const diff = day === 0 ? -6 : 1 - day;
@@ -1347,10 +1373,72 @@ function navigateCalendarWeek(direction) {
     renderCalendarStrip();
 }
 
-// ---------- Today purple card ----------
-function countTodaysCompletedExercises() {
+function selectCalendarDay(isoDate) {
     const todayISO = _dateToISO(new Date());
-    const dayProgress = completionHistory?.[todayISO];
+    if (isoDate > todayISO) return; // future dates not selectable
+
+    selectedDate = iso +++ todayISO === isoDate ? null : isoDate; // toggle if clicking the already selected date
+    renderCalendarStrip();
+    renderTodayCard(); // re-render the purple card to show stats for the selected day
+}
+
+function renderTodayCard() {
+    const container = document.getElementById('home-today-card');
+    if (!container) return;
+
+    const todayISO = _dateToISO(new Date());
+    const targetISO = selectedDate || todayISO;
+    const isToday = targetISO === todayISO;
+
+    const target = new Date(targetISO + 'T00:00:00');
+    const dayName = target.toLocaleDateString('en-US', { weekday: 'long' });
+    const month = target.toLocaleDateString('en-US', { month: 'long' });
+    const date = target.getDate();
+    const count = _countCompletedExercisesForDate(targetISO);
+
+    const headerLabel = isToday
+        ? `Today, ${dayName} ${month} ${date}`
+        : `This ${dayName}, ${month} ${date}`;
+
+    // Show log-past-workout button only for past dates within manual entry window
+    const showLogButton = !isToday && _isDateEligibleForManualEntry(targetISO);
+
+    let bottomContent;
+    if (count === 0 && !isToday) {
+        // Past day with no activity — show invitation to log
+        bottomContent = `
+            <p class="text-base opacity-90 mb-4">No workout logged this day.</p>
+            ${showLogButton ? `
+                <button onclick="openManualEntryModal('${targetISO}')" class="inline-flex items-center gap-2 py-2.5 px-5 bg-white text-brand-dark rounded-md text-base font-semibold border-none cursor-pointer transition-all hover:-translate-y-px">
+                    <i class="fa-solid fa-plus"></i> Log This Workout
+                </button>` : ''}
+        `;
+    } else {
+        // Today (any count) or past day with activity
+        bottomContent = `
+            <div class="flex flex-row gap-4 justify-around items-center">
+                <div class="flex flex-col">
+                    <p class="text-[3.5rem] font-bold leading-none mb-1">${count}</p>
+                    <p class="text-base opacity-90"><i class="fa-solid fa-dumbbell fa-rotate-by mr-1" style="--fa-rotate-angle: 135deg;"></i> Exercises Completed</p>
+                </div>
+                <i class="fa-solid fa-person-running fa-4x" style="color: rgb(255, 255, 255);"></i>
+            </div>
+            ${showLogButton ? `
+                <button onclick="openManualEntryModal('${targetISO}')" class="mt-4 inline-flex items-center gap-2 py-2 px-4 bg-white/15 text-white rounded-md text-sm font-medium border border-white/30 cursor-pointer transition-all hover:bg-white/25">
+                    <i class="fa-solid fa-pen-to-square"></i> Edit This Workout
+                </button>` : ''}
+        `;
+    }
+
+    container.innerHTML = `
+        <p class="text-lg font-semibold mb-6">${headerLabel}</p>
+        ${bottomContent}
+    `;
+}
+
+// Counts completed exercises for an arbitrary date
+function _countCompletedExercisesForDate(iso) {
+    const dayProgress = completionHistory?.[iso];
     if (!dayProgress) return 0;
     let count = 0;
     for (const playlistId of Object.keys(dayProgress)) {
@@ -1365,26 +1453,6 @@ function countTodaysCompletedExercises() {
         }
     }
     return count;
-}
-
-function renderTodayCard() {
-    const container = document.getElementById('home-today-card');
-    if (!container) return;
-    const today = new Date();
-    const dayName = today.toLocaleDateString('en-US', { weekday: 'long' });
-    const month = today.toLocaleDateString('en-US', { month: 'long' });
-    const date = today.getDate();
-    const count = countTodaysCompletedExercises();
-    container.innerHTML = `
-        <p class="text-lg font-semibold mb-6">Today, ${dayName} ${month} ${date}</p>
-        <div class="flex flex-row gap-4 justify-around items-center">
-            <div class="flex flex-col">
-                <p class="text-[3.5rem] font-bold leading-none mb-1">${count}</p>
-                <p class="text-base opacity-90"><i class="fa-solid fa-dumbbell fa-rotate-by mr-1" style="--fa-rotate-angle: 135deg;"></i> Exercises Completed</p>
-            </div>
-            <i class="fa-solid fa-person-running fa-4x" style="color: rgb(255, 255, 255);"></i>
-        </div>
-    `;
 }
 
 // ---------- Education home card ----------

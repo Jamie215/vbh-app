@@ -21,12 +21,13 @@ function openManualEntryModal() {
         const maxDate = new Date(today);
         maxDate.setDate(maxDate.getDate() - 1); // Yesterday at most
 
-        const minDate = new Date(today);
-        minDate.setDate(minDate.getDate() - 14); // 2 weeks back
-
         dateInput.value = '';
         dateInput.max = maxDate.toISOString().split('T')[0];
-        dateInput.min = minDate.toISOString().split('T')[0];
+
+        // Floor to the user's account creation date
+        if (currentUser?.created_at) {
+            dateInput.min = currentUser.created_at.split('T')[0];
+        }
     }
 
     // Reset playlist selector
