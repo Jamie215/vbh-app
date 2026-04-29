@@ -1433,7 +1433,7 @@ function renderTodayCard() {
         bottomContent = `
             <p class="text-base opacity-90 mb-4">No workout logged this day.</p>
             ${showLogButton ? `
-                <button onclick="openManualEntryModal('${targetISO}')" class="inline-flex items-center gap-2 py-2.5 px-5 bg-white text-brand-dark rounded-md text-base font-semibold border-none cursor-pointer transition-all hover:-translate-y-px">
+                <button onclick="openManualEntryModal('${targetISO}')" class="mt-4 py-2 px-4 bg-white text-brand-dark rounded-md text-sm font-medium border-none cursor-pointer transition-all hover:-translate-y-px">
                     <i class="fa-solid fa-plus"></i> Log Past Workout
                 </button>` : ''}
         `;
@@ -1448,7 +1448,7 @@ function renderTodayCard() {
                 <i class="fa-solid fa-person-running fa-4x" style="color: rgb(255, 255, 255);"></i>
             </div>
             ${showLogButton ? `
-                <button onclick="openManualEntryModal('${targetISO}')" class="mt-4 inline-flex items-center gap-2 py-2 px-4 bg-white/15 text-white rounded-md text-sm font-medium border border-white/30 cursor-pointer transition-all hover:bg-white/25">
+                <button onclick="openManualEntryModal('${targetISO}')" class="mt-4 py-2 px-4 bg-white text-brand-dark rounded-md text-sm font-medium border-none cursor-pointer transition-all hover:-translate-y-px">
                     <i class="fa-solid fa-pen-to-square"></i> Edit This Workout
                 </button>` : ''}
             ${isToday ? `
