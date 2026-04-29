@@ -132,14 +132,6 @@ function getEducationResumeLesson() {
 }
 
 /**
- * Returns true if the user has a meaningful e-learning record
- * (a row exists in education_progress and we can resolve some lesson).
- */
-function hasEducationProgress() {
-    return window.eduProgress !== null && getEducationResumeLesson() !== null;
-}
-
-/**
  * Resolves the lesson the user last viewed in the e-learning module.
  * Tries bookmark first, then falls back to progress.currentLesson.
  * Returns { title, module } or null if nothing resolves.
@@ -152,6 +144,28 @@ function getEducationResumeLesson() {
     if (current && EDUCATION_LESSONS[current]) return EDUCATION_LESSONS[current];
 
     return null;
+}
+
+/**
+ * Returns 'completed' | 'in_progress' | 'untouched' for a given lesson ID.
+ * Completion is based solely on percentComplete === 100, which is the field
+ * Rise actively maintains across all lesson versions.
+ */
+function getLessonStatus(lessonId) {
+    const lesson = window.eduProgress?.lessons?.[lessonId];
+    if (!lesson) return 'untouched';
+    if (lesson.percentComplete === 100) return 'completed';
+    return 'in-progress';
+}
+
+/**
+ * Aggregates lesson statuses across all known lessons in EDUCATION_LESSONS.
+ */
+function getEducationStats() {
+    const ids = Object.keys(EDUCATION_LESSONS);
+    const stats = { total: ids.length, completed: 0, in_progress: 0, untouched: 0 };
+    for (const id of ids) stats[getLessonStatus(id)]++;
+    return stats;
 }
 
 /**
@@ -1564,21 +1578,48 @@ function renderEducationHomeCard() {
     if (!container) return;
 
     const resumeLesson = hasEducationProgress() ? getEducationResumeLesson() : null;
+    const stats = resumeLesson ? getEducationStats() : null;
+    const allDone = stats && stats.completed === stats.total;
 
-    const headingHTML = resumeLesson
-        ? `<h3 class="text-xl font-semibold text-text-primary mb-4">Hands Up: Bone Health Program for Osteoporosis</h3>
+    let headingHTML;
+    let buttonLabel;
+
+    if (!resumeLesson) {
+        // First-time user — no progress yet
+        headingHTML = `
+            <h3 class="text-xl font-semibold text-text-primary mb-4">Hands Up: Bone Health Program for Osteoporosis</h3>
+            <p class="text-base text-text-tertiary mb-6 leading-relaxed">Learn how to maintain your bone health through safe movement, falls prevention, medication management, and lifestyle strategies.</p>
+        `;
+        buttonLabel = 'Start Program';
+    } else if (allDone) {
+        // All lessons complete — bookmark line would be misleading
+        headingHTML = `
+            <h3 class="text-xl font-semibold text-text-primary mb-2">Hands Up: Bone Health Program for Osteoporosis</h3>
             <p class="text-sm text-text-muted mb-4">
+                <i class="fa-solid fa-circle-check text-green-600 mr-1.5"></i>You've completed all ${stats.total} lessons. Feel free to revisit anytime.
+            </p>
+        `;
+        buttonLabel = 'Revisit Program';
+    } else {
+        // In progress — show bookmark + stats
+        headingHTML = `
+            <h3 class="text-xl font-semibold text-text-primary mb-2">Hands Up: Bone Health Program for Osteoporosis</h3>
+            <p class="text-sm text-text-muted mb-1">
                 <i class="fa-regular fa-bookmark mr-1.5"></i>Last time you left off on:
                 <strong class="text-text-secondary">${resumeLesson.module} — ${resumeLesson.title}</strong>
-            </p>`
-        : `<h3 class="text-xl font-semibold text-text-primary mb-4">Hands Up: Bone Health Program for Osteoporosis</h3>
-            <p class="text-base text-text-tertiary mb-6 leading-relaxed">Learn how to maintain your bone health through safe movement, falls prevention, medication management, and lifestyle strategies.</p>`;
+            </p>
+            <p class="text-sm text-text-muted mb-4">
+                <i class="fa-regular fa-circle-check mr-1.5"></i>${stats.completed} of ${stats.total} lessons completed
+            </p>
+        `;
+        buttonLabel = 'Resume Program';
+    }
 
     container.innerHTML = `
         <div class="bg-white rounded-xl p-8 flex items-center gap-8 max-md:flex-col max-md:p-6">
             <div class="flex-1">
                 ${headingHTML}
-                <button onclick="showEducation()" class="py-3 px-8 bg-blue-900 hover:bg-blue-950 text-white rounded-lg text-base font-semibold border-none cursor-pointer transition-colors">${resumeLesson ? 'Resume Program' : 'Start Program'}</button>
+                <button onclick="showEducation()" class="py-3 px-8 bg-blue-900 hover:bg-blue-950 text-white rounded-lg text-base font-semibold border-none cursor-pointer transition-colors">${buttonLabel}</button>
             </div>
             <div class="shrink-0">
                 <img src="/assets/img/elearning-laptop.png" alt="E-learning module" class="w-[280px] max-md:w-full h-auto">
