@@ -1277,7 +1277,7 @@ function renderCalendarStrip() {
 
     const start = new Date(viewedWeekStart);
     const todayISO = _dateToISO(new Date());
-    const labels = ['Sun', 'Mon', 'Tues', 'Wed', 'Thurs', 'Fri', 'Sat'];
+    const labels = ['S', 'M', 'T', 'W', 'Th', 'F', 'Sa'];
 
     // Forward bound: can't navigate past current week
     const currentWeekStart = _getStartOfCurrentWeekMonday();
