@@ -73,6 +73,12 @@ async function initializeSession() {
             } catch (e) {
                 console.error('initializeSession: Error in loadCompletionHistory:', e);
             }
+
+            try {
+                await loadEducationProgress();
+            } catch (e) {
+                console.error('initializeSession: Error in loadEducationProgress:', e);
+            }
             
             hideLoadingScreen();
             routeAfterAuth();
@@ -88,6 +94,72 @@ async function initializeSession() {
         hideLoadingScreen();
         showAuthPage();
     }
+}
+
+// ==================== Education Lesson Map ====================
+// Maps Rise lesson IDs (used as bookmarks) to display titles.
+// IDs come from the Rise course payload baked into education/content/index.html.
+// Sections (module headers) are excluded — bookmarks only land on `blocks`-type lessons.
+const EDUCATION_LESSONS = {
+    'HS-DDqUH8jqNhXAgn7LRSrXgcYkQIg_N': { title: 'Introduction to the Program',             module: 'Welcome' },
+    'IBYtsdmc0E3aAbnrfc-gisULQGx0cI6y': { title: 'Distal Radius Fractures',                 module: 'Module 1' },
+    'SNEXsbc0L8BIG7sJoEAsMxCMt1JHgAAm': { title: 'Fracture Risk Assessment Tools',          module: 'Module 1' },
+    '_C0-_2v5ZXfW323j44DoRvHM-JVsTiob': { title: 'Osteoporosis and Fracture Risk',          module: 'Module 1' },
+    'C6jHPCIpOhmKeh1sh_8OYW0-ZiJIRaRY': { title: 'Exercise Guidelines',                     module: 'Module 2' },
+    'c-6P8hqKcFTzrjzx5jYN44lIKapLeVoI': { title: 'Osteoporosis Exercise Recommendations',   module: 'Module 2' },
+    '_d5y9Cv61f6BrASFHtjjqZAaxV4LT5e2': { title: 'Safe Movement Recommendations',           module: 'Module 2' },
+    'yD8VGvKEfTqfddlEzytLv2qr1EquxGXp': { title: 'Nutrition for Bone Health',               module: 'Module 3' },
+    'vFlI7sLW2luytUlohBkDt8iG53oYfEUj': { title: 'Fall Hazards',                            module: 'Module 4' },
+    '2C1cX5Kv17nnWVWLf15Hs89rrtDloU_B': { title: 'Behaviour Change Plan',                   module: 'Module 4' },
+    'jQNd6-oi-KwIjhrNoADU7VuIx_r7o708': { title: 'Medication',                              module: 'Module 5' },
+    'oWKAiyGlytIFyF8BnPH3_f0xVQLSBaqq': { title: 'Conversations With Your Healthcare Team', module: 'Module 5' },
+    'eN51e76Rdpb3K9lYu97DvddHkza2xAgK': { title: 'Project Acknowledgements',                module: 'About the Project' }
+};
+
+/**
+ * Resolves the lesson the user last viewed in the e-learning module.
+ * Tries bookmark first, then falls back to progress.currentLesson.
+ * Returns { title, module } or null if nothing resolves.
+ */
+function getEducationResumeLesson() {
+    const bookmark = window.eduBookmark;
+    if (bookmark && EDUCATION_LESSONS[bookmark]) return EDUCATION_LESSONS[bookmark];
+
+    const current = window.eduProgress?.currentLesson;
+    if (current && EDUCATION_LESSONS[current]) return EDUCATION_LESSONS[current];
+
+    return null;
+}
+
+/**
+ * Returns true if the user has a meaningful e-learning record
+ * (a row exists in education_progress and we can resolve some lesson).
+ */
+function hasEducationProgress() {
+    return window.eduProgress !== null && getEducationResumeLesson() !== null;
+}
+
+/**
+ * Resolves the lesson the user last viewed in the e-learning module.
+ * Tries bookmark first, then falls back to progress.currentLesson.
+ * Returns { title, module } or null if nothing resolves.
+ */
+function getEducationResumeLesson() {
+    const bookmark = window.eduBookmark;
+    if (bookmark && EDUCATION_LESSONS[bookmark]) return EDUCATION_LESSONS[bookmark];
+
+    const current = window.eduProgress?.currentLesson;
+    if (current && EDUCATION_LESSONS[current]) return EDUCATION_LESSONS[current];
+
+    return null;
+}
+
+/**
+ * Returns true if the user has a meaningful e-learning record
+ * (a row exists in education_progress and we can resolve some lesson).
+ */
+function hasEducationProgress() {
+    return window.eduProgress !== null && getEducationResumeLesson() !== null;
 }
 
 // ==================== Week Calculation ====================
@@ -1490,12 +1562,23 @@ function _countCompletedExercisesForDate(iso) {
 function renderEducationHomeCard() {
     const container = document.getElementById('home-education-card');
     if (!container) return;
+
+    const resumeLesson = hasEducationProgress() ? getEducationResumeLesson() : null;
+
+    const headingHTML = resumeLesson
+        ? `<h3 class="text-xl font-semibold text-text-primary mb-4">Hands Up: Bone Health Program for Osteoporosis</h3>
+            <p class="text-sm text-text-muted mb-4">
+                <i class="fa-regular fa-bookmark mr-1.5"></i>Last time you left off on:
+                <strong class="text-text-secondary">${resumeLesson.module} — ${resumeLesson.title}</strong>
+            </p>`
+        : `<h3 class="text-xl font-semibold text-text-primary mb-4">Hands Up: Bone Health Program for Osteoporosis</h3>
+            <p class="text-base text-text-tertiary mb-6 leading-relaxed">Learn how to maintain your bone health through safe movement, falls prevention, medication management, and lifestyle strategies.</p>`;
+
     container.innerHTML = `
         <div class="bg-white rounded-xl p-8 flex items-center gap-8 max-md:flex-col max-md:p-6">
             <div class="flex-1">
-                <h3 class="text-xl font-semibold text-text-primary mb-4">Hands Up: Bone Health Program for Osteoporosis</h3>
-                <p class="text-base text-text-tertiary mb-6 leading-relaxed">Learn how to maintain your bone health through safe movement, falls prevention, medication management, and lifestyle strategies.</p>
-                <button onclick="showEducation()" class="py-3 px-8 bg-blue-900 hover:bg-blue-950 text-white rounded-lg text-base font-semibold border-none cursor-pointer transition-colors">Start Program</button>
+                ${headingHTML}
+                <button onclick="showEducation()" class="py-3 px-8 bg-blue-900 hover:bg-blue-950 text-white rounded-lg text-base font-semibold border-none cursor-pointer transition-colors">${resumeLesson ? 'Resume Program' : 'Start Program'}</button>
             </div>
             <div class="shrink-0">
                 <img src="/assets/img/elearning-laptop.png" alt="E-learning module" class="w-[280px] max-md:w-full h-auto">
