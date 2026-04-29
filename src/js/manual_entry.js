@@ -6,7 +6,7 @@ let manualEntryPlaylist = null;
 let activePreviewVideoId = null; // Track which exercise has an active video preview
 
 // ==================== Open / Close Modal ====================
-function openManualEntryModal() {
+function openManualEntryModal(prefillDate = null) {
     const modal = document.getElementById('manual-entry-modal');
     if (!modal) return;
 
@@ -60,6 +60,10 @@ function openManualEntryModal() {
 
     modal.classList.remove('hidden');
     requestAnimationFrame(() => modal.classList.add('visible'));
+
+    if (prefillDate) {
+        onManualEntryDateChange();
+    }
 }
 
 function closeManualEntryModal() {

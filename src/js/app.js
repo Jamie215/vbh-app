@@ -1377,7 +1377,7 @@ function selectCalendarDay(isoDate) {
     const todayISO = _dateToISO(new Date());
     if (isoDate > todayISO) return; // future dates not selectable
 
-    selectedDate = iso +++ todayISO === isoDate ? null : isoDate; // toggle if clicking the already selected date
+    selectedDate = isoDate === todayISO ? null : isoDate; // toggle if clicking the already selected date
     renderCalendarStrip();
     renderTodayCard(); // re-render the purple card to show stats for the selected day
 }
