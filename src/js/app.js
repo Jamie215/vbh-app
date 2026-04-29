@@ -1453,7 +1453,7 @@ function renderTodayCard() {
                 </button>` : ''}
             ${isToday ? `
                 <button onclick="showExercises()" class="mt-4 py-2 px-4 bg-white text-brand-dark rounded-md text-sm font-medium border-none cursor-pointer transition-all hover:-translate-y-px">
-                    <i class="fa-solid fa-dumbbell mr-1"></i> ${count > 0 ? 'Continue' : 'Start'} Today's Workout
+                    ${count > 0 ? '<i class="fa-solid fa-dumbbell mr-1"></i>Continue' : 'Start'} Today's Workout
                 </button>` : ''}
         `;
     }
