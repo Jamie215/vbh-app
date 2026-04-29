@@ -503,7 +503,7 @@ function getExerciseWeekStartPhrase(state) {
 
     // "this {day}" vs "last {day}" by calendar-week boundaries (Monday-based,
     // matching the home view's calendar strip).
-    const startOfThisWeek = _getStartOfCurrentWeekMonday();
+    const startOfThisWeek = _getStartOfCurrentWeek();
     const startOfLastWeek = new Date(startOfThisWeek);
     startOfLastWeek.setDate(startOfLastWeek.getDate() - 7);
 
@@ -1156,12 +1156,11 @@ function _dateToISO(d) {
     return `${y}-${m}-${day}`;
 }
 
-function _getStartOfCurrentWeekMonday() {
+function _getStartOfCurrentWeek() {
     const d = new Date();
     d.setHours(0, 0, 0, 0);
     const day = d.getDay(); // 0 = Sun
-    const diff = day === 0 ? -6 : 1 - day;
-    d.setDate(d.getDate() + diff);
+    d.setDate(d.getDate() - day);
     return d;
 }
 
@@ -1240,7 +1239,7 @@ function dismissClinicReminder() {
 // ---------- Workouts remaining this week ----------
 function countSessionsThisCalendarWeek() {
     if (!completionHistory) return 0;
-    const start = _getStartOfCurrentWeekMonday();
+    const start = _getStartOfCurrentWeek();
     const end = new Date(start);
     end.setDate(end.getDate() + 6);
     const startISO = _dateToISO(start);
@@ -1286,14 +1285,14 @@ function renderCalendarStrip() {
     if (!container) return;
 
     // Ensure state is initialized (e.g., if called before loadHomeView)
-    if (!viewedWeekStart) viewedWeekStart = _getStartOfCurrentWeekMonday();
+    if (!viewedWeekStart) viewedWeekStart = _getStartOfCurrentWeek();
 
     const start = new Date(viewedWeekStart);
     const todayISO = _dateToISO(new Date());
     const effectiveSelectedISO = selectedHomeDate || todayISO;
     const labels = ['S', 'M', 'T', 'W', 'Th', 'F', 'Sa'];
 
-    const currentWeekStart = _getStartOfCurrentWeekMonday();
+    const currentWeekStart = _getStartOfCurrentWeek();
     const canGoForward = start.getTime() < currentWeekStart.getTime();
     const canGoBack = _canNavigatePreviousWeek(start);
 
@@ -1305,7 +1304,7 @@ function renderCalendarStrip() {
         const isToday = iso === todayISO;
         const isSelected = iso === effectiveSelectedISO;
         const isFuture = d.getTime() > new Date(todayISO + 'T00:00:00').getTime();
-        const isBeforeAccountCreation = d.getTime() < currentUser.created_at ? new Date(currentUser.created_at.split('T')[0] + 'T00:00:00').getTime() : false;
+        const isBeforeAccountCreation = currentUser.created_at? iso < currentUser.created_at.split('T')[0] : false;
         const isDisabled = isFuture || isBeforeAccountCreation;
 
         const hasActivity = completionHistory?.[iso] && _dayHasAnyCompletedExercise(completionHistory[iso]);
@@ -1361,24 +1360,23 @@ function _canNavigatePreviousWeek(currentViewedStart) {
 
     const accountCreatedISO = new Date(currentUser.created_at.split('T')[0] + 'T00:00:00');
 
-    // Find the Monday of the week containing the first logged session
+    // Find the start of the week containing the first logged session
     const firstWeekStart = new Date(accountCreatedISO);
     firstWeekStart.setHours(0, 0, 0, 0);
     const day = firstWeekStart.getDay();
-    const diff = day === 0 ? -6 : 1 - day;
-    firstWeekStart.setDate(firstWeekStart.getDate() + diff);
+    firstWeekStart.setDate(firstWeekStart.getDate() - day);
 
     return currentViewedStart.getTime() > firstWeekStart.getTime();
 }
 
 // direction: -1 = back, +1 = forward
 function navigateCalendarWeek(direction) {
-    if (!viewedWeekStart) viewedWeekStart = _getStartOfCurrentWeekMonday();
+    if (!viewedWeekStart) viewedWeekStart = _getStartOfCurrentWeek();
     const newStart = new Date(viewedWeekStart);
     newStart.setDate(newStart.getDate() + (direction * 7));
 
     // Re-check bounds defensively (handles rapid clicks)
-    const currentWeekStart = _getStartOfCurrentWeekMonday();
+    const currentWeekStart = _getStartOfCurrentWeek();
     if (direction > 0 && newStart.getTime() > currentWeekStart.getTime()) return;
     if (direction < 0 && !_canNavigatePreviousWeek(viewedWeekStart)) return;
 
@@ -1447,7 +1445,7 @@ function renderTodayCard() {
         `;
     }
 
-    const accountNote = isAccountCreationDay ? `<p class="text-sm text-text-secondary mt-2">This is the day you created your account.</p>` : '';
+    const accountNote = isAccountCreationDay ? `<p class="text-sm text-base mb-2">This is the day you created your account.</p>` : '';
 
     container.innerHTML = `
         <p class="text-lg font-semibold mb-6">${headerLabel}</p>
