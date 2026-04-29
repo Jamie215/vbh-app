@@ -1451,7 +1451,7 @@ function renderTodayCard() {
 
     container.innerHTML = `
         <p class="text-lg font-semibold mb-6">${headerLabel}</p>
-        ${accoutNote}
+        ${accountNote}
         ${bottomContent}
     `;
 }
