@@ -1335,7 +1335,7 @@ function renderCalendarStrip() {
             <button type="button" class="flex-1 flex flex-col items-center gap-1 min-w-0 bg-transparent border-none p-0 ${cursorClass}"
                     onclick="selectCalendarDay('${iso}')" ${disabledAttr} aria-label="View ${iso}" ${tooltipText ? `data-tippy-content="${tooltipText}"` : ''}>
                 <span class="text-sm text-text-secondary font-medium max-md:text-xs">${labels[i]}</span>
-                <div class="w-10 h-10 rounded-full flex items-center justify-center text-base font-semibold transition-colors ${dayBoxClass} max-lg:w-9 max-lg:h-9 max-lg:text-sm max-md:w-8 max-md:h-8 max-md:text-sm">${d.getDate()}</div>
+                <div class="w-10 h-10 rounded-full flex items-center justify-center text-base font-semibold transition-colors ${dayBoxClass} max-lg:w-8 max-lg:h-8 max-lg:text-sm max-md:w-8 max-md:h-8 max-md:text-sm">${d.getDate()}</div>
                 <div class="h-2 flex items-center">${hasActivity ? '<span class="w-1.5 h-1.5 rounded-full bg-green-500"></span>' : ''}</div>
             </button>
         `;
