@@ -1309,13 +1309,13 @@ function renderCalendarStrip() {
 
         const hasActivity = completionHistory?.[iso] && _dayHasAnyCompletedExercise(completionHistory[iso]);
 
-        let dayBoxClass;
+        let dayBoxClass = 'border-2 border-transparent transition-colors';
         if (isSelected) {
-            dayBoxClass = 'bg-brand text-white';
+            dayBoxClass += ' bg-brand text-white';
         } else if (isToday) {
-            dayBoxClass = 'ring-2 ring-brand-dark text-text-primary';
+            dayBoxClass += ' border-brand-dark text-text-primary';
         } else {
-            dayBoxClass = 'text-text-primary hover:bg-[#f1f5f9]';
+            dayBoxClass += ' text-text-primary hover:bg-[#f1f5f9]';
         }
 
         const disabledAttr = isDisabled ? 'disabled' : '';
@@ -1335,7 +1335,7 @@ function renderCalendarStrip() {
             <button type="button" class="flex-1 flex flex-col items-center gap-1 min-w-0 bg-transparent border-none p-0 ${cursorClass}"
                     onclick="selectCalendarDay('${iso}')" ${disabledAttr} aria-label="View ${iso}" ${tooltipText ? `data-tippy-content="${tooltipText}"` : ''}>
                 <span class="text-sm text-text-secondary font-medium max-md:text-xs">${labels[i]}</span>
-                <div class="w-10 h-10 rounded-full flex items-center justify-center text-base font-semibold transition-colors ${dayBoxClass} max-md:w-6 max-md:h-6">${d.getDate()}</div>
+                <div class="w-10 h-10 rounded-full flex items-center justify-center text-base font-semibold transition-colors ${dayBoxClass} max-md:w-8 max-md:h-8 max-md:text-sm">${d.getDate()}</div>
                 <div class="h-2 flex items-center">${hasActivity ? '<span class="w-1.5 h-1.5 rounded-full bg-green-500"></span>' : ''}</div>
             </button>
         `;
