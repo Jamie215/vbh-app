@@ -1297,13 +1297,13 @@ function renderCalendarStrip() {
         daysHTML += `
             <div class="flex-1 flex flex-col items-center gap-1 min-w-0">
                 <span class="text-sm text-text-secondary font-medium max-md: text-xs">${labels[i]}</span>
-                <div class="w-10 h-10 rounded-full flex items-center justify-center text-base font-semibold ${dayBoxClass} max-md: w-8 max-md:w-8">${d.getDate()}</div>
+                <div class="w-10 h-10 rounded-full flex items-center justify-center text-base font-semibold ${dayBoxClass} max-md:w-8 max-md:w-8">${d.getDate()}</div>
                 <div class="h-2 flex items-center">${hasActivity ? '<span class="w-1.5 h-1.5 rounded-full bg-green-500"></span>' : ''}</div>
             </div>
         `;
     }
 
-    const chevronClass = 'shrink-0 self-center w-8 h-8 rounded-full flex items-center justify-center bg-transparent border-none text-text-secondary cursor-pointer transition-colors hover:bg-[#f1f5f9] hover:text-text-primary disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:bg-transparent disabled:hover:text-text-secondary';
+    const chevronClass = 'shrink-0 self-center w-8 h-8 rounded-full flex items-center justify-center bg-transparent border-none text-text-secondary cursor-pointer transition-colors hover:bg-[#f1f5f9] hover:text-text-primary disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:bg-transparent disabled:hover:text-text-secondary max-md:w-6 max-md:h-6';
 
     container.innerHTML = `
         <button class="${chevronClass}" onclick="navigateCalendarWeek(-1)" ${!canGoBack ? 'disabled' : ''} aria-label="Previous week">
