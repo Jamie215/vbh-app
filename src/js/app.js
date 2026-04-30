@@ -1367,11 +1367,50 @@ function renderTotalDaysCard() {
 }
 
 // ---------- Calendar strip ----------
+function renderCalendarHeader() {
+    const container = document.getElementById('home-calendar-header');
+    if (!container) return;
+
+    if (!viewedWeekStart) viewedWeekStart = _getStartOfCurrentWeek();
+
+    const start = new Date(viewedWeekStart);
+    const end = new Date(start);
+    end.setDate(end.getDate() + 6);
+
+    // Month label — handles single month, cross-month, and cross-year weeks
+    let monthLabel;
+    if (start.getMonth() === end.getMonth() && start.getFullYear() === end.getFullYear()) {
+        monthLabel = start.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+    } else if (start.getFullYear() === end.getFullYear()) {
+        const a = start.toLocaleDateString('en-US', { month: 'short' });
+        const b = end.toLocaleDateString('en-US', { month: 'short' });
+        monthLabel = `${a} – ${b} ${end.getFullYear()}`;
+    } else {
+        const a = `${start.toLocaleDateString('en-US', { month: 'short' })} ${start.getFullYear()}`;
+        const b = `${end.toLocaleDateString('en-US', { month: 'short' })} ${end.getFullYear()}`;
+        monthLabel = `${a} – ${b}`;
+    }
+
+    // Relative week descriptor
+    const currentWeekStart = _getStartOfCurrentWeek();
+    const weeksAgo = Math.round((currentWeekStart - start) / (7 * 86400000));
+    let weekLabel;
+    if (weeksAgo === 0)      weekLabel = 'This week';
+    else if (weeksAgo === 1) weekLabel = 'Last week';
+    else                     weekLabel = `Week of ${start.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}`;
+
+    container.innerHTML = `
+        <span class="text-base font-semibold text-text-primary">${monthLabel}</span>
+        <span class="text-sm text-text-secondary">${weekLabel}</span>
+    `;
+}
+
 function renderCalendarStrip() {
     const container = document.getElementById('home-calendar-strip');
     if (!container) return;
 
     // Ensure state is initialized (e.g., if called before loadHomeView)
+    renderCalendarHeader();
     if (!viewedWeekStart) viewedWeekStart = _getStartOfCurrentWeek();
 
     const start = new Date(viewedWeekStart);
