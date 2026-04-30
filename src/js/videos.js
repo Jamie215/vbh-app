@@ -86,7 +86,7 @@ function renderSetTrackingPanel() {
     let setsHTML = '';
     
     for (let i = 1; i <= currentVideo.sets; i++) {
-        const setData = currentVideoProgress[`set${i}`] || { reps: currentVideo.reps, completed: false };
+        const setData = currentVideoProgress[`set${i}`] || { reps: currentVideo.reps, seconds: currentVideo.seconds, completed: false };
         
         setsHTML += `
             <div class="flex items-center gap-3">
@@ -106,7 +106,7 @@ function renderSetTrackingPanel() {
                         <i class="fa-solid fa-plus"></i>
                     </button>
                 </div>
-                <span class="text-base text-text-secondary -ml-1">${setData.reps === 0 && video.seconds > 0 ? `${video.seconds} seconds` : `${setData.reps} reps`}</span>
+                <span class="text-base text-text-secondary -ml-1">${setData.reps === 0 && setData.seconds > 0 ? `${setData.seconds} seconds` : `${setData.reps} reps`}</span>
                 <label class="relative flex items-center justify-center cursor-pointer ml-auto">
                     <input type="checkbox" 
                            class="set-checkbox" 
