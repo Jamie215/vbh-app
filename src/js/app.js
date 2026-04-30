@@ -1431,7 +1431,7 @@ function renderCalendarStrip() {
         const iso = _dateToISO(d);
         const isToday = iso === todayISO;
         const isSelected = iso === effectiveSelectedISO;
-        const isExerciseStart = iso === exerciseStartISO;
+        const isExerciseWeekStart = iso === exerciseStartISO;
         const isFuture = d.getTime() > new Date(todayISO + 'T00:00:00').getTime();
         const isBeforeAccountCreation = currentUser.created_at? iso < currentUser.created_at.split('T')[0] : false;
         const isDisabled = isFuture || isBeforeAccountCreation;
