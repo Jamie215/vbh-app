@@ -123,9 +123,10 @@ function renderSetTrackingPanel() {
     
     panel.innerHTML = `
         <div class="mb-5">
-            <h3 class="text-[1.1rem] font-semibold text-text-primary mb-2 leading-tight">How many reps and sets did you do?</h3>
+            <h3 class="text-[1.1rem] font-semibold text-text-primary mb-2 leading-tight">How many ${isTimeBased ? 'seconds' : 'reps'} and sets did you do?</h3>
             <p class="text-base text-text-secondary leading-relaxed">Tap the plus or minus to change the number of ${isTimeBased ? 'seconds' : 'reps'} you did. Check the box if you completed the set.</p>
         </div>
+        <button type="button" class="manual-check-all-btn" onClick="markAllSetsCompleted()">Check all sets</button>
         <div class="flex flex-col gap-3 mb-6">
             ${setsHTML}
         </div>
@@ -139,7 +140,9 @@ function incrementReps(setNumber, isTimeBased) {
     if (!input) return;
     
     let value = parseInt(input.value) || 0;
-    value++;
+    if (isTimeBased) {
+        value = Math.min(999, value + 5); // Increment time by 5 seconds, max 999
+    } else value++;
     input.value = value;
     
     if (isTimeBased) {
@@ -162,7 +165,9 @@ function decrementReps(setNumber, isTimeBased) {
     
     let value = parseInt(input.value) || 0;
     if (value > 0) {
-        value--;
+        if (isTimeBased) {
+            value = Math.max(0, value - 5); // Decrement time by 5 seconds, min 0
+        } else value--;
         input.value = value;
         
         if (isTimeBased) {
@@ -211,6 +216,20 @@ function toggleSetCompleted(setNumber) {
         ...currentVideoProgress[`set${setNumber}`],
         completed: checkbox.checked
     };
+}
+
+// Mark all sets as completed
+function markAllSetsCompleted() {
+    for (let i = 1; i <= currentVideo.sets; i++) {
+        const checkbox = document.getElementById(`completed_set${i}`);
+        if (checkbox) {
+            checkbox.checked = true;
+            currentVideoProgress[`set${i}`] = {
+                ...currentVideoProgress[`set${i}`],
+                completed: true
+            };
+        }
+    }
 }
 
 // Save video progress to database and close modal

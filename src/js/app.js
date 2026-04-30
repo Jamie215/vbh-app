@@ -1088,9 +1088,7 @@ function loadExerciseTable() {
         const setsRepsCell = document.createElement('td');
         setsRepsCell.className = 'py-5 px-6 border-b border-border-subtle align-middle text-center max-lg:py-4 max-lg:px-4 max-md:py-3 max-md:px-3 max-[540px]:hidden';
         
-        // Handle "each side" notation for single-leg exercises
-        const needsEachSide = video.title.toLowerCase().includes('single leg') || 
-                             video.title.toLowerCase().includes('hand squeeze');
+        const needsEachSide = video.needsEachSide === true;
 
         // Identify if reps are iterations or seconds based on title keywords
         const isTimeBase = video.reps === 0 && video.seconds > 0;

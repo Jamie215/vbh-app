@@ -269,7 +269,7 @@ label:hover .checkmark-box {
     border-radius: var(--radius-md);
 }
 
-.manual-check-all-btn {
+.check-all-btn {
     display: inline-flex;
     align-items: center;
     gap: 0.35rem;
@@ -285,7 +285,7 @@ label:hover .checkmark-box {
     transition: all 0.2s ease;
 }
 
-.manual-check-all-btn:hover {
+.check-all-btn:hover {
     background: rgba(124, 58, 237, 0.15);
     border-color: rgba(124, 58, 237, 0.4);
 }
