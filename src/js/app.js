@@ -1414,8 +1414,6 @@ function renderCalendarStrip() {
     if (!viewedWeekStart) viewedWeekStart = _getStartOfCurrentWeek();
 
     const start = new Date(viewedWeekStart);
-    const end = new Date(start);
-    end.setDate(end.getDate() + 6);
     
     const todayISO = _dateToISO(new Date());
     const effectiveSelectedISO = selectedHomeDate || todayISO;
@@ -1424,27 +1422,6 @@ function renderCalendarStrip() {
     const currentWeekStart = _getStartOfCurrentWeek();
     const canGoForward = start.getTime() < currentWeekStart.getTime();
     const canGoBack = _canNavigatePreviousWeek(start);
-
-    // ── Header: month on the left, relative week descriptor on the right ──
-    let monthLabel;
-    if (start.getMonth() === end.getMonth() && start.getFullYear() === end.getFullYear()) {
-        monthLabel = start.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
-    } else if (start.getFullYear() === end.getFullYear()) {
-        const a = start.toLocaleDateString('en-US', { month: 'short' });
-        const b = end.toLocaleDateString('en-US', { month: 'short' });
-        monthLabel = `${a} – ${b} ${end.getFullYear()}`;
-    } else {
-        // Spans New Year (e.g., Dec 28 – Jan 3)
-        const a = `${start.toLocaleDateString('en-US', { month: 'short' })} ${start.getFullYear()}`;
-        const b = `${end.toLocaleDateString('en-US', { month: 'short' })} ${end.getFullYear()}`;
-        monthLabel = `${a} – ${b}`;
-    }
-
-    const weeksAgo = Math.round((currentWeekStart - start) / (7 * 86400000));
-    let weekLabel;
-    if (weeksAgo === 0)      weekLabel = 'This week';
-    else if (weeksAgo === 1) weekLabel = 'Last week';
-    else                     weekLabel = `Week of ${start.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}`;
 
     let daysHTML = '';
     for (let i = 0; i < 7; i++) {
@@ -1494,10 +1471,6 @@ function renderCalendarStrip() {
     const chevronClass = 'shrink-0 self-center w-8 h-8 rounded-full flex items-center justify-center bg-transparent border-none text-text-secondary cursor-pointer transition-colors hover:bg-[#f1f5f9] hover:text-text-primary disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:bg-transparent disabled:hover:text-text-secondary max-md:w-6 max-md:h-6';
 
     container.innerHTML = `
-        <div class="flex justify-between items-baseline mb-3 px-2">
-            <span class="text-base font-semibold text-text-primary">${monthLabel}</span>
-            <span class="text-sm text-text-secondary">${weekLabel}</span>
-        </div>
         <div class="flex justify-between gap-1 px-2">
             <button class="${chevronClass}" onclick="navigateCalendarWeek(-1)" ${!canGoBack ? 'disabled' : ''} aria-label="Previous week">
                 <i class="fa-solid fa-chevron-left"></i>
