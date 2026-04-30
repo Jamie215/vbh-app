@@ -42,14 +42,14 @@ const PLAYLISTS = [
                 equipment: ["Chair (For Support)", "No Chair"],
                 thumbnail: 'https://img.youtube.com/vi/ZKec-ggfkmE/hqdefault.jpg',
             },{
-                id: 'xSaxyL5S0Fw',
+                id: 'it4y0lVzvFg',
                 title: 'Single Leg Deadlift',
                 sets: 3,
                 reps: 8,
                 needsEachSide: true,
                 seconds: 0,
-                equipment: ["Chair (Easier)", "No Chair (More Challenging)"],
-                thumbnail: 'https://img.youtube.com/vi/xSaxyL5S0Fw/hqdefault.jpg',
+                equipment: ["Chair (For Support)", "No Chair"],
+                thumbnail: 'https://img.youtube.com/vi/it4y0lVzvFg/hqdefault.jpg',
             },{
                 id: 'JPext-e_lws',
                 title: 'Cloth Slide',
@@ -78,14 +78,14 @@ const PLAYLISTS = [
                 equipment: ["A Dowel or Broomstick"],
                 thumbnail: 'https://img.youtube.com/vi/bl36zCco4nM/hqdefault.jpg',
             },{
-                id: '1L2dCDzBzGk',
+                id: 'hQbv0Z9QPkw',
                 title: 'Isometric Shoulder Contraction - External Rotation',
                 sets: 3,
                 reps: 0,
                 needsEachSide: false,
                 seconds: 30,
                 equipment: ["A Table & Chair"],
-                thumbnail: 'https://img.youtube.com/vi/1L2dCDzBzGk/hqdefault.jpg',
+                thumbnail: 'https://img.youtube.com/vi/hQbv0Z9QPkw/hqdefault.jpg',
             },{
                 id: 'RCHWmmnE2xM',
                 title: 'Isometric Shoulder Contraction - Front Raise',
@@ -114,14 +114,14 @@ const PLAYLISTS = [
                 equipment: ["A Cloth or Ball or Towel"],
                 thumbnail: 'https://img.youtube.com/vi/_vlYsmleqgg/hqdefault.jpg',
             },{
-                id: 'r1Wh6vJ3tHY',
+                id: 'GegYjbIXcMo',
                 title: 'Reach Behind Back',
                 sets: 3,
                 reps: 8,
                 needsEachSide: true,
                 seconds: 0,
                 equipment: [],
-                thumbnail: 'https://img.youtube.com/vi/r1Wh6vJ3tHY/hqdefault.jpg',
+                thumbnail: 'https://img.youtube.com/vi/GegYjbIXcMo/hqdefault.jpg',
             },{
                 id: 'HEYLsGviHiI',
                 title: 'Tandem Stand',
@@ -132,14 +132,14 @@ const PLAYLISTS = [
                 equipment: ["Chair (For Support)", "No Chair"],
                 thumbnail: 'https://img.youtube.com/vi/HEYLsGviHiI/hqdefault.jpg',
             },{
-                id: 'XU1og9bz_Lw',
+                id: 'sY5n7wpVLXI',
                 title: 'Single Leg Stand',
                 sets: 3,
                 reps: 0,
                 needsEachSide: true,
                 seconds: 45,
                 equipment: ["A Chair or Wall"],
-                thumbnail: 'https://img.youtube.com/vi/XU1og9bz_Lw/hqdefault.jpg',
+                thumbnail: 'https://img.youtube.com/vi/sY5n7wpVLXI/hqdefault.jpg',
             }
         ]
     },
@@ -149,14 +149,14 @@ const PLAYLISTS = [
         description: 'Workout playlist for Week 4 to 6',
         videos: [
             {
-                id: 'CNhgzve4B5s',
+                id: 'ABMlz_M3gFc',
                 title: 'Squat',
                 sets: 3,
                 reps: 8,
                 needsEachSide: false,
                 seconds: 0,
                 equipment: ["Chair (For Support)", "No Chair", "Weight (Challenging)"],
-                thumbnail: 'https://img.youtube.com/vi/CNhgzve4B5s/hqdefault.jpg',
+                thumbnail: 'https://img.youtube.com/vi/ABMlz_M3gFc/hqdefault.jpg',
             },{
                 id: 'LRALTxfWzpA',
                 title: 'Hip Hinge',
@@ -203,14 +203,14 @@ const PLAYLISTS = [
                 equipment: ["A Chair & Weight"],
                 thumbnail: 'https://img.youtube.com/vi/N6b1q1Lcjco/hqdefault.jpg',
             },{
-                id: 'WN81Wbx7lwY',
+                id: 'wUY_uBTHDUM',
                 title: 'Upright Rows',
                 sets: 3,
                 reps: 8,
                 needsEachSide: false,
                 seconds: 0,
                 equipment: ["Weights"],
-                thumbnail: 'https://img.youtube.com/vi/WN81Wbx7lwY/hqdefault.jpg',
+                thumbnail: 'https://img.youtube.com/vi/wUY_uBTHDUM/hqdefault.jpg',
             },{
                 id: 'df6Ylaa4zfE',
                 title: 'Band Pull Apart',
