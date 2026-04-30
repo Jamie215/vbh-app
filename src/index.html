@@ -403,13 +403,13 @@
             <div class="max-w-[1400px] mx-auto py-3 px-8 flex justify-between items-center max-lg:px-4 max-lg:flex-wrap">
                 <!-- Left: logo + nav links -->
                 <div class="flex items-center gap-12">
+                    <button id="hamburger-btn" class="lg:hidden flex items-center justify-center bg-transparent border-none cursor-pointer text-lg text-[#64748b] p-2 rounded-md transition-all duration-200 hover:bg-[#f1f5f9] hover:text-[#1a1a2e] leading-none" onclick="toggleMobileMenu()" aria-label="Toggle menu">
+                        <i class="fa-solid fa-bars" id="hamburger-icon"></i>
+                    </button>
                     <div class="flex items-center gap-2 cursor-pointer" onclick="showHome()">
                         <img src="/assets/img/icon.png" alt="HandsUP" class="w-8 h-8 object-contain">
                         <span class="text-xl font-bold text-[#1a1a2e]">HandsUP</span>
                     </div>
-                    <button id="hamburger-btn" class="lg:hidden flex items-center justify-center bg-transparent border-none cursor-pointer text-lg text-[#64748b] p-2 rounded-md transition-all duration-200 hover:bg-[#f1f5f9] hover:text-[#1a1a2e] leading-none" onclick="toggleMobileMenu()" aria-label="Toggle menu">
-                        <i class="fa-solid fa-bars" id="hamburger-icon"></i>
-                    </button>
                     <div class="flex items-center gap-2" id="nav-links">
                         <!-- Standalone:Home -->
                         <a href="/" class="nav-link" onclick="showHome(); return false;">Home</a>
