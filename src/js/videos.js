@@ -41,6 +41,7 @@ function initializeVideoProgress() {
         for (let i = 1; i <= currentVideo.sets; i++) {
             currentVideoProgress[`set${i}`] = {
                 reps: currentVideo.reps,
+                seconds: currentVideo.seconds,
                 completed: false
             };
         }
@@ -88,7 +89,6 @@ function renderSetTrackingPanel() {
     for (let i = 1; i <= currentVideo.sets; i++) {
         const setData = currentVideoProgress[`set${i}`] || { reps: currentVideo.reps, seconds: currentVideo.seconds, completed: false };
         const isTimeBased = currentVideo.reps === 0 && currentVideo.seconds > 0;
-        console.log("setData: ", setData);
         setsHTML += `
             <div class="flex items-center gap-3">
                 <span class="w-[45px] text-base font-medium text-text-tertiary">Set ${i}</span>
