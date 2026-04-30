@@ -94,7 +94,7 @@ function renderSetTrackingPanel() {
             <div class="flex items-center gap-3">
                 <span class="w-[45px] text-base font-medium text-text-tertiary">Set ${i}</span>
                 <div class="flex items-center border border-border-light rounded-md overflow-hidden">
-                    <button type="button" class="rep-btn" onclick="decrementReps(${i})">
+                    <button type="button" class="rep-btn" onclick="decrementReps(${i}, ${isTimeBased})">
                         <i class="fa-solid fa-minus"></i>
                     </button>
                     <input type="number" 
@@ -103,8 +103,8 @@ function renderSetTrackingPanel() {
                            value="${isTimeBased ? setData.seconds : setData.reps}" 
                            min="0" 
                            max="99"
-                           onchange="updateReps(${i})">
-                    <button type="button" class="rep-btn" onclick="incrementReps(${i})">
+                           onchange="updateReps(${i}, ${isTimeBased})">
+                    <button type="button" class="rep-btn" onclick="incrementReps(${i}, ${isTimeBased})">
                         <i class="fa-solid fa-plus"></i>
                     </button>
                 </div>
@@ -134,7 +134,7 @@ function renderSetTrackingPanel() {
 }
 
 // Increment reps for a set
-function incrementReps(setNumber) {
+function incrementReps(setNumber, isTimeBased) {
     const input = document.getElementById(`reps_set${setNumber}`);
     if (!input) return;
     
@@ -142,14 +142,21 @@ function incrementReps(setNumber) {
     value++;
     input.value = value;
     
-    currentVideoProgress[`set${setNumber}`] = {
-        ...currentVideoProgress[`set${setNumber}`],
-        reps: value
-    };
+    if (isTimeBased) {
+        currentVideoProgress[`set${setNumber}`] = {
+            ...currentVideoProgress[`set${setNumber}`],
+            seconds: value
+        };
+    } else {
+        currentVideoProgress[`set${setNumber}`] = {
+            ...currentVideoProgress[`set${setNumber}`],
+            reps: value
+        };
+    }
 }
 
 // Decrement reps for a set
-function decrementReps(setNumber) {
+function decrementReps(setNumber, isTimeBased) {
     const input = document.getElementById(`reps_set${setNumber}`);
     if (!input) return;
     
@@ -158,15 +165,22 @@ function decrementReps(setNumber) {
         value--;
         input.value = value;
         
-        currentVideoProgress[`set${setNumber}`] = {
-            ...currentVideoProgress[`set${setNumber}`],
-            reps: value
-        };
+        if (isTimeBased) {
+            currentVideoProgress[`set${setNumber}`] = {
+                ...currentVideoProgress[`set${setNumber}`],
+                seconds: value
+            };
+        } else {
+            currentVideoProgress[`set${setNumber}`] = {
+                ...currentVideoProgress[`set${setNumber}`],
+                reps: value
+            };
+        }
     }
 }
 
 // Update reps from input change
-function updateReps(setNumber) {
+function updateReps(setNumber, isTimeBased) {
     const input = document.getElementById(`reps_set${setNumber}`);
     if (!input) return;
     
@@ -174,10 +188,18 @@ function updateReps(setNumber) {
     value = Math.max(0, Math.min(99, value));
     input.value = value;
     
-    currentVideoProgress[`set${setNumber}`] = {
-        ...currentVideoProgress[`set${setNumber}`],
-        reps: value
-    };
+    
+    if (isTimeBased) {
+        currentVideoProgress[`set${setNumber}`] = {
+            ...currentVideoProgress[`set${setNumber}`],
+            seconds: value
+        };
+    } else {
+        currentVideoProgress[`set${setNumber}`] = {
+            ...currentVideoProgress[`set${setNumber}`],
+            reps: value
+        };
+    }
 }
 
 // Toggle set completion checkbox
