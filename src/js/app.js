@@ -555,30 +555,36 @@ function closeProgramCompletionModal() {
 }
 
 /**
+ * Returns the Date object for the start of the user's current exercise week,
+ * or null if there's no meaningful start (no history, reset, or completed).
+ * Same logic as getExerciseWeekStartPhrase but returns the raw date.
+ */
+function getExerciseWeekStartDate(state) {
+    if (!state || state.wasReset) return null;
+    if (!completionHistory || Object.keys(completionHistory).length === 0) return null;
+    if (state.programWeek === 6 && state.sessionsInCurrentWeek >= 2) return null;
+
+    const allDates = Object.keys(completionHistory).sort();
+    if (!allDates.length) return null;
+
+    const firstDate = new Date(allDates[0] + 'T00:00:00');
+    const weekStartDate = state.windowAnchor
+        ? new Date(state.windowAnchor)
+        : new Date(firstDate.getTime() + state.programWeek * 7 * 86400000);
+
+    weekStartDate.setHours(0, 0, 0, 0);
+    return weekStartDate;
+}
+
+/**
  * Returns a human-readable phrase for when the user's current exercise week began,
  * suitable for embedding in a sentence (e.g., "this Wednesday", "on Apr 15").
  * Returns null if there's no session history or the user is in a reset state.
  * @param {object} state - result of getProgramWeekState()
  */
 function getExerciseWeekStartPhrase(state) {
-    if (!state || state.wasReset) return null;
-    if (!completionHistory || Object.keys(completionHistory).length === 0) return null;
-    if (state.programWeek === 6 && state.sessionsInCurrentWeek >= 2) return null; // Completed program - no active week
-
-    const allDates = Object.keys(completionHistory).sort();
-    if (!allDates.length) return null;
-
-    // Start of the user's current exercise week.
-    // windowAnchor (weeks 4-6) is post-reset-aware via getProgramWeekState.
-    // Weeks 0-3 fall back to calendar week offset from their first session.
-    const firstDate = new Date(allDates[0] + 'T00:00:00');
-    const weekStartDate = state.windowAnchor
-        ? new Date(state.windowAnchor)
-        : new Date(firstDate.getTime() + state.programWeek * 7 * 86400000);
-
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    weekStartDate.setHours(0, 0, 0, 0);
+    weekStartDate = getExerciseWeekStartDate(state);
+    if (!weekStartDate) return null;
 
     const diff = Math.floor((today - weekStartDate) / 86400000);
     const dayName = weekStartDate.toLocaleDateString('en-US', { weekday: 'long' });
@@ -1391,17 +1397,8 @@ function renderCalendarHeader() {
         monthLabel = `${a} – ${b}`;
     }
 
-    // Relative week descriptor
-    const currentWeekStart = _getStartOfCurrentWeek();
-    const weeksAgo = Math.round((currentWeekStart - start) / (7 * 86400000));
-    let weekLabel;
-    if (weeksAgo === 0)      weekLabel = 'This week';
-    else if (weeksAgo === 1) weekLabel = 'Last week';
-    else                     weekLabel = `Week of ${start.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}`;
-
     container.innerHTML = `
         <span class="text-base font-semibold text-text-primary">${monthLabel}</span>
-        <span class="text-sm text-text-secondary">${weekLabel}</span>
     `;
 }
 
@@ -1423,6 +1420,10 @@ function renderCalendarStrip() {
     const canGoForward = start.getTime() < currentWeekStart.getTime();
     const canGoBack = _canNavigatePreviousWeek(start);
 
+    const exerciseStart = getExerciseWeekStartDate(getProgramWeekState());
+    const exerciseStartISO = exerciseStart ? _dateToISO(exerciseStart) : null;
+    const exerciseWeek = exerciseStart ? calculateUserWeek() : null;
+
     let daysHTML = '';
     for (let i = 0; i < 7; i++) {
         const d = new Date(start);
@@ -1430,6 +1431,7 @@ function renderCalendarStrip() {
         const iso = _dateToISO(d);
         const isToday = iso === todayISO;
         const isSelected = iso === effectiveSelectedISO;
+        const isExerciseStart = iso === exerciseStartISO;
         const isFuture = d.getTime() > new Date(todayISO + 'T00:00:00').getTime();
         const isBeforeAccountCreation = currentUser.created_at? iso < currentUser.created_at.split('T')[0] : false;
         const isDisabled = isFuture || isBeforeAccountCreation;
@@ -1461,6 +1463,9 @@ function renderCalendarStrip() {
         daysHTML += `
             <button type="button" class="flex-1 flex flex-col items-center gap-1 min-w-0 bg-transparent border-none p-0 ${cursorClass}"
                     onclick="selectCalendarDay('${iso}')" ${disabledAttr} aria-label="View ${iso}" ${tooltipText ? `data-tippy-content="${tooltipText}"` : ''}>
+                <div class="h-3 flex items-center justify-center">
+                    ${isExerciseWeekStart ? `<i class="fa-solid fa-flag text-brand text-base leading-none" data-tippy-content="Week ${exerciseWeek} of your exercise program started this day"></i>` : ''}
+                </div>
                 <span class="text-sm text-text-secondary font-medium max-md:text-xs">${labels[i]}</span>
                 <div class="w-10 h-10 rounded-full flex items-center justify-center text-base font-semibold transition-colors ${dayBoxClass} max-lg:w-8 max-lg:h-8 max-lg:text-sm max-md:w-8 max-md:h-8 max-md:text-sm">${d.getDate()}</div>
                 <div class="h-2 flex items-center">${hasActivity ? '<span class="w-1.5 h-1.5 rounded-full bg-green-500"></span>' : ''}</div>
