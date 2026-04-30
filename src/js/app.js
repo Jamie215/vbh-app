@@ -585,7 +585,7 @@ function getExerciseWeekStartDate(state) {
 function getExerciseWeekStartPhrase(state) {
     weekStartDate = getExerciseWeekStartDate(state);
     if (!weekStartDate) return null;
-    
+
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
@@ -1479,15 +1479,13 @@ function renderCalendarStrip() {
     const chevronClass = 'shrink-0 self-center w-8 h-8 rounded-full flex items-center justify-center bg-transparent border-none text-text-secondary cursor-pointer transition-colors hover:bg-[#f1f5f9] hover:text-text-primary disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:bg-transparent disabled:hover:text-text-secondary max-md:w-6 max-md:h-6';
 
     container.innerHTML = `
-        <div class="flex justify-between gap-1 px-2">
-            <button class="${chevronClass}" onclick="navigateCalendarWeek(-1)" ${!canGoBack ? 'disabled' : ''} aria-label="Previous week">
-                <i class="fa-solid fa-chevron-left"></i>
-            </button>
-            ${daysHTML}
-            <button class="${chevronClass}" onclick="navigateCalendarWeek(1)" ${!canGoForward ? 'disabled' : ''} aria-label="Next week">
-                <i class="fa-solid fa-chevron-right"></i>
-            </button>
-        </div>
+        <button class="${chevronClass}" onclick="navigateCalendarWeek(-1)" ${!canGoBack ? 'disabled' : ''} aria-label="Previous week">
+            <i class="fa-solid fa-chevron-left"></i>
+        </button>
+        ${daysHTML}
+        <button class="${chevronClass}" onclick="navigateCalendarWeek(1)" ${!canGoForward ? 'disabled' : ''} aria-label="Next week">
+            <i class="fa-solid fa-chevron-right"></i>
+        </button>
     `;
 
     // Attach Tippy tooltips
