@@ -1344,7 +1344,7 @@ function renderExerciseProgressCard() {
 
     container.innerHTML = `<h2 class="text-[2.5rem] font-bold text-brand-dark leading-none mb-4">Week ${userWeek}</h2>
         <div class="mb-5 flex flex-row text-base text-text-secondary leading-relaxed">
-            <i class="fa-solid fa-flag text-brand mr-1.5 mt-1"></i> Your week started ${weekStartPhrase}
+            <i class="fa-solid fa-flag text-violet-400 mr-1.5 mt-1"></i> Your week started ${weekStartPhrase}
         </div>
     `;
 }
@@ -1453,7 +1453,7 @@ function renderCalendarStrip() {
             <button type="button" class="flex-1 flex flex-col items-center gap-1 min-w-0 bg-transparent border-none p-0 ${cursorClass}"
                     onclick="selectCalendarDay('${iso}')" ${disabledAttr} aria-label="View ${iso}" ${tooltipText ? `data-tippy-content="${tooltipText}"` : ''}>
                 <div class="h-3 flex items-center justify-center">
-                    ${isExerciseWeekStart ? `<i class="fa-solid fa-flag text-brand text-base leading-none" data-tippy-content="Week ${exerciseWeek} of your exercise program started this day"></i>` : ''}
+                    ${isExerciseWeekStart ? `<i class="fa-solid fa-flag text-violet-400 text-base leading-none" data-tippy-content="Week ${exerciseWeek} of your exercise program started this day"></i>` : ''}
                 </div>
                 <span class="text-sm text-text-secondary font-medium max-md:text-xs">${labels[i]}</span>
                 <div class="w-10 h-10 rounded-full flex items-center justify-center text-base font-semibold transition-colors ${dayBoxClass} max-lg:w-8 max-lg:h-8 max-lg:text-sm max-md:w-8 max-md:h-8 max-md:text-sm">${d.getDate()}</div>
