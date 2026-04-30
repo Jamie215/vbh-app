@@ -1091,9 +1091,13 @@ function loadExerciseTable() {
         // Handle "each side" notation for single-leg exercises
         const needsEachSide = video.title.toLowerCase().includes('single leg') || 
                              video.title.toLowerCase().includes('hand squeeze');
+
+        // Identify if reps are iterations or seconds based on title keywords
+        const isTimeBase = video.reps === 0 && video.seconds > 0;
+        const repsLabel = isTimeBase ? `${video.seconds} seconds` : `${video.reps} reps`;
         const setsRepsText = needsEachSide 
-            ? `${video.sets} sets of ${video.reps} reps<br><span class="block text-base text-text-secondary">(each side)</span>`
-            : `${video.sets} sets of ${video.reps} reps`;
+            ? `${video.sets} sets of ${repsLabel}<br><span class="block text-base text-text-secondary">(each side)</span>`
+            : `${video.sets} sets of ${repsLabel}`;
         
         setsRepsCell.innerHTML = `<span class="text-text-tertiary text-base leading-relaxed">${setsRepsText}</span>`;
         row.appendChild(setsRepsCell);

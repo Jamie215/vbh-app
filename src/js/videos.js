@@ -106,7 +106,7 @@ function renderSetTrackingPanel() {
                         <i class="fa-solid fa-plus"></i>
                     </button>
                 </div>
-                <span class="text-base text-text-secondary -ml-1">reps</span>
+                <span class="text-base text-text-secondary -ml-1">${setData.reps === 0 && video.seconds > 0 ? `${video.seconds} seconds` : `${setData.reps} reps`}</span>
                 <label class="relative flex items-center justify-center cursor-pointer ml-auto">
                     <input type="checkbox" 
                            class="set-checkbox" 
