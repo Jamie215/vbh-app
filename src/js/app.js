@@ -1042,18 +1042,17 @@ function getEquipmentDisplayName(equipmentText) {
 }
 
 // Get equipment difficulty level
-function getEquipmentDifficulty(equipmentText) {
+function getEquipmentDifficulty(equipmentText, isMultiEquipment) {
     const lowerText = equipmentText.toLowerCase();
-    
-    if (lowerText.includes('easier')) {
-        return 'easier';
-    } else if (lowerText.includes('more challenging')) {
-        return 'more-challenging';
-    } else if (lowerText.includes('challenging')) {
-        return 'challenging';
+    if (isMultiEquipment) {
+        if (lowerText.includes('support')) {
+            return 'support';
+        } else if (lowerText.includes('challenging')) {
+            return 'challenging';
+        }
+        else return 'baseline'
     }
-    
-    return 'neutral';
+    else return 'neutral';
 }
 
 function loadExerciseTable() {
@@ -1102,10 +1101,10 @@ function loadExerciseTable() {
         // Equipment column with colored dots and "or" separators
         const equipmentCell = document.createElement('td');
         equipmentCell.className = 'py-5 px-6 border-b border-border-subtle align-middle max-lg:py-4 max-lg:px-4 max-md:hidden';
-        
+        const isMultiEquipment = video.equipment && Array.isArray(video.equipment) && video.equipment.length > 1;
         if (video.equipment && Array.isArray(video.equipment) && video.equipment.length > 0) {
             const badges = video.equipment.map((item, i) => {
-                const difficulty = getEquipmentDifficulty(item);
+                const difficulty = getEquipmentDifficulty(item, isMultiEquipment);
                 const displayName = getEquipmentDisplayName(item);
                 const dotClass = `dot-${difficulty}`;
                 
@@ -1118,7 +1117,7 @@ function loadExerciseTable() {
             // Join with "or" separator
             equipmentCell.innerHTML = badges.join('<span class="equipment-separator">or</span>');
         } else if (video.equipment && typeof video.equipment === 'string') {
-            const difficulty = getEquipmentDifficulty(video.equipment);
+            const difficulty = getEquipmentDifficulty(video.equipment, isMultiEquipment);
             const displayName = getEquipmentDisplayName(video.equipment);
             equipmentCell.innerHTML = `<span class="equipment-badge badge-${difficulty}">
                 <span class="equipment-dot dot-${difficulty}"></span>
