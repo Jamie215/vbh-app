@@ -53,9 +53,10 @@ function openVideoPlayer() {
     const modal = document.getElementById('video-player-modal');
     const titleEl = document.getElementById('current-video-title');
     const descEl = document.getElementById('current-video-description');
+    const isTimeBased = currentVideo.reps === 0 && currentVideo.seconds > 0;
     
     if (titleEl) titleEl.textContent = currentVideo.title;
-    if (descEl) descEl.textContent = `Recommended: ${currentVideo.sets} sets of ${currentVideo.reps} reps`;
+    if (descEl) descEl.textContent = `Recommended: ${currentVideo.sets} sets of ${isTimeBased ? `${currentVideo.seconds} seconds` : `${currentVideo.reps} reps`}`;
     
     // Render the set tracking panel
     renderSetTrackingPanel();
@@ -123,7 +124,7 @@ function renderSetTrackingPanel() {
     panel.innerHTML = `
         <div class="mb-5">
             <h3 class="text-[1.1rem] font-semibold text-text-primary mb-2 leading-tight">How many reps and sets did you do?</h3>
-            <p class="text-base text-text-secondary leading-relaxed">Tap the plus or minus to change the number of reps you did. Check the box if you completed the set.</p>
+            <p class="text-base text-text-secondary leading-relaxed">Tap the plus or minus to change the number of ${isTimeBased ? 'seconds' : 'reps'} you did. Check the box if you completed the set.</p>
         </div>
         <div class="flex flex-col gap-3 mb-6">
             ${setsHTML}
