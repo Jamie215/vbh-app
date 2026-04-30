@@ -1342,53 +1342,6 @@ function renderExerciseProgressCard() {
     const weekStartPhrase = getExerciseWeekStartPhrase(state);
     const hasHistory = completionHistory && Object.keys(completionHistory).length > 0;
 
-    const bodyHTML = `<h2 class="text-xl font-semibold text-text-primary mb-4">Week ${userWeek}</h2>`;
-
-    if (!hasHistory) {
-        bodyHTML += `
-            <p class="text-base text-text-primary mb-5 leading-relaxed">
-                Welcome! Log your first workout to begin <strong>Week 1</strong> of your exercise program.
-            </p>
-            <button onclick="showExercises()" class="py-3 px-8 bg-brand hover:bg-brand-dark text-white rounded-md text-base font-semibold transition-colors border-none cursor-pointer">Get Started</button>
-        `;
-    } else if (completed) {
-        bodyHTML += `
-            <p class="text-base text-text-primary mb-2 leading-relaxed">
-                You've completed the <strong>6-week program</strong>! 🎉
-            </p>
-            <p class="text-sm text-text-secondary mb-5">Feel free to keep exercising at your own pace.</p>
-            <button onclick="showExercises()" class="py-3 px-8 bg-brand hover:bg-brand-dark text-white rounded-md text-base font-semibold transition-colors border-none cursor-pointer">Go to Workouts</button>
-        `;
-    } else if (state.wasReset) {
-        bodyHTML += `
-            <p class="text-base text-text-primary mb-2 leading-relaxed">
-                Welcome back! You're restarting at <strong>Week 4</strong>.
-            </p>
-            <p class="text-sm text-text-secondary mb-5">Log a session to pick up where you left off.</p>
-            <button onclick="showExercises()" class="py-3 px-8 bg-brand hover:bg-brand-dark text-white rounded-md text-base font-semibold transition-colors border-none cursor-pointer">Go to Workouts</button>
-        `;
-    } else {
-        const phraseHTML = weekStartPhrase
-            ? `<p class="text-sm text-text-secondary mb-1"><i class="fa-regular fa-calendar mr-1.5"></i>This week began ${weekStartPhrase}</p>`
-            : '';
-
-        let sessionsHTML = '';
-        if (userWeek >= 4) {
-            const sessionsLeft = Math.max(0, 2 - state.sessionsInCurrentWeek);
-            sessionsHTML = sessionsLeft === 0
-                ? `<p class="text-sm text-text-secondary mb-5"><i class="fa-solid fa-circle-check text-green-600 mr-1.5"></i>You've hit your sessions for this week!</p>`
-                : `<p class="text-sm text-text-secondary mb-5"><i class="fa-regular fa-clock mr-1.5"></i><strong>${sessionsLeft}</strong> more session${sessionsLeft === 1 ? '' : 's'} this week to advance</p>`;
-        }
-
-        bodyHTML += `
-            <p class="text-base text-text-primary mb-2 leading-relaxed">
-                You're on <strong>Week ${userWeek}</strong>${userWeek === 6 ? ' — the final week!' : ''}
-            </p>
-            ${phraseHTML}
-            ${sessionsHTML}
-        `;
-    }
-
     container.innerHTML = `<h2 class="text-xl font-semibold text-text-primary mb-4">Week ${userWeek}</h2>
         <div class="mb-5 flex flex-row text-base text-text-primary leading-relaxed">
             <i class="fa-solid fa-flag text-brand mr-1.5 mt-1"></i> Your week started on ${weekStartPhrase}
