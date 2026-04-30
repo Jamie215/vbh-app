@@ -1375,6 +1375,9 @@ function renderCalendarStrip() {
     if (!viewedWeekStart) viewedWeekStart = _getStartOfCurrentWeek();
 
     const start = new Date(viewedWeekStart);
+    const end = new Date(start);
+    end.setDate(end.getDate() + 6);
+    
     const todayISO = _dateToISO(new Date());
     const effectiveSelectedISO = selectedHomeDate || todayISO;
     const labels = ['S', 'M', 'T', 'W', 'Th', 'F', 'Sa'];
