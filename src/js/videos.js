@@ -122,11 +122,11 @@ function renderSetTrackingPanel() {
     }
     
     panel.innerHTML = `
-        <div class="mb-5">
+        <div class="mb-2">
             <h3 class="text-[1.1rem] font-semibold text-text-primary mb-2 leading-tight">How many ${isTimeBased ? 'seconds' : 'reps'} and sets did you do?</h3>
             <p class="text-base text-text-secondary leading-relaxed">Tap the plus or minus to change the number of ${isTimeBased ? 'seconds' : 'reps'} you did. Check the box if you completed the set.</p>
         </div>
-        <button type="button" class="check-all-btn" onClick="markAllSetsCompleted()">
+        <button type="button" class="check-all-btn mb-5" onClick="markAllSetsCompleted()">
             <i class="fa-solid fa-check-double"></i> Check all sets
         </button>
         <div class="flex flex-col gap-3 mb-6">
