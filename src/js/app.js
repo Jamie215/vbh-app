@@ -1383,6 +1383,27 @@ function renderCalendarStrip() {
     const canGoForward = start.getTime() < currentWeekStart.getTime();
     const canGoBack = _canNavigatePreviousWeek(start);
 
+    // ── Header: month on the left, relative week descriptor on the right ──
+    let monthLabel;
+    if (start.getMonth() === end.getMonth() && start.getFullYear() === end.getFullYear()) {
+        monthLabel = start.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+    } else if (start.getFullYear() === end.getFullYear()) {
+        const a = start.toLocaleDateString('en-US', { month: 'short' });
+        const b = end.toLocaleDateString('en-US', { month: 'short' });
+        monthLabel = `${a} – ${b} ${end.getFullYear()}`;
+    } else {
+        // Spans New Year (e.g., Dec 28 – Jan 3)
+        const a = `${start.toLocaleDateString('en-US', { month: 'short' })} ${start.getFullYear()}`;
+        const b = `${end.toLocaleDateString('en-US', { month: 'short' })} ${end.getFullYear()}`;
+        monthLabel = `${a} – ${b}`;
+    }
+
+    const weeksAgo = Math.round((currentWeekStart - start) / (7 * 86400000));
+    let weekLabel;
+    if (weeksAgo === 0)      weekLabel = 'This week';
+    else if (weeksAgo === 1) weekLabel = 'Last week';
+    else                     weekLabel = `Week of ${start.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}`;
+
     let daysHTML = '';
     for (let i = 0; i < 7; i++) {
         const d = new Date(start);
@@ -1431,13 +1452,19 @@ function renderCalendarStrip() {
     const chevronClass = 'shrink-0 self-center w-8 h-8 rounded-full flex items-center justify-center bg-transparent border-none text-text-secondary cursor-pointer transition-colors hover:bg-[#f1f5f9] hover:text-text-primary disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:bg-transparent disabled:hover:text-text-secondary max-md:w-6 max-md:h-6';
 
     container.innerHTML = `
-        <button class="${chevronClass}" onclick="navigateCalendarWeek(-1)" ${!canGoBack ? 'disabled' : ''} aria-label="Previous week">
-            <i class="fa-solid fa-chevron-left"></i>
-        </button>
-        ${daysHTML}
-        <button class="${chevronClass}" onclick="navigateCalendarWeek(1)" ${!canGoForward ? 'disabled' : ''} aria-label="Next week">
-            <i class="fa-solid fa-chevron-right"></i>
-        </button>
+        <div class="flex justify-between items-baseline mb-3 px-2">
+            <span class="text-base font-semibold text-text-primary">${monthLabel}</span>
+            <span class="text-sm text-text-secondary">${weekLabel}</span>
+        </div>
+        <div class="flex justify-between gap-1 px-2">
+            <button class="${chevronClass}" onclick="navigateCalendarWeek(-1)" ${!canGoBack ? 'disabled' : ''} aria-label="Previous week">
+                <i class="fa-solid fa-chevron-left"></i>
+            </button>
+            ${daysHTML}
+            <button class="${chevronClass}" onclick="navigateCalendarWeek(1)" ${!canGoForward ? 'disabled' : ''} aria-label="Next week">
+                <i class="fa-solid fa-chevron-right"></i>
+            </button>
+        </div>
     `;
 
     // Attach Tippy tooltips
@@ -1527,12 +1554,9 @@ function renderTodayCard() {
     } else {
         // Today (any count) or past day with activity
         bottomContent = `
-            <div class="flex flex-row gap-4 justify-around items-center">
-                <div class="flex flex-col">
-                    <p class="text-[3.5rem] font-bold leading-none mb-1">${count}</p>
-                    <p class="text-base opacity-90"><i class="fa-solid fa-dumbbell fa-rotate-by mr-1" style="--fa-rotate-angle: 135deg;"></i> Exercises Completed</p>
-                </div>
-                <i class="fa-solid fa-person-running fa-4x" style="color: rgb(255, 255, 255);"></i>
+            <div class="flex flex-col">
+                <p class="text-[3.5rem] font-bold leading-none mb-1">${count}</p>
+                <p class="text-base opacity-90"><i class="fa-solid fa-dumbbell fa-rotate-by mr-1" style="--fa-rotate-angle: 135deg;"></i> Exercises Completed</p>
             </div>
             ${showLogButton ? `
                 <button onclick="openManualEntryModal('${targetISO}')" class="mt-4 py-2 px-4 bg-white text-brand-dark rounded-md text-sm font-medium border-none cursor-pointer transition-all hover:-translate-y-px">
@@ -1540,7 +1564,7 @@ function renderTodayCard() {
                 </button>` : ''}
             ${isToday ? `
                 <button onclick="showExercises()" class="mt-4 py-2 px-4 bg-white text-brand-dark rounded-md text-sm font-medium border-none cursor-pointer transition-all hover:-translate-y-px">
-                    ${count > 0 ? '<i class="fa-solid fa-dumbbell mr-1"></i>Continue' : 'Start'} Today's Workout
+                    ${count > 0 ? 'Continue' : 'Start'} Today's Workout
                 </button>` : ''}
         `;
     }
