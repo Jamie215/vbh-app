@@ -21,7 +21,7 @@ function openManualEntryModal(prefillDate = null) {
         const maxDate = new Date(today);
         maxDate.setDate(maxDate.getDate() - 1); // Yesterday at most
 
-        dateInput.value = '';
+        dateInput.value = prefillDate ||'';
         dateInput.max = maxDate.toISOString().split('T')[0];
 
         // Floor to the user's account creation date
@@ -104,15 +104,18 @@ async function onManualEntryDateChange() {
         if (conflictWarning) conflictWarning.classList.add('hidden');
     }
 
-    // Auto-suggest a playlist based on the date's program week
     if (playlistSelect && !playlistSelect.value) {
         playlistSelect.disabled = false;
-        // Simple heuristic: if user is on week 4+, suggest advanced
-        const userWeek = calculateUserWeek();
-        if (userWeek >= 4) {
+
+        // Prefer the playlist that already has data for this date.
+        // Fall back to the user's current-week heuristic for fresh dates.
+        const existingDay = completionHistory?.[selectedDate];
+        if (existingDay?.['advanced-4-6']) {
             playlistSelect.value = 'advanced-4-6';
-        } else {
+        } else if (existingDay?.['beginner-0-3']) {
             playlistSelect.value = 'beginner-0-3';
+        } else {
+            playlistSelect.value = calculateUserWeek() >= 4 ? 'advanced-4-6' : 'beginner-0-3';
         }
         onManualEntryPlaylistChange();
     }
