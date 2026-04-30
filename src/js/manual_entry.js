@@ -204,7 +204,7 @@ function renderManualEntryExercises() {
 
         // Check all sets button for this exercise
         const checkAllBtnHTML = `
-            <button class="manual-check-all-btn" onclick="manualCheckAllExerciseSets('${video.id}', ${video.sets})" title="Mark all sets complete">
+            <button class="check-all-btn" onclick="manualCheckAllExerciseSets('${video.id}', ${video.sets})" title="Mark all sets complete">
                 <i class="fa-solid fa-check-double"></i> Check All Sets
             </button>`;
 
