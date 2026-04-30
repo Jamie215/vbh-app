@@ -585,6 +585,9 @@ function getExerciseWeekStartDate(state) {
 function getExerciseWeekStartPhrase(state) {
     weekStartDate = getExerciseWeekStartDate(state);
     if (!weekStartDate) return null;
+    
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
 
     const diff = Math.floor((today - weekStartDate) / 86400000);
     const dayName = weekStartDate.toLocaleDateString('en-US', { weekday: 'long' });
