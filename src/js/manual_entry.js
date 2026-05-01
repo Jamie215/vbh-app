@@ -4,6 +4,7 @@
 let manualEntryProgress = {};
 let manualEntryPlaylist = null;
 let activePreviewVideoId = null; // Track which exercise has an active video preview
+let originalManualEntryProgressSnapshot = null; // Snapshot of progress at modal open to detect changes
 
 // ==================== Open / Close Modal ====================
 function openManualEntryModal(prefillDate = null) {
@@ -13,6 +14,7 @@ function openManualEntryModal(prefillDate = null) {
     // Reset state
     manualEntryProgress = {};
     manualEntryPlaylist = null;
+    originalManualEntryProgressSnapshot = null;
 
     // Set date constraints
     const dateInput = document.getElementById('manual-entry-date');
@@ -141,6 +143,8 @@ function onManualEntryPlaylistChange() {
             }
         });
     }
+
+    originalManualEntryProgressSnapshot = JSON.stringify(manualEntryProgress);
 
     renderManualEntryExercises();
     renderManualEntryConflictWarning();
@@ -417,6 +421,11 @@ function renderManualEntryConflictWarning() {
     `;
 }
 
+function _manualEntryHasChanges() {
+    if (originalManualEntrySnapshot === null) return false;
+    return JSON.stringify(manualEntryProgress) !== originalManualEntrySnapshot;
+}
+
 function updateManualEntrySaveState() {
     const saveBtn = document.getElementById('manual-entry-save-btn');
     const dateInput = document.getElementById('manual-entry-date');
@@ -424,31 +433,14 @@ function updateManualEntrySaveState() {
     
     if (!saveBtn) return;
 
-    const hasDate = dateInput && dateInput.value;
-    const hasPlaylist = playlistSelect && playlistSelect.value;
+    const hasDate = !!(dateInput && dateInput.value);
+    const hasPlaylist = !!(playlistSelect && playlistSelect.value);
     
-    // Check if at least one set is marked completed
-    let hasCompletedSet = false;
-    if (hasPlaylist && manualEntryProgress) {
-        for (const videoId of Object.keys(manualEntryProgress)) {
-            const videoData = manualEntryProgress[videoId];
-            for (const setKey of Object.keys(videoData)) {
-                if (setKey.startsWith('set') && videoData[setKey]?.completed) {
-                    hasCompletedSet = true;
-                    break;
-                }
-            }
-            if (hasCompletedSet) break;
-        }
-    }
-
-    // When editing existing data for this date+playlist, allow save even if
-    // everything is unchecked — that's how the user deletes the playlist's
-    // data for the day.
-    const isEditingExistingPlaylist = !!(hasDate && hasPlaylist &&
-        completionHistory?.[dateInput.value]?.[playlistSelect.value]);
-
-    saveBtn.disabled = !(hasDate && hasPlaylist && hasCompletedSet);
+    // Disable unless date+playlist are set AND the form state differs from
+    // what was originally loaded. This single rule handles new entries,
+    // edits, and "uncheck everything to delete".
+    saveBtn.disabled = !(hasDate && hasPlaylist && _manualEntryHasChanges());
+    
     renderManualEntryConflictWarning();
 }
 

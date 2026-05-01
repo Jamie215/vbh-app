@@ -5,6 +5,10 @@ let player;
 // Track reps for each set in the current video
 let currentVideoProgress = {};
 
+// Snapshot of currentVideoProgress at modal open — used to disable the Done
+// button until something actually changes.
+let originalVideoProgressSnapshot = null;
+
 function onYouTubeIframeAPIReady() {
     console.log('YouTube API Ready');
 }
@@ -46,6 +50,8 @@ function initializeVideoProgress() {
             };
         }
     }
+
+    originalVideoProgressSnapshot = JSON.stringify(currentVideoProgress);
 }
 
 // Open video player modal
@@ -132,8 +138,18 @@ function renderSetTrackingPanel() {
         <div class="flex flex-col gap-3 mb-6">
             ${setsHTML}
         </div>
-        <button type="button" class="done-btn" id="done-btn" onclick="saveVideoProgress()">Done</button>
+        <button type="button" class="done-btn" id="done-btn" disabled  onclick="saveVideoProgress()">Done</button>
     `;
+}
+
+function _videoProgressHasChanges() {
+    return JSON.stringify(currentVideoProgress) !== originalVideoProgressSnapshot;
+}
+
+function _updateDoneBtnState() {
+    const doneBtn = document.getElementById('done-btn');
+    if (!doneBtn) return;
+    doneBtn.disabled = !_videoProgressHasChanges();
 }
 
 // Increment reps for a set
@@ -195,6 +211,8 @@ function toggleSetCompleted(setNumber) {
         ...currentVideoProgress[`set${setNumber}`],
         completed: checkbox.checked
     };
+
+    _updateDoneBtnState();
 }
 
 // Mark all sets as completed
@@ -209,6 +227,7 @@ function markAllSetsCompleted() {
             };
         }
     }
+    _updateDoneBtnState();
 }
 
 // Save video progress to database and close modal
