@@ -177,7 +177,12 @@ function _videoProgressHasChanges() {
 function _updateDoneBtnState() {
     const doneBtn = document.getElementById('done-btn');
     if (!doneBtn) return;
-    doneBtn.disabled = !_videoProgressHasChanges();
+
+    const hasChanges = _videoProgressHasChanges();
+    doneBtn.disabled = !hasChanges;
+    doneBtn.title = hasChanges 
+        ? '' 
+        : 'Check at least one set as completed to save';
 }
 
 // Increment reps for a set

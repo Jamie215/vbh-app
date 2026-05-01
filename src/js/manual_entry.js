@@ -473,12 +473,21 @@ function updateManualEntrySaveState() {
 
     const hasDate = !!(dateInput && dateInput.value);
     const hasPlaylist = !!(playlistSelect && playlistSelect.value);
-    
+    const hasChanges = _manualEntryHasChanges();
+
     // Disable unless date+playlist are set AND the form state differs from
     // what was originally loaded. This single rule handles new entries,
     // edits, and "uncheck everything to delete".
-    saveBtn.disabled = !(hasDate && hasPlaylist && _manualEntryHasChanges());
+    saveBtn.disabled = !(hasDate && hasPlaylist && hasChanges);
     
+    // Hint text on hover for why it's disabled
+    if (saveBtn.disabled) {
+        if (!hasDate) saveBtn.title = 'Pick a date first';
+        else if (!hasPlaylist) saveBtn.title = 'Pick a playlist first';
+        else saveBtn.title = 'Make a change to save';
+    } else {
+        saveBtn.title = '';
+    }
     renderManualEntryConflictWarning();
 }
 

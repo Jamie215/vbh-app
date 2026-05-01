@@ -294,6 +294,23 @@ label:hover .checkmark-box {
     opacity: 0.5;
     cursor: not-allowed;
 }
+
+.done-btn:disabled,
+.done-btn[disabled] {
+    opacity: 0.45;
+    cursor: not-allowed;
+    pointer-events: none;  /* belt-and-suspenders: blocks clicks even if styling is overridden */
+    filter: grayscale(0.4);
+}
+
+#manual-entry-save-btn:disabled,
+#manual-entry-save-btn[disabled] {
+    opacity: 0.45;
+    cursor: not-allowed;
+    pointer-events: none;
+    filter: grayscale(0.4);
+}
+
 /* ============================================================
    RESPONSIVE BREAKPOINTS (consolidated)
    ============================================================ */
