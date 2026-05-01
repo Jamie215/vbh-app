@@ -153,7 +153,7 @@ function renderSetTrackingPanel() {
             <p class="text-base text-text-secondary leading-relaxed">Tap the plus or minus to change the number of ${isTimeBased ? 'seconds' : 'reps'} you did. Check the box if you completed the set.</p>
         </div>
         <label class="flex items-center cursor-pointer mb-5 select-none">
-            <span id="check_all_sets_label" class="text-base font-medium text-text-tertiary">${labelText}</span>
+            <span id="check_all_sets_label" class="text-base font-medium text-text-tertiary ml-24">${labelText}</span>
             <span class="relative flex items-center justify-center ml-auto">
                 <input type="checkbox"
                        class="set-checkbox"
