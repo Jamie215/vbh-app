@@ -195,7 +195,7 @@ function renderManualEntryExercises() {
                             <i class="fa-solid fa-plus"></i>
                         </button>
                     </div>
-                    <span class="text-base text-text-secondary -ml-1">reps</span>
+                    <span class="text-base text-text-secondary -ml-1">${isTimeBased ? 'seconds' : 'reps'}</span>
                     <label class="relative flex items-center justify-center cursor-pointer ml-auto">
                         <input type="checkbox" 
                                class="set-checkbox" 
@@ -225,7 +225,7 @@ function renderManualEntryExercises() {
                         </div>
                         <div>
                             <h4 class="text-base font-semibold text-text-primary mb-0.5">${video.title}</h4>
-                            <p class="text-base text-text-secondary">Recommended: ${video.sets} sets of ${video.reps} reps${video.needsEachSide ? ' (each side)' : ''}</p>
+                            <p class="text-base text-text-secondary">Recommended: ${video.sets} sets of ${isTimeBased ? video.seconds : video.reps} ${isTimeBased ? 'seconds' : 'reps'} ${video.needsEachSide ? ' (each side)' : ''}</p>
                             ${checkAllBtnHTML}
                         </div>
                     </div>
