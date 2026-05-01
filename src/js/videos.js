@@ -155,7 +155,7 @@ function renderSetTrackingPanel() {
         <div class="flex flex-col gap-3 mb-6">
             ${setsHTML}
         </div>
-        <button type="button" class="done-btn" id="done-btn" disabled onclick="saveVideoProgress()">Done</button>
+        <button type="button" class="done-btn" id="done-btn" disabled onclick="saveVideoProgress()">Save</button>
     `;
 }
 
@@ -336,7 +336,7 @@ async function saveVideoProgress() {
             alert('Error saving progress. Please try again.');
             if (doneBtn) {
                 doneBtn.disabled = false;
-                doneBtn.innerHTML = 'Done';
+                doneBtn.innerHTML = 'Save';
             }
             return;
         }
@@ -367,7 +367,7 @@ async function saveVideoProgress() {
         alert('Error saving progress. Please try again.');
         if (doneBtn) {
             doneBtn.disabled = false;
-            doneBtn.innerHTML = 'Done';
+            doneBtn.innerHTML = 'Save';
         }
     }
 }
@@ -383,7 +383,7 @@ function closeVideo() {
     const doneBtn = document.getElementById('done-btn');
     if (doneBtn) {
         doneBtn.disabled = false;
-        doneBtn.innerHTML = 'Done';
+        doneBtn.innerHTML = 'Save';
     }
 }
 
