@@ -143,15 +143,26 @@ function renderSetTrackingPanel() {
             </div>
         `;
     }
+
+    const allChecked = _allSetsCompleted();
+    const labelText = allChecked ? 'Deselect all sets' : 'Check all sets';
     
     panel.innerHTML = `
         <div class="mb-2">
             <h3 class="text-[1.1rem] font-semibold text-text-primary mb-2 leading-tight">How many ${isTimeBased ? 'seconds' : 'reps'} and sets did you do?</h3>
             <p class="text-base text-text-secondary leading-relaxed">Tap the plus or minus to change the number of ${isTimeBased ? 'seconds' : 'reps'} you did. Check the box if you completed the set.</p>
         </div>
-        <button type="button" class="check-all-btn mb-5" onClick="markAllSetsCompleted()">
-            <i class="fa-solid fa-check-double"></i> Check all sets
-        </button>
+        <label class="inline-flex items-center gap-2 cursor-pointer mb-5 select-none">
+            <span class="relative flex items-center justify-center">
+                <input type="checkbox"
+                       class="set-checkbox"
+                       id="check_all_sets_master"
+                       ${allChecked ? 'checked' : ''}
+                       onchange="toggleAllSets()">
+                <span class="checkmark-box"><i class="fa-solid fa-check"></i></span>
+            </span>
+            <span id="check_all_sets_label" class="text-base font-medium text-text-tertiary">${labelText}</span>
+        </label>
         <div class="flex flex-col gap-3 mb-6">
             ${setsHTML}
         </div>
@@ -238,31 +249,56 @@ function updateReps(setNumber, isTimeBased) {
     _updateDoneBtnState();
 }
 
-// Toggle set completion checkbox
 function toggleSetCompleted(setNumber) {
     const checkbox = document.getElementById(`completed_set${setNumber}`);
     if (!checkbox) return;
-    
+
     currentVideoProgress[`set${setNumber}`] = {
         ...currentVideoProgress[`set${setNumber}`],
         completed: checkbox.checked
     };
 
+    _updateMasterCheckbox();
     _updateDoneBtnState();
 }
 
-// Mark all sets as completed
-function markAllSetsCompleted() {
+// True iff every set in the current video is marked completed.
+function _allSetsCompleted() {
+    if (!currentVideo || !currentVideo.sets) return false;
+    for (let i = 1; i <= currentVideo.sets; i++) {
+        if (!currentVideoProgress[`set${i}`]?.completed) return false;
+    }
+    return true;
+}
+
+// Sync master checkbox + label text to the current set states.
+function _updateMasterCheckbox() {
+    const master = document.getElementById('check_all_sets_master');
+    const label = document.getElementById('check_all_sets_label');
+    if (!master || !label) return;
+
+    const allChecked = _allSetsCompleted();
+    master.checked = allChecked;
+    label.textContent = allChecked ? 'Deselect all sets' : 'Check all sets';
+}
+
+// Master toggles all sets based on its own checked state.
+function toggleAllSets() {
+    const master = document.getElementById('check_all_sets_master');
+    if (!master || !currentVideo) return;
+
+    const shouldCheck = master.checked;
+
     for (let i = 1; i <= currentVideo.sets; i++) {
         const checkbox = document.getElementById(`completed_set${i}`);
-        if (checkbox) {
-            checkbox.checked = true;
-            currentVideoProgress[`set${i}`] = {
-                ...currentVideoProgress[`set${i}`],
-                completed: true
-            };
-        }
+        if (checkbox) checkbox.checked = shouldCheck;
+        currentVideoProgress[`set${i}`] = {
+            ...currentVideoProgress[`set${i}`],
+            completed: shouldCheck
+        };
     }
+
+    _updateMasterCheckbox();
     _updateDoneBtnState();
 }
 

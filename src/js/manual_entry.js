@@ -198,11 +198,20 @@ function renderManualEntryExercises() {
             `;
         }
 
-        // Check all sets button for this exercise
+        // Master checkbox: reflects state of all sets, toggles all when clicked
+        const allCompleted = _manualEntryAllSetsCompleted(video.id, video.sets);
         const checkAllBtnHTML = `
-            <button class="check-all-btn" onclick="manualCheckAllExerciseSets('${video.id}', ${video.sets})" title="Mark all sets complete">
-                <i class="fa-solid fa-check-double"></i> Check All Sets
-            </button>`;
+            <label class="inline-flex items-center gap-2 cursor-pointer select-none mt-2">
+                <span class="relative flex items-center justify-center">
+                    <input type="checkbox"
+                           class="set-checkbox"
+                           id="manual_check_all_${video.id}"
+                           ${allCompleted ? 'checked' : ''}
+                           onchange="manualToggleAllExerciseSets('${video.id}', ${video.sets})">
+                    <span class="checkmark-box"><i class="fa-solid fa-check"></i></span>
+                </span>
+                <span id="manual_check_all_label_${video.id}" class="text-base font-medium text-text-tertiary">${allCompleted ? 'Deselect all sets' : 'Check all sets'}</span>
+            </label>`;
 
         html += `
             <div class="bg-subtle border border-border-light rounded-[10px] p-4 px-5 mb-3">
@@ -349,25 +358,64 @@ function manualUpdateReps(videoId, setNumber, isTimeBased) {
 function manualToggleSet(videoId, setNumber) {
     const checkbox = document.getElementById(`manual_completed_${videoId}_set${setNumber}`);
     if (!checkbox) return;
-    
+
     if (!manualEntryProgress[videoId]) manualEntryProgress[videoId] = {};
     manualEntryProgress[videoId][`set${setNumber}`] = {
         ...manualEntryProgress[videoId][`set${setNumber}`],
         completed: checkbox.checked
     };
 
+    // Sync the master "check all" checkbox for this exercise
+    const video = manualEntryPlaylist?.videos.find(v => v.id === videoId);
+    if (video) {
+        _updateManualEntryMasterCheckbox(videoId, video.sets);
+    }
+
     updateManualEntrySaveState();
     renderManualEntryConflictWarning();
 }
 
-function manualCheckAllExerciseSets(videoId, totalSets) {
+// True iff every set for this exercise is currently marked completed.
+function _manualEntryAllSetsCompleted(videoId, totalSets) {
+    if (!totalSets) return false;
+    const videoProgress = manualEntryProgress[videoId] || {};
+    for (let i = 1; i <= totalSets; i++) {
+        if (!videoProgress[`set${i}`]?.completed) return false;
+    }
+    return true;
+}
+
+// Sync the master checkbox + label text for this exercise to its current state.
+function _updateManualEntryMasterCheckbox(videoId, totalSets) {
+    const master = document.getElementById(`manual_check_all_${videoId}`);
+    const label = document.getElementById(`manual_check_all_label_${videoId}`);
+    if (!master || !label) return;
+
+    const allChecked = _manualEntryAllSetsCompleted(videoId, totalSets);
+    master.checked = allChecked;
+    label.textContent = allChecked ? 'Deselect all sets' : 'Check all sets';
+}
+
+// Master toggles all sets for this exercise based on its own checked state.
+function manualToggleAllExerciseSets(videoId, totalSets) {
+    const master = document.getElementById(`manual_check_all_${videoId}`);
+    if (!master) return;
+
+    const shouldCheck = master.checked;
+    if (!manualEntryProgress[videoId]) manualEntryProgress[videoId] = {};
+
     for (let i = 1; i <= totalSets; i++) {
         const checkbox = document.getElementById(`manual_completed_${videoId}_set${i}`);
-        if (checkbox) {
-            checkbox.checked = true;
-            manualToggleSet(videoId, i);
-        }
+        if (checkbox) checkbox.checked = shouldCheck;
+        manualEntryProgress[videoId][`set${i}`] = {
+            ...manualEntryProgress[videoId][`set${i}`],
+            completed: shouldCheck
+        };
     }
+
+    _updateManualEntryMasterCheckbox(videoId, totalSets);
+    updateManualEntrySaveState();
+    renderManualEntryConflictWarning();
 }
 
 // ==================== Save State Management ====================

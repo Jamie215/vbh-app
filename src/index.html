@@ -775,52 +775,55 @@
 
         <!-- Manual Entry Modal -->
         <div id="manual-entry-modal" class="modal hidden">
-            <div class="modal-content max-w-[700px] max-h-[85vh] overflow-y-auto max-md:max-w-full max-md:mx-2">
-                <button class="absolute top-4 right-4 bg-transparent text-text-secondary text-xl p-2 w-10 h-10 rounded-full border-none flex items-center justify-center cursor-pointer transition-all leading-none hover:bg-black/5 hover:text-text-primary" onclick="closeManualEntryModal()"><i class="fa-solid fa-xmark"></i></button>
-                
-                <div class="text-center mb-6 pr-8">
-                    <div class="w-14 h-14 rounded-[14px] bg-gradient-to-br from-[#667eea] to-[#764ba2] flex items-center justify-center mx-auto mb-4">
-                        <i class="fa-solid fa-clock-rotate-left text-2xl text-white"></i>
+            <div class="modal-content max-w-[700px] max-h-[85vh] flex flex-col max-md:max-w-full max-md:mx-2">
+                <button class="absolute top-4 right-4 bg-transparent text-text-secondary text-xl p-2 w-10 h-10 rounded-full border-none flex items-center justify-center cursor-pointer transition-all leading-none hover:bg-black/5 hover:text-text-primary z-10" onclick="closeManualEntryModal()"><i class="fa-solid fa-xmark"></i></button>
+
+                <!-- Fixed header -->
+                <div class="shrink-0">
+                    <div class="text-center mb-6 pr-8">
+                        <div class="w-14 h-14 rounded-[14px] bg-gradient-to-br from-[#667eea] to-[#764ba2] flex items-center justify-center mx-auto mb-4">
+                            <i class="fa-solid fa-clock-rotate-left text-2xl text-white"></i>
+                        </div>
+                        <h2 class="text-2xl font-bold text-text-primary mb-2">Log Past Workout</h2>
+                        <p class="text-text-secondary text-base leading-relaxed">Forgot to log a session? Select the date and workout, then fill in what you completed.</p>
                     </div>
-                    <h2 class="text-2xl font-bold text-text-primary mb-2">Log Past Workout</h2>
-                    <p class="text-text-secondary text-base leading-relaxed">Forgot to log a session? Select the date and workout, then fill in what you completed.</p>
+
+                    <!-- Date & Playlist Selectors -->
+                    <div class="grid grid-cols-2 gap-4 mb-5 max-md:grid-cols-1">
+                        <div>
+                            <label for="manual-entry-date" class="flex items-center gap-1.5 text-base font-semibold text-text-tertiary mb-1.5">
+                                <i class="fa-solid fa-calendar-day text-base text-brand"></i> Date
+                            </label>
+                            <input type="date" id="manual-entry-date" class="manual-entry-input" onchange="onManualEntryDateChange()">
+                        </div>
+                        <div>
+                            <label for="manual-entry-playlist" class="flex items-center gap-1.5 text-base font-semibold text-text-tertiary mb-1.5">
+                                <i class="fa-solid fa-dumbbell text-base text-brand"></i> Workout
+                            </label>
+                            <select id="manual-entry-playlist" class="manual-entry-input" onchange="onManualEntryPlaylistChange()" disabled>
+                                <option value="">Select a workout...</option>
+                                <option value="beginner-0-3">Beginner Weeks 0-3</option>
+                                <option value="advanced-4-6">Advanced Weeks 4-6</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Conflict Warning -->
+                    <div id="manual-entry-conflict" class="hidden flex items-center gap-2 py-3 px-4 bg-amber-50 border border-amber-400 rounded-lg mb-5 text-base text-amber-900">
+                        <i class="fa-solid fa-circle-info shrink-0 text-amber-500"></i>
+                        <span></span>
+                    </div>
                 </div>
 
-                <!-- Date & Playlist Selectors -->
-                <div class="grid grid-cols-2 gap-4 mb-5 max-md:grid-cols-1">
-                    <div>
-                        <label for="manual-entry-date" class="flex items-center gap-1.5 text-base font-semibold text-text-tertiary mb-1.5">
-                            <i class="fa-solid fa-calendar-day text-base text-brand"></i> Date
-                        </label>
-                        <input type="date" id="manual-entry-date" class="manual-entry-input" onchange="onManualEntryDateChange()">
-                    </div>
-                    <div>
-                        <label for="manual-entry-playlist" class="flex items-center gap-1.5 text-base font-semibold text-text-tertiary mb-1.5">
-                            <i class="fa-solid fa-dumbbell text-base text-brand"></i> Workout
-                        </label>
-                        <select id="manual-entry-playlist" class="manual-entry-input" onchange="onManualEntryPlaylistChange()" disabled>
-                            <option value="">Select a workout...</option>
-                            <option value="beginner-0-3">Beginner Weeks 0-3</option>
-                            <option value="advanced-4-6">Advanced Weeks 4-6</option>
-                        </select>
-                    </div>
-                </div>
-
-                <!-- Conflict Warning -->
-                <div id="manual-entry-conflict" class="hidden flex items-center gap-2 py-3 px-4 bg-amber-50 border border-amber-400 rounded-lg mb-5 text-base text-amber-900">
-                    <i class="fa-solid fa-circle-info shrink-0 text-amber-500"></i>
-                    <span></span>
-                </div>
-
-                <!-- Exercise Entry Area -->
-                <div id="manual-entry-exercises" class="mb-6 max-h-[400px] overflow-y-auto pr-1">
+                <!-- Scrollable exercise list -->
+                <div id="manual-entry-exercises" class="flex-1 overflow-y-auto pr-1 mb-4 min-h-0">
                     <div class="text-center py-12 px-4 text-text-muted">
                         <p class="text-base">Select a date then workout to log your exercises</p>
                     </div>
                 </div>
 
-                <!-- Save Button -->
-                <div class="flex justify-end gap-3 pt-4 border-t border-border">
+                <!-- Fixed footer -->
+                <div class="shrink-0 flex justify-end gap-3 pt-4 border-t border-border">
                     <button type="button" class="py-2.5 px-6 bg-white text-text-secondary border-[1.5px] border-border-light rounded-lg text-base font-medium cursor-pointer transition-all hover:bg-subtle hover:border-border-medium" onclick="closeManualEntryModal()">Cancel</button>
                     <button type="button" id="manual-entry-save-btn" class="manual-entry-save-btn" disabled onclick="saveManualEntry()">
                         <i class="fa-solid fa-floppy-disk"></i> Save Workout
