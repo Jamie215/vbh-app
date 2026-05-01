@@ -189,7 +189,7 @@ function renderManualEntryExercises() {
                                class="rep-input" 
                                value="${isTimeBased ? setData.seconds : setData.reps}" 
                                min="0" 
-                               max="99"
+                               max="${isTimeBased ? '120' : '99'}"
                                onchange="manualUpdateReps('${video.id}', ${i}, ${isTimeBased})">
                         <button type="button" class="rep-btn" onclick="manualIncrementReps('${video.id}', ${i}, ${isTimeBased})">
                             <i class="fa-solid fa-plus"></i>
@@ -305,12 +305,10 @@ function manualIncrementReps(videoId, setNumber, isTimeBased) {
     if (!input) return;
     
     let value = parseInt(input.value) || 0;
-    if (value < 99) {
+    if (value < 120) {
         if (isTimeBased) {
-            value = Math.min(99, value + 5); // Increment time by 5 seconds for time-based exercises
-        } else {
-            value++;
-        }
+            value = Math.min(120, value + 5); // Increment time by 5 seconds for time-based exercises
+        } else value++;
     }
     input.value = value;
     
@@ -336,24 +334,22 @@ function manualDecrementReps(videoId, setNumber, isTimeBased) {
     if (value > 0) {
         if (isTimeBased) {
             value = Math.max(0, value - 5); // Decrement time by 5 seconds for time-based exercises
-        } else {
-            value--;
-        }
-        input.value = value;
+        } else value--;
+    }
+    input.value = value;
         
-        if (!manualEntryProgress[videoId]) manualEntryProgress[videoId] = {};
+    if (!manualEntryProgress[videoId]) manualEntryProgress[videoId] = {};
 
-        if (isTimeBased) {
-            manualEntryProgress[videoId][`set${setNumber}`] = {
-                ...manualEntryProgress[videoId][`set${setNumber}`],
-                seconds: value
-            };
-        } else {
-            manualEntryProgress[videoId][`set${setNumber}`] = {
-                ...manualEntryProgress[videoId][`set${setNumber}`],
-                reps: value
-            };
-        }
+    if (isTimeBased) {
+        manualEntryProgress[videoId][`set${setNumber}`] = {
+            ...manualEntryProgress[videoId][`set${setNumber}`],
+            seconds: value
+        };
+    } else {
+        manualEntryProgress[videoId][`set${setNumber}`] = {
+            ...manualEntryProgress[videoId][`set${setNumber}`],
+            reps: value
+        };
     }
 }
 

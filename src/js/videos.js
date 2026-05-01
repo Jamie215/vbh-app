@@ -102,7 +102,7 @@ function renderSetTrackingPanel() {
                            class="rep-input" 
                            value="${isTimeBased ? setData.seconds : setData.reps}" 
                            min="0" 
-                           max="99"
+                           max="${isTimeBased ? '120' : '99'}"
                            onchange="updateReps(${i}, ${isTimeBased})">
                     <button type="button" class="rep-btn" onclick="incrementReps(${i}, ${isTimeBased})">
                         <i class="fa-solid fa-plus"></i>
@@ -142,9 +142,11 @@ function incrementReps(setNumber, isTimeBased) {
     if (!input) return;
     
     let value = parseInt(input.value) || 0;
-    if (isTimeBased) {
-        value = Math.min(999, value + 5); // Increment time by 5 seconds, max 999
-    } else value++;
+    if (value < 120) {
+        if (isTimeBased) {
+            value = Math.min(120, value + 5); // Increment time by 5 seconds, max 120
+        } else value++;
+    }
     input.value = value;
     
     if (isTimeBased) {
@@ -170,19 +172,19 @@ function decrementReps(setNumber, isTimeBased) {
         if (isTimeBased) {
             value = Math.max(0, value - 5); // Decrement time by 5 seconds, min 0
         } else value--;
-        input.value = value;
-        
-        if (isTimeBased) {
-            currentVideoProgress[`set${setNumber}`] = {
-                ...currentVideoProgress[`set${setNumber}`],
-                seconds: value
-            };
-        } else {
-            currentVideoProgress[`set${setNumber}`] = {
-                ...currentVideoProgress[`set${setNumber}`],
-                reps: value
-            };
-        }
+    }
+    input.value = value;
+    
+    if (isTimeBased) {
+        currentVideoProgress[`set${setNumber}`] = {
+            ...currentVideoProgress[`set${setNumber}`],
+            seconds: value
+        };
+    } else {
+        currentVideoProgress[`set${setNumber}`] = {
+            ...currentVideoProgress[`set${setNumber}`],
+            reps: value
+        };
     }
 }
 
