@@ -1061,7 +1061,7 @@ function loadExerciseTable() {
         
         // Order column
         const orderCell = document.createElement('td');
-        orderCell.className = 'py-5 px-6 border-b border-border-subtle align-middle text-center font-medium text-text-secondary text-base max-lg:py-4 max-lg:px-4 max-md:py-3 max-md:px-3';
+        orderCell.className = 'py-4 px-6 border-b border-border-subtle align-middle text-center font-medium text-text-secondary text-base max-lg:py-4 max-lg:px-4 max-md:hidden';
         orderCell.textContent = index + 1;
         row.appendChild(orderCell);
         
