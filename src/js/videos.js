@@ -152,8 +152,9 @@ function renderSetTrackingPanel() {
             <h3 class="text-[1.1rem] font-semibold text-text-primary mb-2 leading-tight">How many ${isTimeBased ? 'seconds' : 'reps'} and sets did you do?</h3>
             <p class="text-base text-text-secondary leading-relaxed">Tap the plus or minus to change the number of ${isTimeBased ? 'seconds' : 'reps'} you did. Check the box if you completed the set.</p>
         </div>
-        <label class="inline-flex items-center gap-2 cursor-pointer mb-5 select-none">
-            <span class="relative flex items-center justify-center">
+        <label class="flex items-center cursor-pointer mb-5 select-none">
+            <span id="check_all_sets_label" class="text-base font-medium text-text-tertiary">${labelText}</span>
+            <span class="relative flex items-center justify-center ml-auto">
                 <input type="checkbox"
                        class="set-checkbox"
                        id="check_all_sets_master"
@@ -161,7 +162,6 @@ function renderSetTrackingPanel() {
                        onchange="toggleAllSets()">
                 <span class="checkmark-box"><i class="fa-solid fa-check"></i></span>
             </span>
-            <span id="check_all_sets_label" class="text-base font-medium text-text-tertiary">${labelText}</span>
         </label>
         <div class="flex flex-col gap-3 mb-6">
             ${setsHTML}

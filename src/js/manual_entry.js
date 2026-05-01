@@ -200,9 +200,10 @@ function renderManualEntryExercises() {
 
         // Master checkbox: reflects state of all sets, toggles all when clicked
         const allCompleted = _manualEntryAllSetsCompleted(video.id, video.sets);
-        const checkAllBtnHTML = `
-            <label class="inline-flex items-center gap-2 cursor-pointer select-none mt-2">
-                <span class="relative flex items-center justify-center">
+        const checkAllRowHTML = `
+            <label class="flex items-center cursor-pointer select-none pb-2 mb-1 border-b border-border-light">
+                <span id="manual_check_all_label_${video.id}" class="text-base font-medium text-text-tertiary">${allCompleted ? 'Deselect all sets' : 'Check all sets'}</span>
+                <span class="relative flex items-center justify-center ml-auto">
                     <input type="checkbox"
                            class="set-checkbox"
                            id="manual_check_all_${video.id}"
@@ -210,7 +211,6 @@ function renderManualEntryExercises() {
                            onchange="manualToggleAllExerciseSets('${video.id}', ${video.sets})">
                     <span class="checkmark-box"><i class="fa-solid fa-check"></i></span>
                 </span>
-                <span id="manual_check_all_label_${video.id}" class="text-base font-medium text-text-tertiary">${allCompleted ? 'Deselect all sets' : 'Check all sets'}</span>
             </label>`;
 
         html += `
@@ -225,11 +225,11 @@ function renderManualEntryExercises() {
                         <div>
                             <h4 class="text-base font-semibold text-text-primary mb-0.5">${video.title}</h4>
                             <p class="text-base text-text-secondary">Recommended: ${video.sets} sets of ${isTimeBased ? video.seconds : video.reps} ${isTimeBased ? 'seconds' : 'reps'} ${video.needsEachSide ? ' (each side)' : ''}</p>
-                            ${checkAllBtnHTML}
                         </div>
                     </div>
                 </div>
                 <div class="flex flex-col gap-2 pl-10 max-md:pl-0">
+                    ${checkAllRowHTML}
                     ${setsHTML}
                 </div>
             </div>
