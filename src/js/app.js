@@ -1061,13 +1061,13 @@ function loadExerciseTable() {
         
         // Order column
         const orderCell = document.createElement('td');
-        orderCell.className = 'py-4 px-6 border-b border-border-subtle align-middle text-center font-medium text-text-secondary text-base max-lg:py-4 max-lg:px-4 max-md:hidden';
+        orderCell.className = 'py-5 px-6 border-b border-border-subtle align-middle text-center font-medium text-text-secondary text-base max-lg:py-4 max-lg:px-4 max-md:px-2';
         orderCell.textContent = index + 1;
         row.appendChild(orderCell);
         
         // Name column (thumbnail + title)
         const nameCell = document.createElement('td');
-        nameCell.className = 'py-5 px-6 border-b border-border-subtle align-middle text-text-primary max-lg:py-4 max-lg:px-4 max-md:py-3 max-md:px-3';
+        nameCell.className = 'py-4 px-6 border-b border-border-subtle align-middle text-text-primary max-lg:py-4 max-lg:px-4 max-md:py-3 max-md:px-3';
         nameCell.innerHTML = `
           <div class="flex items-center gap-4 max-md:flex-col max-md:items-start max-md:gap-2">
             <div class="video-thumb" onclick="playExerciseVideo('${video.id}')">
