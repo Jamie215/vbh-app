@@ -778,8 +778,8 @@
             <div class="modal-content max-w-[700px] max-h-[85vh] flex flex-col max-md:max-w-full max-md:mx-2">
                 <button class="absolute top-4 right-4 bg-transparent text-text-secondary text-xl p-2 w-10 h-10 rounded-full border-none flex items-center justify-center cursor-pointer transition-all leading-none hover:bg-black/5 hover:text-text-primary z-10" onclick="closeManualEntryModal()"><i class="fa-solid fa-xmark"></i></button>
 
-                <!-- Fixed header -->
-                <div class="shrink-0">
+                <!-- Scrollable area: everything except the footer -->
+                <div class="flex-1 overflow-y-auto min-h-0 pr-1">
                     <div class="text-center mb-6 pr-8">
                         <div class="w-14 h-14 rounded-[14px] bg-gradient-to-br from-[#667eea] to-[#764ba2] flex items-center justify-center mx-auto mb-4">
                             <i class="fa-solid fa-clock-rotate-left text-2xl text-white"></i>
@@ -813,12 +813,12 @@
                         <i class="fa-solid fa-circle-info shrink-0 text-amber-500"></i>
                         <span></span>
                     </div>
-                </div>
 
-                <!-- Scrollable exercise list -->
-                <div id="manual-entry-exercises" class="flex-1 overflow-y-auto pr-1 mb-4 min-h-0">
-                    <div class="text-center py-12 px-4 text-text-muted">
-                        <p class="text-base">Select a date then workout to log your exercises</p>
+                    <!-- Exercise Entry Area -->
+                    <div id="manual-entry-exercises" class="mb-4">
+                        <div class="text-center py-12 px-4 text-text-muted">
+                            <p class="text-base">Select a date then workout to log your exercises</p>
+                        </div>
                     </div>
                 </div>
 

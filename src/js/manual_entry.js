@@ -202,7 +202,7 @@ function renderManualEntryExercises() {
         const allCompleted = _manualEntryAllSetsCompleted(video.id, video.sets);
         const checkAllRowHTML = `
             <label class="flex items-center cursor-pointer select-none pb-2 mb-1 border-b border-border-light">
-                <span id="manual_check_all_label_${video.id}" class="text-base font-medium text-text-tertiary ml-26">${allCompleted ? 'Deselect all sets' : 'Check all sets'}</span>
+                <span id="manual_check_all_label_${video.id}" class="text-base font-medium text-text-tertiary ml-24">${allCompleted ? 'Deselect all sets' : 'Check all sets'}</span>
                 <span class="relative flex items-center justify-center ml-auto">
                     <input type="checkbox"
                            class="set-checkbox"
