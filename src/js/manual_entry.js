@@ -304,26 +304,17 @@ function manualIncrementReps(videoId, setNumber, isTimeBased) {
     const input = document.getElementById(`manual_reps_${videoId}_set${setNumber}`);
     if (!input) return;
     
+    const cap = isTimeBased ? 120 : 99;
     let value = parseInt(input.value) || 0;
-    if (value < 120) {
-        if (isTimeBased) {
-            value = Math.min(120, value + 5); // Increment time by 5 seconds for time-based exercises
-        } else value++;
-    }
+    value = Math.min(cap, value + (isTimeBased ? 5 : 1));
     input.value = value;
     
     if (!manualEntryProgress[videoId]) manualEntryProgress[videoId] = {};
-    if (isTimeBased) {
-        manualEntryProgress[videoId][`set${setNumber}`] = {
-            ...manualEntryProgress[videoId][`set${setNumber}`],
-            seconds: value
-        };
-    } else {
-        manualEntryProgress[videoId][`set${setNumber}`] = {
-            ...manualEntryProgress[videoId][`set${setNumber}`],
-            reps: value
-        };
-    }
+    const field = isTimeBased ? 'seconds' : 'reps';
+    manualEntryProgress[videoId][`set${setNumber}`] = {
+        ...manualEntryProgress[videoId][`set${setNumber}`],
+        [field]: value
+    };
 }
 
 function manualDecrementReps(videoId, setNumber, isTimeBased) {
@@ -331,26 +322,16 @@ function manualDecrementReps(videoId, setNumber, isTimeBased) {
     if (!input) return;
     
     let value = parseInt(input.value) || 0;
-    if (value > 0) {
-        if (isTimeBased) {
-            value = Math.max(0, value - 5); // Decrement time by 5 seconds for time-based exercises
-        } else value--;
-    }
+    value = Math.max(0, value - (isTimeBased ? 5 : 1));
     input.value = value;
-        
-    if (!manualEntryProgress[videoId]) manualEntryProgress[videoId] = {};
 
-    if (isTimeBased) {
-        manualEntryProgress[videoId][`set${setNumber}`] = {
-            ...manualEntryProgress[videoId][`set${setNumber}`],
-            seconds: value
-        };
-    } else {
-        manualEntryProgress[videoId][`set${setNumber}`] = {
-            ...manualEntryProgress[videoId][`set${setNumber}`],
-            reps: value
-        };
-    }
+    if (!manualEntryProgress[videoId]) manualEntryProgress[videoId] = {};
+    const field = isTimeBased ? 'seconds' : 'reps';
+    manualEntryProgress[videoId][`set${setNumber}`] = {
+        ...manualEntryProgress[videoId][`set${setNumber}`],
+        [field]: value
+    };
+
 }
 
 function manualUpdateReps(videoId, setNumber, isTimeBased) {
@@ -362,17 +343,11 @@ function manualUpdateReps(videoId, setNumber, isTimeBased) {
     input.value = value;
     
     if (!manualEntryProgress[videoId]) manualEntryProgress[videoId] = {};
-    if (isTimeBased) {
-        manualEntryProgress[videoId][`set${setNumber}`] = {
-            ...manualEntryProgress[videoId][`set${setNumber}`],
-            seconds: value
-        };
-    } else {
-        manualEntryProgress[videoId][`set${setNumber}`] = {
-            ...manualEntryProgress[videoId][`set${setNumber}`],
-            reps: value
-        };
-    }
+    const field = isTimeBased ? 'seconds' : 'reps';
+    manualEntryProgress[videoId][`set${setNumber}`] = {
+        ...manualEntryProgress[videoId][`set${setNumber}`],
+        [field]: value
+    };
 }
 
 function manualToggleSet(videoId, setNumber) {

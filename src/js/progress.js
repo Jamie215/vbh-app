@@ -170,7 +170,8 @@ function renderWorkoutHistoryChart() {
                             completedSets++;
                             repsData.push({
                                 set: setKey.replace('set', 'Set '),
-                                reps: videoProgress[setKey].reps || 0
+                                reps: videoProgress[setKey].reps || 0,
+                                seconds: videoProgress[setKey].seconds || 0
                             });
                         }
                     });
@@ -454,7 +455,11 @@ function renderDayView(container, dateStr) {
                         label: function(context) {
                             const exercise = allExercises[context.dataIndex];
                             const repsStr = exercise.repsData
-                                .map(r => `${r.set}: ${r.reps} reps`)
+                                .map(r => {
+                                    // Time-based sets store reps=0 and seconds>0
+                                    if (r.seconds > 0 && r.reps === 0) return `${r.set}: ${r.seconds}s`;
+                                    return `${r.set}: ${r.reps} reps`;
+                                })
                                 .join(', ');
                             return `${exercise.sets} sets (${repsStr})`;
                         },

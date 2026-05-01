@@ -102,7 +102,7 @@ function renderSetTrackingPanel() {
                            class="rep-input" 
                            value="${isTimeBased ? setData.seconds : setData.reps}" 
                            min="0" 
-                           max="${isTimeBased ? '120' : '99'}"
+                           max="${isTimeBased ? 120 : 99}"
                            onchange="updateReps(${i}, ${isTimeBased})">
                     <button type="button" class="rep-btn" onclick="incrementReps(${i}, ${isTimeBased})">
                         <i class="fa-solid fa-plus"></i>
@@ -141,25 +141,16 @@ function incrementReps(setNumber, isTimeBased) {
     const input = document.getElementById(`reps_set${setNumber}`);
     if (!input) return;
     
+    const cap = isTimeBased ? 120 : 99;
     let value = parseInt(input.value) || 0;
-    if (value < 120) {
-        if (isTimeBased) {
-            value = Math.min(120, value + 5); // Increment time by 5 seconds, max 120
-        } else value++;
-    }
+    value = Math.min(cap, value + (isTimeBased ? 5 : 1));
     input.value = value;
     
-    if (isTimeBased) {
-        currentVideoProgress[`set${setNumber}`] = {
-            ...currentVideoProgress[`set${setNumber}`],
-            seconds: value
-        };
-    } else {
-        currentVideoProgress[`set${setNumber}`] = {
-            ...currentVideoProgress[`set${setNumber}`],
-            reps: value
-        };
-    }
+    const field = isTimeBased ? 'seconds' : 'reps';
+    currentVideoProgress[`set${setNumber}`] = {
+        ...currentVideoProgress[`set${setNumber}`],
+        [field]: value
+    };
 }
 
 // Decrement reps for a set
@@ -168,24 +159,14 @@ function decrementReps(setNumber, isTimeBased) {
     if (!input) return;
     
     let value = parseInt(input.value) || 0;
-    if (value > 0) {
-        if (isTimeBased) {
-            value = Math.max(0, value - 5); // Decrement time by 5 seconds, min 0
-        } else value--;
-    }
+    value = Math.max(0, value - (isTimeBased ? 5 : 1));
     input.value = value;
-    
-    if (isTimeBased) {
-        currentVideoProgress[`set${setNumber}`] = {
-            ...currentVideoProgress[`set${setNumber}`],
-            seconds: value
-        };
-    } else {
-        currentVideoProgress[`set${setNumber}`] = {
-            ...currentVideoProgress[`set${setNumber}`],
-            reps: value
-        };
-    }
+
+    const field = isTimeBased ? 'seconds' : 'reps';
+    currentVideoProgress[`set${setNumber}`] = {
+        ...currentVideoProgress[`set${setNumber}`],
+        [field]: value
+    };
 }
 
 // Update reps from input change
@@ -193,22 +174,16 @@ function updateReps(setNumber, isTimeBased) {
     const input = document.getElementById(`reps_set${setNumber}`);
     if (!input) return;
     
+    const cap = isTimeBased ? 120 : 99;
     let value = parseInt(input.value) || 0;
-    value = Math.max(0, Math.min(99, value));
+    value = Math.max(0, Math.min(cap, value));
     input.value = value;
-    
-    
-    if (isTimeBased) {
-        currentVideoProgress[`set${setNumber}`] = {
-            ...currentVideoProgress[`set${setNumber}`],
-            seconds: value
-        };
-    } else {
-        currentVideoProgress[`set${setNumber}`] = {
-            ...currentVideoProgress[`set${setNumber}`],
-            reps: value
-        };
-    }
+
+    const field = isTimeBased ? 'seconds' : 'reps';
+    currentVideoProgress[`set${setNumber}`] = {
+        ...currentVideoProgress[`set${setNumber}`],
+        [field]: value
+    };
 }
 
 // Toggle set completion checkbox
