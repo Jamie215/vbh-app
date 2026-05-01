@@ -140,6 +140,7 @@ function onManualEntryPlaylistChange() {
         for (let i = 1; i <= video.sets; i++) {
             manualEntryProgress[video.id][`set${i}`] = {
                 reps: video.reps,
+                seconds: video.seconds,
                 completed: false
             };
         }
@@ -171,24 +172,26 @@ function renderManualEntryExercises() {
         const videoProgress = manualEntryProgress[video.id] || {};
         
         let setsHTML = '';
+        const isTimeBased = video.reps === 0 && video.seconds > 0;
+
         for (let i = 1; i <= video.sets; i++) {
-            const setData = videoProgress[`set${i}`] || { reps: video.reps, completed: false };
+            const setData = videoProgress[`set${i}`] || { reps: video.reps, seconds: video.seconds, completed: false };
             
             setsHTML += `
                 <div class="flex items-center gap-3">
                     <span class="w-10 text-base font-medium text-text-tertiary">Set ${i}</span>
                     <div class="flex items-center border border-border-light rounded-md overflow-hidden">
-                        <button type="button" class="rep-btn" onclick="manualDecrementReps('${video.id}', ${i})">
+                        <button type="button" class="rep-btn" onclick="manualDecrementReps(${video.id}, ${i}, ${isTimeBased})">
                             <i class="fa-solid fa-minus"></i>
                         </button>
                         <input type="number" 
                                id="manual_reps_${video.id}_set${i}" 
                                class="rep-input" 
-                               value="${setData.reps}" 
+                               value="${isTimeBased ? setData.seconds : setData.reps}" 
                                min="0" 
                                max="99"
-                               onchange="manualUpdateReps('${video.id}', ${i})">
-                        <button type="button" class="rep-btn" onclick="manualIncrementReps('${video.id}', ${i})">
+                               onchange="manualUpdateReps(${video.id}, ${i}, ${isTimeBased})">
+                        <button type="button" class="rep-btn" onclick="manualIncrementReps(${video.id}, ${i}, ${isTimeBased})">
                             <i class="fa-solid fa-plus"></i>
                         </button>
                     </div>
@@ -297,31 +300,27 @@ function closeVideoPreview() {
 }
 
 // ==================== Rep/Set Controls ====================
-function manualIncrementReps(videoId, setNumber) {
+function manualIncrementReps(videoId, setNumber, isTimeBased) {
     const input = document.getElementById(`manual_reps_${videoId}_set${setNumber}`);
     if (!input) return;
     
     let value = parseInt(input.value) || 0;
-    value++;
+    if (value < 99) {
+        if (isTimeBased) {
+            value = Math.min(99, value + 5); // Increment time by 5 seconds for time-based exercises
+        } else {
+            value++;
+        }
+    }
     input.value = value;
     
     if (!manualEntryProgress[videoId]) manualEntryProgress[videoId] = {};
-    manualEntryProgress[videoId][`set${setNumber}`] = {
-        ...manualEntryProgress[videoId][`set${setNumber}`],
-        reps: value
-    };
-}
-
-function manualDecrementReps(videoId, setNumber) {
-    const input = document.getElementById(`manual_reps_${videoId}_set${setNumber}`);
-    if (!input) return;
-    
-    let value = parseInt(input.value) || 0;
-    if (value > 0) {
-        value--;
-        input.value = value;
-        
-        if (!manualEntryProgress[videoId]) manualEntryProgress[videoId] = {};
+    if (isTimeBased) {
+        manualEntryProgress[videoId][`set${setNumber}`] = {
+            ...manualEntryProgress[videoId][`set${setNumber}`],
+            seconds: value
+        };
+    } else {
         manualEntryProgress[videoId][`set${setNumber}`] = {
             ...manualEntryProgress[videoId][`set${setNumber}`],
             reps: value
@@ -329,7 +328,36 @@ function manualDecrementReps(videoId, setNumber) {
     }
 }
 
-function manualUpdateReps(videoId, setNumber) {
+function manualDecrementReps(videoId, setNumber, isTimeBased) {
+    const input = document.getElementById(`manual_reps_${videoId}_set${setNumber}`);
+    if (!input) return;
+    
+    let value = parseInt(input.value) || 0;
+    if (value > 0) {
+        if (isTimeBased) {
+            value = Math.max(0, value - 5); // Decrement time by 5 seconds for time-based exercises
+        } else {
+            value--;
+        }
+        input.value = value;
+        
+        if (!manualEntryProgress[videoId]) manualEntryProgress[videoId] = {};
+
+        if (isTimeBased) {
+            manualEntryProgress[videoId][`set${setNumber}`] = {
+                ...manualEntryProgress[videoId][`set${setNumber}`],
+                seconds: value
+            };
+        } else {
+            manualEntryProgress[videoId][`set${setNumber}`] = {
+                ...manualEntryProgress[videoId][`set${setNumber}`],
+                reps: value
+            };
+        }
+    }
+}
+
+function manualUpdateReps(videoId, setNumber, isTimeBased) {
     const input = document.getElementById(`manual_reps_${videoId}_set${setNumber}`);
     if (!input) return;
     
@@ -338,10 +366,17 @@ function manualUpdateReps(videoId, setNumber) {
     input.value = value;
     
     if (!manualEntryProgress[videoId]) manualEntryProgress[videoId] = {};
-    manualEntryProgress[videoId][`set${setNumber}`] = {
-        ...manualEntryProgress[videoId][`set${setNumber}`],
-        reps: value
-    };
+    if (isTimeBased) {
+        manualEntryProgress[videoId][`set${setNumber}`] = {
+            ...manualEntryProgress[videoId][`set${setNumber}`],
+            seconds: value
+        };
+    } else {
+        manualEntryProgress[videoId][`set${setNumber}`] = {
+            ...manualEntryProgress[videoId][`set${setNumber}`],
+            reps: value
+        };
+    }
 }
 
 function manualToggleSet(videoId, setNumber) {
