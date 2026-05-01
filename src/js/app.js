@@ -1325,11 +1325,12 @@ function renderExerciseProgressCard() {
     const userWeek = state.programWeek;
     const completed = isProgramCompleted();
     const weekStartPhrase = getExerciseWeekStartPhrase(state);
+    if (weekStartPhrase === null) {
     const hasHistory = completionHistory && Object.keys(completionHistory).length > 0;
 
     container.innerHTML = `<h2 class="text-[2.5rem] font-bold text-brand-dark leading-none mb-4">Week ${userWeek}</h2>
         <div class="mb-5 flex flex-row text-base text-text-secondary leading-relaxed">
-            <i class="fa-solid fa-flag text-violet-400 mr-1.5 mt-1"></i> Your week started ${weekStartPhrase}
+            <i class="fa-solid fa-flag text-violet-400 mr-1.5 mt-1"></i> ${weekStartPhrase ? 'Your week started ' + weekStartPhrase : (completed ? 'You have completed the program!' : (hasHistory ? 'Your progress will appear here as you log workouts.' : 'No workouts logged yet. Your progress will appear here as you log workouts.'))}
         </div>
     `;
 }
