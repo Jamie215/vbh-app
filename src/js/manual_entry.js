@@ -85,31 +85,15 @@ function closeManualEntryModal() {
 async function onManualEntryDateChange() {
     const dateInput = document.getElementById('manual-entry-date');
     const playlistSelect = document.getElementById('manual-entry-playlist');
-    const conflictWarning = document.getElementById('manual-entry-conflict');
     
     if (!dateInput || !dateInput.value) return;
-
-    const selectedDate = dateInput.value;
-
-    // Check if there's existing data for this date
-    if (completionHistory && completionHistory[selectedDate]) {
-        if (conflictWarning) {
-            conflictWarning.classList.remove('hidden');
-            conflictWarning.innerHTML = `
-                <i class="fa-solid fa-circle-info"></i>
-                <span>You already have workout data for this date. New entries will be combined with existing data.</span>
-            `;
-        }
-    } else {
-        if (conflictWarning) conflictWarning.classList.add('hidden');
-    }
 
     if (playlistSelect && !playlistSelect.value) {
         playlistSelect.disabled = false;
 
         // Prefer the playlist that already has data for this date.
         // Fall back to the user's current-week heuristic for fresh dates.
-        const existingDay = completionHistory?.[selectedDate];
+        const existingDay = completionHistory?.[dateInput.value];
         if (existingDay?.['advanced-4-6']) {
             playlistSelect.value = 'advanced-4-6';
         } else if (existingDay?.['beginner-0-3']) {
@@ -120,6 +104,7 @@ async function onManualEntryDateChange() {
         onManualEntryPlaylistChange();
     }
 
+    renderManualEntryConflictWarning();
     updateManualEntrySaveState();
 }
 
@@ -158,6 +143,7 @@ function onManualEntryPlaylistChange() {
     }
 
     renderManualEntryExercises();
+    renderManualEntryConflictWarning();
     updateManualEntrySaveState();
 }
 
@@ -361,6 +347,7 @@ function manualToggleSet(videoId, setNumber) {
     };
 
     updateManualEntrySaveState();
+    renderManualEntryConflictWarning();
 }
 
 function manualCheckAllExerciseSets(videoId, totalSets) {
@@ -374,6 +361,62 @@ function manualCheckAllExerciseSets(videoId, totalSets) {
 }
 
 // ==================== Save State Management ====================
+// Renders the appropriate conflict / context warning based on live state.
+// Called whenever date, playlist, or checkbox state changes.
+function renderManualEntryConflictWarning() {
+    const conflictWarning = document.getElementById('manual-entry-conflict');
+    const dateInput = document.getElementById('manual-entry-date');
+    const playlistSelect = document.getElementById('manual-entry-playlist');
+    if (!conflictWarning) return;
+
+    const selectedDate = dateInput?.value;
+    const playlistId = playlistSelect?.value;
+
+    if (!selectedDate) {
+        conflictWarning.classList.add('hidden');
+        return;
+    }
+
+    const dayData = completionHistory?.[selectedDate];
+    if (!dayData) {
+        conflictWarning.classList.add('hidden');
+        return;
+    }
+
+    const isEditingThisPlaylist = !!(playlistId && dayData[playlistId]);
+    const hasOtherPlaylistData = Object.keys(dayData).some(pid => pid !== playlistId);
+
+    // Is anything currently checked in the form?
+    const hasAnyCompletedSet = manualEntryProgress && Object.values(manualEntryProgress).some(videoData =>
+        Object.keys(videoData).some(k => k.startsWith('set') && videoData[k]?.completed)
+    );
+
+    let icon, message;
+
+    if (isEditingThisPlaylist && !hasAnyCompletedSet) {
+        // Deletion case
+        icon = 'fa-triangle-exclamation';
+        message = "Saving with no sets checked will <strong>clear this playlist's data</strong> for this day.";
+    } else if (isEditingThisPlaylist) {
+        // Replacement case
+        icon = 'fa-circle-info';
+        message = "You already have data for this playlist on this day. Saving will replace it with these entries.";
+    } else if (hasOtherPlaylistData) {
+        // Adding alongside another playlist on the same day
+        icon = 'fa-circle-info';
+        message = "You already have a different playlist logged for this day. Your new entries will be added alongside.";
+    } else {
+        conflictWarning.classList.add('hidden');
+        return;
+    }
+
+    conflictWarning.classList.remove('hidden');
+    conflictWarning.innerHTML = `
+        <i class="fa-solid ${icon}"></i>
+        <span>${message}</span>
+    `;
+}
+
 function updateManualEntrySaveState() {
     const saveBtn = document.getElementById('manual-entry-save-btn');
     const dateInput = document.getElementById('manual-entry-date');
@@ -399,7 +442,14 @@ function updateManualEntrySaveState() {
         }
     }
 
+    // When editing existing data for this date+playlist, allow save even if
+    // everything is unchecked — that's how the user deletes the playlist's
+    // data for the day.
+    const isEditingExistingPlaylist = !!(hasDate && hasPlaylist &&
+        completionHistory?.[dateInput.value]?.[playlistSelect.value]);
+
     saveBtn.disabled = !(hasDate && hasPlaylist && hasCompletedSet);
+    renderManualEntryConflictWarning();
 }
 
 // ==================== Toast Notification ====================
@@ -464,8 +514,30 @@ async function saveManualEntry() {
             progressData = JSON.parse(JSON.stringify(completionHistory[selectedDate]));
         }
 
-        // Merge manual entry progress into the selected playlist
-        progressData[playlistId] = { ...manualEntryProgress };
+        // Did the user mark any set as completed across all exercises?
+        const hasAnyCompletedSet = Object.values(manualEntryProgress).some(videoData =>
+            Object.keys(videoData).some(k =>
+                k.startsWith('set') && videoData[k]?.completed
+            )
+        );
+
+        if (hasAnyCompletedSet) {
+            // Strip exercises with no completed sets — "uncheck = removed exercise"
+            const cleanedProgress = {};
+            Object.keys(manualEntryProgress).forEach(videoId => {
+                const videoData = manualEntryProgress[videoId];
+                const hasCompleted = Object.keys(videoData).some(k =>
+                    k.startsWith('set') && videoData[k]?.completed
+                );
+                if (hasCompleted) {
+                    cleanedProgress[videoId] = videoData;
+                }
+            });
+            progressData[playlistId] = cleanedProgress;
+        } else {
+            // Editing existing data and unchecked everything → delete this playlist for the day
+            delete progressData[playlistId];
+        }
 
         // Upsert to database
         const { error } = await window.supabaseClient

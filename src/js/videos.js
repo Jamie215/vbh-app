@@ -221,8 +221,17 @@ async function saveVideoProgress() {
         sessionProgress[playlistId] = {};
     }
     
-    // Save the detailed progress to session
-    sessionProgress[playlistId][videoId] = { ...currentVideoProgress };
+    // "Uncheck = removed exercise" — if no sets were marked completed,
+    // drop this exercise from progress entirely instead of saving an empty record.
+    const hasAnyCompletedSet = Object.keys(currentVideoProgress).some(k =>
+        k.startsWith('set') && currentVideoProgress[k]?.completed
+    );
+    
+    if (hasAnyCompletedSet) {
+        sessionProgress[playlistId][videoId] = { ...currentVideoProgress };
+    } else {
+        delete sessionProgress[playlistId][videoId];
+    }
     
     // Update Done button to show saving state
     const doneBtn = document.getElementById('done-btn');
@@ -236,7 +245,9 @@ async function saveVideoProgress() {
 
     const progressData = {};
     Object.keys(sessionProgress).forEach(pId => {
-        progressData[pId] = sessionProgress[pId];
+        if (Object.keys(sessionProgress[pId]).length > 0) {
+            progressData[pId] = sessionProgress[pId];
+        }
     });
 
     try {
