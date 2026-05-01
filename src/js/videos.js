@@ -306,18 +306,33 @@ async function saveVideoProgress() {
     });
 
     try {
-        const { error } = await window.supabaseClient
-            .from('workout_sessions')
-            .upsert({
-                user_id: currentUser.id,
-                session_date: today,
-                progress: progressData
-            }, {
-                onConflict: 'user_id,session_date'
-            });
+        const isEmpty = Object.keys(progressData).length === 0;
 
-        if (error) {
-            console.error('Error saving progress:', error);
+        let dbError;
+        if (isEmpty) {
+            // Today's last logged exercise was just unchecked away — drop the row
+            // rather than leaving an empty progress object behind.
+            const { error } = await window.supabaseClient
+                .from('workout_sessions')
+                .delete()
+                .eq('user_id', currentUser.id)
+                .eq('session_date', today);
+            dbError = error;
+        } else {
+            const { error } = await window.supabaseClient
+                .from('workout_sessions')
+                .upsert({
+                    user_id: currentUser.id,
+                    session_date: today,
+                    progress: progressData
+                }, {
+                    onConflict: 'user_id,session_date'
+                });
+            dbError = error;
+        }
+
+        if (dbError) {
+            console.error('Error saving progress:', dbError);
             alert('Error saving progress. Please try again.');
             if (doneBtn) {
                 doneBtn.disabled = false;

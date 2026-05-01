@@ -538,6 +538,25 @@ async function saveManualEntry() {
     const selectedDate = dateInput.value;
     const playlistId = playlistSelect.value;
 
+    // Capture program state BEFORE save so we can detect transitions
+    // (week advancement, program completion) for the post-save toast.
+    const weekBefore = calculateUserWeek();
+    const completedBefore = isProgramCompleted();
+
+    // Did the user mark any set as completed across all exercises?
+    const hasAnyCompletedSet = Object.values(manualEntryProgress).some(videoData =>
+        Object.keys(videoData).some(k =>
+            k.startsWith('set') && videoData[k]?.completed
+        )
+    );
+
+    // Confirm the destructive case before doing anything irreversible.
+    const isDeletingPlaylist = !hasAnyCompletedSet && completionHistory?.[selectedDate]?.[playlistId];
+    if (isDeletingPlaylist) {
+        const ok = confirm("Save with no sets checked? This will clear this playlist's data for this day.");
+        if (!ok) return;
+    }
+
     // Show saving state
     if (saveBtn) {
         saveBtn.disabled = true;
@@ -548,17 +567,9 @@ async function saveManualEntry() {
         // Build the progress data - merge with any existing data for that date
         let progressData = {};
 
-        // Load existing session for this date if it exists
         if (completionHistory && completionHistory[selectedDate]) {
             progressData = JSON.parse(JSON.stringify(completionHistory[selectedDate]));
         }
-
-        // Did the user mark any set as completed across all exercises?
-        const hasAnyCompletedSet = Object.values(manualEntryProgress).some(videoData =>
-            Object.keys(videoData).some(k =>
-                k.startsWith('set') && videoData[k]?.completed
-            )
-        );
 
         if (hasAnyCompletedSet) {
             // Strip exercises with no completed sets — "uncheck = removed exercise"
@@ -578,19 +589,34 @@ async function saveManualEntry() {
             delete progressData[playlistId];
         }
 
-        // Upsert to database
-        const { error } = await window.supabaseClient
-            .from('workout_sessions')
-            .upsert({
-                user_id: currentUser.id,
-                session_date: selectedDate,
-                progress: progressData
-            }, {
-                onConflict: 'user_id,session_date'
-            });
+        // If nothing remains for this date, delete the row entirely. Empty
+        // {} progress would inflate "Total Days" and trigger the conflict
+        // warning on re-open.
+        const isEmpty = Object.keys(progressData).length === 0;
 
-        if (error) {
-            console.error('Error saving manual entry:', error);
+        let dbError;
+        if (isEmpty) {
+            const { error } = await window.supabaseClient
+                .from('workout_sessions')
+                .delete()
+                .eq('user_id', currentUser.id)
+                .eq('session_date', selectedDate);
+            dbError = error;
+        } else {
+            const { error } = await window.supabaseClient
+                .from('workout_sessions')
+                .upsert({
+                    user_id: currentUser.id,
+                    session_date: selectedDate,
+                    progress: progressData
+                }, {
+                    onConflict: 'user_id,session_date'
+                });
+            dbError = error;
+        }
+
+        if (dbError) {
+            console.error('Error saving manual entry:', dbError);
             alert('Error saving workout. Please try again.');
             if (saveBtn) {
                 saveBtn.disabled = false;
@@ -603,22 +629,41 @@ async function saveManualEntry() {
         await loadTodaySession();
         await loadCompletionHistory();
 
+        // Capture program state AFTER save for the toast comparison
+        const weekAfter = calculateUserWeek();
+        const completedAfter = isProgramCompleted();
+
         // Show success state
         if (saveBtn) {
             saveBtn.innerHTML = '<i class="fa-solid fa-check"></i> Saved!';
         }
 
-        // Close modal after brief delay and refresh progress page
         setTimeout(() => {
             closeManualEntryModal();
 
-            // Refresh progress view if it's currently visible
+            // Refresh whichever view is currently visible.
             const progressView = document.getElementById('progress-view');
             if (progressView && !progressView.classList.contains('hidden')) {
                 loadProgressStats();
                 renderWorkoutHistoryChart();
                 renderDetailPanel();
                 loadRecentActivity();
+            }
+
+            // Home view shows the "week started" phrase, total days, calendar
+            // strip, and today card — all of which can shift when a date is
+            // added or removed. Re-render everything to stay in sync.
+            const homeView = document.getElementById('home-view');
+            if (homeView && !homeView.classList.contains('hidden')) {
+                loadHomeView();
+            }
+
+            // Playlist view shows progress for the suggested workout.
+            const playlistView = document.getElementById('playlist-view');
+            if (playlistView && !playlistView.classList.contains('hidden')) {
+                if (typeof updatePlaylistProgressRing === 'function') {
+                    updatePlaylistProgressRing();
+                }
             }
 
             // Show toast for program state changes

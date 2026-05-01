@@ -132,21 +132,6 @@ function getEducationResumeLesson() {
 }
 
 /**
- * Resolves the lesson the user last viewed in the e-learning module.
- * Tries bookmark first, then falls back to progress.currentLesson.
- * Returns { title, module } or null if nothing resolves.
- */
-function getEducationResumeLesson() {
-    const bookmark = window.eduBookmark;
-    if (bookmark && EDUCATION_LESSONS[bookmark]) return EDUCATION_LESSONS[bookmark];
-
-    const current = window.eduProgress?.currentLesson;
-    if (current && EDUCATION_LESSONS[current]) return EDUCATION_LESSONS[current];
-
-    return null;
-}
-
-/**
  * Returns 'completed' | 'in_progress' | 'untouched' for a given lesson ID.
  * Completion is based solely on percentComplete === 100, which is the field
  * Rise actively maintains across all lesson versions.
@@ -583,7 +568,7 @@ function getExerciseWeekStartDate(state) {
  * @param {object} state - result of getProgramWeekState()
  */
 function getExerciseWeekStartPhrase(state) {
-    weekStartDate = getExerciseWeekStartDate(state);
+    const weekStartDate = getExerciseWeekStartDate(state);
     if (!weekStartDate) return null;
 
     const today = new Date();
