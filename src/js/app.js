@@ -1325,7 +1325,6 @@ function renderExerciseProgressCard() {
     const userWeek = state.programWeek;
     const completed = isProgramCompleted();
     const weekStartPhrase = getExerciseWeekStartPhrase(state);
-    if (weekStartPhrase === null) {
     const hasHistory = completionHistory && Object.keys(completionHistory).length > 0;
 
     container.innerHTML = `<h2 class="text-[2.5rem] font-bold text-brand-dark leading-none mb-4">Week ${userWeek}</h2>
