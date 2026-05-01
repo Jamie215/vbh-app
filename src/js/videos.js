@@ -138,12 +138,23 @@ function renderSetTrackingPanel() {
         <div class="flex flex-col gap-3 mb-6">
             ${setsHTML}
         </div>
-        <button type="button" class="done-btn" id="done-btn" disabled  onclick="saveVideoProgress()">Done</button>
+        <button type="button" class="done-btn" id="done-btn" disabled onclick="saveVideoProgress()">Done</button>
     `;
 }
 
 function _videoProgressHasChanges() {
-    return JSON.stringify(currentVideoProgress) !== originalVideoProgressSnapshot;
+    if (originalVideoProgressSnapshot === null) return false;
+    
+    const original = JSON.parse(originalVideoProgressSnapshot);
+    
+    for (const setKey of Object.keys(currentVideoProgress)) {
+        if (!setKey.startsWith('set')) continue;
+        if (_setHasMeaningfulChange(original[setKey], currentVideoProgress[setKey])) {
+            return true;
+        }
+    }
+    
+    return false;
 }
 
 function _updateDoneBtnState() {
@@ -167,6 +178,7 @@ function incrementReps(setNumber, isTimeBased) {
         ...currentVideoProgress[`set${setNumber}`],
         [field]: value
     };
+    _updateDoneBtnState();
 }
 
 // Decrement reps for a set
@@ -183,6 +195,7 @@ function decrementReps(setNumber, isTimeBased) {
         ...currentVideoProgress[`set${setNumber}`],
         [field]: value
     };
+    _updateDoneBtnState();
 }
 
 // Update reps from input change
@@ -200,6 +213,7 @@ function updateReps(setNumber, isTimeBased) {
         ...currentVideoProgress[`set${setNumber}`],
         [field]: value
     };
+    _updateDoneBtnState();
 }
 
 // Toggle set completion checkbox

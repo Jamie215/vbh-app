@@ -305,6 +305,8 @@ function manualIncrementReps(videoId, setNumber, isTimeBased) {
         ...manualEntryProgress[videoId][`set${setNumber}`],
         [field]: value
     };
+
+    updateManualEntrySaveState();
 }
 
 function manualDecrementReps(videoId, setNumber, isTimeBased) {
@@ -322,14 +324,16 @@ function manualDecrementReps(videoId, setNumber, isTimeBased) {
         [field]: value
     };
 
+    updateManualEntrySaveState();
 }
 
 function manualUpdateReps(videoId, setNumber, isTimeBased) {
     const input = document.getElementById(`manual_reps_${videoId}_set${setNumber}`);
     if (!input) return;
-    
+
+    const cap = isTimeBased ? 120 : 99;
     let value = parseInt(input.value) || 0;
-    value = Math.max(0, Math.min(99, value));
+    value = Math.max(0, Math.min(cap, value));
     input.value = value;
     
     if (!manualEntryProgress[videoId]) manualEntryProgress[videoId] = {};
@@ -338,6 +342,8 @@ function manualUpdateReps(videoId, setNumber, isTimeBased) {
         ...manualEntryProgress[videoId][`set${setNumber}`],
         [field]: value
     };
+
+    updateManualEntrySaveState();
 }
 
 function manualToggleSet(videoId, setNumber) {
@@ -421,9 +427,41 @@ function renderManualEntryConflictWarning() {
     `;
 }
 
+// True if a set has a "completion-related" change vs its original state.
+//   - Completion status flipped
+//   - OR set is currently completed AND reps/seconds differ
+function _setHasMeaningfulChange(originalSet, currentSet) {
+    const orig = originalSet || {};
+    const curr = currentSet || {};
+    
+    if ((orig.completed ?? false) !== (curr.completed ?? false)) return true;
+    
+    if (curr.completed) {
+        if ((orig.reps ?? 0) !== (curr.reps ?? 0)) return true;
+        if ((orig.seconds ?? 0) !== (curr.seconds ?? 0)) return true;
+    }
+    
+    return false;
+}
+
 function _manualEntryHasChanges() {
-    if (originalManualEntrySnapshot === null) return false;
-    return JSON.stringify(manualEntryProgress) !== originalManualEntrySnapshot;
+    if (originalManualEntryProgressSnapshot === null) return false;
+    
+    const original = JSON.parse(originalManualEntryProgressSnapshot);
+    
+    for (const videoId of Object.keys(manualEntryProgress)) {
+        const currentVideo = manualEntryProgress[videoId] || {};
+        const originalVideo = original[videoId] || {};
+        
+        for (const setKey of Object.keys(currentVideo)) {
+            if (!setKey.startsWith('set')) continue;
+            if (_setHasMeaningfulChange(originalVideo[setKey], currentVideo[setKey])) {
+                return true;
+            }
+        }
+    }
+    
+    return false;
 }
 
 function updateManualEntrySaveState() {
