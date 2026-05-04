@@ -644,6 +644,9 @@ function calculatePlaylistProgress(playlistId, todayOnly = false) {
             // Check if it's the new structure (object with set1, set2, etc.)
             if (typeof videoProgress === 'object' && !Array.isArray(videoProgress)) {
                 const hasCompletedSet = Object.keys(videoProgress).some(key => {
+                    if (key.startsWith('set') && videoProgress[key]?.completed === true) {
+
+                    }
                     return key.startsWith('set') && videoProgress[key]?.completed === true;
                 });
                 if (hasCompletedSet) completedExercises++;
@@ -795,7 +798,7 @@ function loadPlaylists() {
     if (!currentUser) {
         showAuthPage();
         return;
-    }
+    }    
 
     // Show sections
     const greetingSection = document.getElementById('user-greeting-section');
@@ -1055,9 +1058,13 @@ function loadExerciseTable() {
     
     tbody.innerHTML = '';
 
+    const today = new Date().toISOString().split('T')[0]; 
+    const todayCompletedExercises = completionHistory?.[today]?.[currentPlaylist.id] || {};
+
     currentPlaylist.videos.forEach((video, index) => {
+        // New structure with sets
         const row = document.createElement('tr');
-        row.className = 'hover:bg-[#fafbfc] [&:last-child_td]:border-b-0';
+        row.className = `border-b border-border-subtle transition-colors duration-150 hover:bg-[#fafbfc] [&:last-child_td]:border-b-0 ${todayCompletedExercises[video.id] ? 'bg-green/10' : 'bg-white'}`;
         
         // Order column
         const orderCell = document.createElement('td');
