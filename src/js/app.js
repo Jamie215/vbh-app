@@ -75,6 +75,12 @@ async function initializeSession() {
             }
 
             try {
+                await loadProgramState();
+            } catch (e) {
+                console.error('initializeSession: Error in loadProgramState:', e);
+            }
+
+            try {
                 await loadEducationProgress();
             } catch (e) {
                 console.error('initializeSession: Error in loadEducationProgress:', e);
@@ -265,6 +271,18 @@ function _didEverComplete(advancedSessionDates, fromDate) {
 function getProgramWeekState() {
     const empty = { programWeek: 0, calendarWeek: 0, windowAnchor: null, sessionsInCurrentWeek: 0 };
 
+    // Sticky completion: once persisted, the flag wins. This means
+    // post-completion edits to old sessions can't revoke completion status.
+    if (programCompletedAt) {
+        return {
+            programWeek: 6,
+            calendarWeek: 6,
+            windowAnchor: null,
+            sessionsInCurrentWeek: 2,
+            completed: true
+        };
+    }
+
     if (!completionHistory || Object.keys(completionHistory).length === 0) return empty;
 
     const allDates = Object.keys(completionHistory).sort();
@@ -391,6 +409,56 @@ function calculateUserWeek() {
 function isProgramCompleted() {
     const state = getProgramWeekState();
     return state.completed === true || (state.programWeek === 6 && state.sessionsInCurrentWeek >= 2);
+}
+
+/**
+ * Writes the user_program_state row the first time the user completes
+ * the program. Idempotent — safe to call multiple times. Once written,
+ * completion is sticky and cannot be revoked by editing past sessions.
+ *
+ * Must be called AFTER loadCompletionHistory() so getProgramWeekState()
+ * has fresh data to evaluate.
+ *
+ * @param {'live' | 'manual_entry'} method - which save path triggered this
+ */
+async function persistCompletionIfNeeded(method) {
+    // Already stored — nothing to do.
+    if (programCompletedAt) return;
+
+    // Re-evaluate completion from raw data. We can't use isProgramCompleted()
+    // here because it now consults the flag (which we know is unset).
+    const state = getProgramWeekState();
+    const justCompleted = state.completed === true ||
+        (state.programWeek === 6 && state.sessionsInCurrentWeek >= 2);
+
+    if (!justCompleted) return;
+
+    const nowISO = new Date().toISOString();
+
+    try {
+        const { error } = await window.supabaseClient
+            .from('user_program_state')
+            .insert({
+                user_id: currentUser.id,
+                completed_at: nowISO,
+                completion_method: method
+            });
+
+        if (error) {
+            // 23505 = unique_violation. Another tab beat us to it; that's fine.
+            // Reload from DB to sync local state.
+            if (error.code === '23505') {
+                await loadProgramState();
+                return;
+            }
+            console.error('Error persisting completion:', error);
+            return;
+        }
+
+        programCompletedAt = nowISO;
+    } catch (error) {
+        console.error('Exception persisting completion:', error);
+    }
 }
 
 /**

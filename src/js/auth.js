@@ -131,7 +131,13 @@ async function handlePostSignIn(user) {
     } catch (e) {
         console.error('handlePostSignIn: Error loading completion history:', e);
     }
-    
+
+    try {
+        await loadProgramState();
+    } catch (e) {
+        console.error('handlePostSignIn: Error loading program state:', e);
+    }
+
     hideLoadingScreen();
     routeAfterAuth();
     console.log('handlePostSignIn: Complete');

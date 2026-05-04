@@ -8,6 +8,7 @@ let currentVideo = null;
 let todaySession = null;
 let sessionProgress = {};
 let completionHistory = {};
+let programCompletedAt = null;
 
 // ==================== Shared UI Functions ====================
 // Show form message (used by auth.js)
@@ -56,6 +57,27 @@ async function loadCompletionHistory() {
     } catch (error) {
         console.error('Exception in loadCompletionHistory:', error);
     }   
+}
+
+async function loadProgramState() {
+    if (!currentUser) return;
+
+    try {
+        const { data, error } = await window.supabaseClient
+            .from('user_program_state')
+            .select('completed_at')
+            .eq('user_id', currentUser.id)
+            .maybeSingle();
+
+        if (error) {
+            console.error('Error loading program state:', error);
+            return;
+        }
+
+        programCompletedAt = data?.completed_at ?? null;
+    } catch (error) {
+        console.error('Exception in loadProgramState:', error);
+    }
 }
 
 async function loadTodaySession() {
@@ -147,6 +169,7 @@ function resetAppState() {
     sessionProgress = {};
     completionHistory = {};
     currentPlaylist = null;
+    programCompletedAt = null;
 }
 
 console.log('Shared utilities loaded');

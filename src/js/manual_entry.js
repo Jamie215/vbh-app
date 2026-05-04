@@ -676,6 +676,7 @@ async function saveManualEntry() {
         // Reload data to update all UI
         await loadTodaySession();
         await loadCompletionHistory();
+        await persistCompletionIfNeeded('manual_entry');
 
         // Capture program state AFTER save for the toast comparison
         const weekAfter = calculateUserWeek();

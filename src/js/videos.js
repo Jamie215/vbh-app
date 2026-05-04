@@ -380,6 +380,7 @@ async function saveVideoProgress() {
         // Reload data to update UI
         await loadTodaySession();
         await loadCompletionHistory();
+        await persistCompletionIfNeeded('live');
         updatePlaylistProgressRing();
         checkAndShowFinalSessionModal();
         loadExerciseTable();
