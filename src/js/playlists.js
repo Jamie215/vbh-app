@@ -82,7 +82,7 @@ const PLAYLISTS = [
                 title: 'Isometric Shoulder Contraction - External Rotation',
                 sets: 3,
                 reps: 0,
-                needsEachSide: false,
+                needsEachSide: true,
                 seconds: 30,
                 equipment: ["A Table & Chair"],
                 thumbnail: 'https://img.youtube.com/vi/hQbv0Z9QPkw/hqdefault.jpg',
