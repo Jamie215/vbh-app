@@ -140,7 +140,7 @@ function getLessonStatus(lessonId) {
     const lesson = window.eduProgress?.lessons?.[lessonId];
     if (!lesson) return 'untouched';
     if (lesson.percentComplete === 100) return 'completed';
-    return 'in-progress';
+    return 'in_progress';
 }
 
 /**
@@ -324,7 +324,7 @@ function getProgramWeekState() {
 
     let sessionsInCurrentWeek = 0;
 
-    for (const sessionDateStr of advancedSessions) {
+    for (const sessionDateStr of advancedSessionsInRun) {
         const sessionDate = new Date(sessionDateStr + 'T00:00:00');
         if (sessionDate < windowAnchor) continue;
         sessionsInCurrentWeek++;
@@ -359,7 +359,7 @@ function getProgramWeekState() {
     if (programWeek === 6 && windowAnchor) {
         sessionsInCurrentWeek = 0;
         const anchorTime = windowAnchor.getTime();
-        for (const sessionDateStr of advancedSessions) {
+        for (const sessionDateStr of advancedSessionsInRun) {
             const sd = new Date(sessionDateStr + 'T00:00:00');
             if (sd.getTime() >= anchorTime) sessionsInCurrentWeek++;
         }
