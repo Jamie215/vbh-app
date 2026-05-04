@@ -289,12 +289,12 @@ function getProgramWeekState() {
 
     // Weeks 4-6: compute effectiveFirstDate for the gap-aware progression
     let effectiveFirstIdx = 0;
-    const effectiveFirstDate = sessionDates[effectiveFirstIdx];
 
     for (let i = 1; i < sessionDates.length; i++) {
         const gapDays = Math.floor((sessionDates[i] - sessionDates[i - 1]) / 86400000);
         if (gapDays >= 14) effectiveFirstIdx = i;
     }
+    const effectiveFirstDate = sessionDates[effectiveFirstIdx];
 
     // ── Completion check: did the user already finish the program in this run?
     // Once true, completion is permanent for this effective period — survives
