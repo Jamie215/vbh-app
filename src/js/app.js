@@ -283,8 +283,6 @@ function getProgramWeekState() {
         if (gapDays >= 14) effectiveFirstIdx = i;
     }
     const effectiveFirstDate = sessionDates[effectiveFirstIdx];
-    const effectiveDates = allDates.slice(effectiveFirstIdx);
-
     const diffDays = Math.floor((today - effectiveFirstDate) / 86400000);
     const calendarWeek = Math.min(Math.floor(diffDays / 7), 6);
 
@@ -644,9 +642,6 @@ function calculatePlaylistProgress(playlistId, todayOnly = false) {
             // Check if it's the new structure (object with set1, set2, etc.)
             if (typeof videoProgress === 'object' && !Array.isArray(videoProgress)) {
                 const hasCompletedSet = Object.keys(videoProgress).some(key => {
-                    if (key.startsWith('set') && videoProgress[key]?.completed === true) {
-
-                    }
                     return key.startsWith('set') && videoProgress[key]?.completed === true;
                 });
                 if (hasCompletedSet) completedExercises++;
@@ -1135,58 +1130,6 @@ function loadExerciseTable() {
 
         tbody.appendChild(row);
     });
-}
-
-// ==================== Set Counter Functions ====================
-function incrementSets(videoId, maxSets) {
-    if (!sessionProgress[currentPlaylist.id]) {
-        sessionProgress[currentPlaylist.id] = {};
-    }
-
-    let currentCount = sessionProgress[currentPlaylist.id][videoId] || 0;
-    currentCount++;
-    sessionProgress[currentPlaylist.id][videoId] = currentCount;
-
-    updateSetsUI(videoId, currentCount, maxSets);
-}
-
-function decrementSets(videoId, maxSets) {
-    if (!sessionProgress[currentPlaylist.id]) {
-        sessionProgress[currentPlaylist.id] = {};
-    }
-
-    let currentCount = sessionProgress[currentPlaylist.id][videoId] || 0;
-
-    if (currentCount > 0) {
-        currentCount--;
-        sessionProgress[currentPlaylist.id][videoId] = currentCount;
-        updateSetsUI(videoId, currentCount, maxSets);
-    }
-}
-
-function updateSetsCount(videoId, maxSets) {
-    const input = document.getElementById(`sets_${videoId}`);
-    if (!input) return;
-    
-    let value = parseInt(input.value) || 0;
-    value = Math.max(0, Math.min(maxSets, value));
-
-    if (!sessionProgress[currentPlaylist.id]) {
-        sessionProgress[currentPlaylist.id] = {};
-    }
-
-    sessionProgress[currentPlaylist.id][videoId] = value;
-    updateSetsUI(videoId, value, maxSets);
-}
-
-function updateSetsUI(videoId, currentCount, maxSets) {
-    const input = document.getElementById(`sets_${videoId}`);
-    if (!input) return;
-    
-    const minusBtn = input.previousElementSibling;
-
-    input.value = currentCount;
-    if (minusBtn) minusBtn.disabled = currentCount <= 0;
 }
 
 let viewedWeekStart = null; // tracks which week the calendar strip is showing
