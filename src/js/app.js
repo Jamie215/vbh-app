@@ -1064,7 +1064,7 @@ function loadExerciseTable() {
     currentPlaylist.videos.forEach((video, index) => {
         // New structure with sets
         const row = document.createElement('tr');
-        row.className = `border-b border-border-subtle transition-colors duration-150 hover:bg-[#fafbfc] [&:last-child_td]:border-b-0 ${todayCompletedExercises[video.id] ? 'bg-green/10' : 'bg-white'}`;
+        row.className = `hover:bg-[#fafbfc] [&:last-child_td]:border-b-0 ${todayCompletedExercises[video.id] ? 'bg-green-100' : 'bg-white'}`;
         
         // Order column
         const orderCell = document.createElement('td');
