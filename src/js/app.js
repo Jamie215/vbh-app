@@ -1041,7 +1041,7 @@ function getEquipmentDifficulty(equipmentText, isMultiEquipment) {
         } else if (lowerText.includes('challenging')) {
             return 'challenging';
         }
-        else return 'baseline'
+        else return 'baseline';
     }
     else return 'neutral';
 }
@@ -1138,9 +1138,8 @@ let selectedHomeDate = null;
 // Returns true if the given ISO date is eligible for manual entry
 function _isDateEligibleForManualEntry(isoDate) {
     const todayISO = _dateToISO(new Date());
-    if (isoDate > todayISO) return false; // future dates not allowed
+    if (!currentUser?.created_at || isoDate > todayISO) return false; // future dates not allowed
 
-    if(!currentUser?.created_at) return false;
     const accountCreatedISO = currentUser.created_at.split('T')[0];
     return isoDate >= accountCreatedISO; // only allow dates on or after account creation
 }
@@ -1424,13 +1423,13 @@ function _canNavigatePreviousWeek(currentViewedStart) {
 
     const accountCreatedISO = new Date(currentUser.created_at.split('T')[0] + 'T00:00:00');
 
-    // Find the start of the week containing the first logged session
-    const firstWeekStart = new Date(accountCreatedISO);
-    firstWeekStart.setHours(0, 0, 0, 0);
-    const day = firstWeekStart.getDay();
-    firstWeekStart.setDate(firstWeekStart.getDate() - day);
+    // Find the start of the week containing the account creating session
+    const accountCreatedWeekStart = new Date(accountCreatedISO);
+    accountCreatedWeekStart.setHours(0, 0, 0, 0);
+    const day = accountCreatedWeekStart.getDay();
+    accountCreatedWeekStart.setDate(accountCreatedWeekStart.getDate() - day);
 
-    return currentViewedStart.getTime() > firstWeekStart.getTime();
+    return currentViewedStart.getTime() > accountCreatedWeekStart.getTime();
 }
 
 // direction: -1 = back, +1 = forward
