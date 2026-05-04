@@ -75,34 +75,6 @@ function loadProgressStats() {
     }
 }
 
-function getWeekNumber(date) {
-    const d = new Date(date);
-    d.setHours(0, 0, 0, 0);
-    d.setDate(d.getDate() + 4 - (d.getDay() || 7));
-    const yearStart = new Date(d.getFullYear(), 0, 1);
-    const weekNo = Math.ceil((((d - yearStart) / 86400000) + 1) / 7);
-    return `${d.getFullYear()}-W${weekNo.toString().padStart(2, '0')}`;
-}
-
-function areConsecutiveWeeks(week1, week2) {
-    const [year1, w1] = week1.split('-W').map((v, i) => i === 0 ? parseInt(v) : parseInt(v));
-    const [year2, w2] = week2.split('-W').map((v, i) => i === 0 ? parseInt(v) : parseInt(v));
-    
-    if (year1 === year2 && w2 === w1 + 1) return true;
-    if (year2 === year1 + 1 && w1 >= 52 && w2 === 1) return true;
-    
-    return false;
-}
-
-function getPreviousWeek(weekId) {
-    const [year, week] = weekId.split('-W').map((v, i) => i === 0 ? parseInt(v) : parseInt(v));
-    
-    if (week === 1) {
-        return `${year - 1}-W52`;
-    }
-    return `${year}-W${(week - 1).toString().padStart(2, '0')}`;
-}
-
 // ==================== Workout History Chart (Aggregated by Playlist) ====================
 function renderWorkoutHistoryChart() {
     const canvas = document.getElementById('workout-history-chart');

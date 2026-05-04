@@ -17,10 +17,6 @@ function detectPasswordRecovery() {
     return false;
 }
 
-function markInitialSessionHandled() {
-    initialSessionHandled = true;
-}
-
 // Sign up new user
 async function signUp() {
     const name = document.getElementById('signup-name').value.trim();
