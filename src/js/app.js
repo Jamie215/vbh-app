@@ -277,18 +277,23 @@ function getProgramWeekState() {
     // or the original first session if no such gap exists.
     // Pre-gap sessions don't count toward post-reset progression.
     const sessionDates = allDates.map(d => new Date(d + 'T00:00:00'));
+    const originalFirstDate = sessionDates[0];
+
+    const diffDaysFromOriginal = Math.floor((today - originalFirstDate) / 86400000);
+    const calendarWeek = Math.min(Math.floor(diffDaysFromOriginal / 7), 6);
+    
+    // Weeks 0-3: purely calendar-based, no reset logic
+    if (calendarWeek <= 3) {
+        return { programWeek: calendarWeek, calendarWeek, windowAnchor: null, sessionsInCurrentWeek: 0 };
+    }
+
+    // Weeks 4-6: compute effectiveFirstDate for the gap-aware progression
     let effectiveFirstIdx = 0;
+    const effectiveFirstDate = sessionDates[effectiveFirstIdx];
+
     for (let i = 1; i < sessionDates.length; i++) {
         const gapDays = Math.floor((sessionDates[i] - sessionDates[i - 1]) / 86400000);
         if (gapDays >= 14) effectiveFirstIdx = i;
-    }
-    const effectiveFirstDate = sessionDates[effectiveFirstIdx];
-    const diffDays = Math.floor((today - effectiveFirstDate) / 86400000);
-    const calendarWeek = Math.min(Math.floor(diffDays / 7), 6);
-
-    // Weeks 0-3: purely calendar-based from effective start
-    if (calendarWeek <= 3) {
-        return { programWeek: calendarWeek, calendarWeek, windowAnchor: null, sessionsInCurrentWeek: 0 };
     }
 
     // ── Completion check: did the user already finish the program in this run?
