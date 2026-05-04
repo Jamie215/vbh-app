@@ -1174,11 +1174,11 @@ function renderHomeGreeting() {
     else if (hour < 17) prefix = 'Good afternoon,';
     else                prefix = 'Good evening,';
 
+    el.textContent = name;
     const h1 = el.closest('h1');
-    if (h1) {
-        h1.innerHTML = `${prefix} <span id="home-user-name">${name}</span>`;
-    } else {
-        el.textContent = name;
+    if (h1 && !h1.dataset.greetingApplied) {
+        h1.firstChild.textContent = `${prefix} `;
+        h1.dataset.greetingApplied = 'true';
     }
 }
 
@@ -1398,6 +1398,8 @@ function renderCalendarStrip() {
                 <div class="h-2 flex items-center">${hasActivity ? '<span class="w-1.5 h-1.5 rounded-full bg-green-500"></span>' : ''}</div>
             </button>
         `;
+
+
     }
 
     const chevronClass = 'shrink-0 self-center w-8 h-8 rounded-full flex items-center justify-center bg-transparent border-none text-text-secondary cursor-pointer transition-colors hover:bg-[#f1f5f9] hover:text-text-primary disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:bg-transparent disabled:hover:text-text-secondary max-md:w-6 max-md:h-6';
@@ -1414,6 +1416,9 @@ function renderCalendarStrip() {
 
     // Attach Tippy tooltips
     if (typeof tippy === 'function') {
+        document.querySelectorAll('[data-tippy-content]').forEach(el => {
+            if (el._tippy) el._tippy.destroy();
+        });
         tippy('[data-tippy-content]', {
             theme: 'material',
             placement: 'top',
@@ -1470,7 +1475,7 @@ function renderTodayCard() {
     const todayISO = _dateToISO(new Date());
     const targetISO = selectedHomeDate || todayISO;
     const isToday = targetISO === todayISO;
-    const accountCreatedISO = currentUser.created_at.split('T')[0];
+    const accountCreatedISO = currentUser?.created_at?.split('T')[0] ?? null;
     const isAccountCreationDay = accountCreatedISO && targetISO === accountCreatedISO;
 
     const target = new Date(targetISO + 'T00:00:00');
