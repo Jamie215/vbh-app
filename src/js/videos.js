@@ -380,14 +380,9 @@ async function saveVideoProgress() {
         // Reload data to update UI
         await loadTodaySession();
         await loadCompletionHistory();
-
-        // Update progress ring in playlist view
-        if (typeof updatePlaylistProgressRing === 'function') {
-            updatePlaylistProgressRing();
-            
-            // Check if user just completed the program
-            checkAndShowProgramCompletionModal();
-        }
+        updatePlaylistProgressRing();
+        checkAndShowFinalSessionModal();
+        loadExerciseTable();
 
         // Show success state briefly then close
         if (doneBtn) {

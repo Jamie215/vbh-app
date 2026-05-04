@@ -999,9 +999,8 @@ function showPlaylist(playlistId) {
         sessionProgress[playlistId] = {};
     }
 
-    // Update progress ring in playlist view
+    // Update playlist view
     updatePlaylistProgressRing();
-
     loadExerciseTable();
 }
 
