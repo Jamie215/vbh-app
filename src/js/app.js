@@ -811,7 +811,7 @@ function loadPlaylists() {
 
     // Update user name
     const userName = userProfile?.full_name?.split(' ')[0] || currentUser.email?.split('@')[0] || 'there';
-    const userNameEl = document.getElementById('user-name');
+    const userNameEl = document.getElementById('home-user-name');
     if (userNameEl) userNameEl.textContent = userName;
 
     // Compute program week state

@@ -169,7 +169,7 @@ function renderManualEntryExercises() {
             
             setsHTML += `
                 <div class="flex items-center gap-3">
-                    <span class="w-10 text-base font-medium text-text-tertiary max-md: text-sm">Set ${i}</span>
+                    <span class="w-10 text-base font-medium text-text-tertiary max-md:text-sm">Set ${i}</span>
                     <div class="flex items-center border border-border-light rounded-md overflow-hidden">
                         <button type="button" class="rep-btn" onclick="manualDecrementReps('${video.id}', ${i}, ${isTimeBased})">
                             <i class="fa-solid fa-minus"></i>
