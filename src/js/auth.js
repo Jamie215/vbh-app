@@ -34,8 +34,8 @@ async function signUp() {
         return;
     }
 
-    if (password.length < 6) {
-        showMessage('signup-message', 'Password must be at least 6 characters', true);
+    if (password.length < 8) {
+        showMessage('signup-message', 'Password must be at least 8 characters', true);
         return;
     }
 
