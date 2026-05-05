@@ -271,18 +271,6 @@ function _didEverComplete(advancedSessionDates, fromDate) {
 function getProgramWeekState() {
     const empty = { programWeek: 0, calendarWeek: 0, windowAnchor: null, sessionsInCurrentWeek: 0 };
 
-    // Sticky completion: once persisted, the flag wins. This means
-    // post-completion edits to old sessions can't revoke completion status.
-    if (programCompletedAt) {
-        return {
-            programWeek: 6,
-            calendarWeek: 6,
-            windowAnchor: null,
-            sessionsInCurrentWeek: 2,
-            completed: true
-        };
-    }
-
     if (!completionHistory || Object.keys(completionHistory).length === 0) return empty;
 
     const allDates = Object.keys(completionHistory).sort();
@@ -412,52 +400,133 @@ function isProgramCompleted() {
 }
 
 /**
- * Writes the user_program_state row the first time the user completes
- * the program. Idempotent — safe to call multiple times. Once written,
- * completion is sticky and cannot be revoked by editing past sessions.
+ * Replays session-gated progression and returns the date string of the
+ * session that earned completion, or null if not completed.
  *
- * Must be called AFTER loadCompletionHistory() so getProgramWeekState()
- * has fresh data to evaluate.
+ * Uses the same effectiveFirstDate logic as getProgramWeekState() — only
+ * post-resume sessions count toward the run that achieved completion.
+ */
+function _getCompletionEarnedDate() {
+    if (!completionHistory || Object.keys(completionHistory).length === 0) return null;
+
+    const allDates = Object.keys(completionHistory).sort();
+    if (allDates.length === 0) return null;
+
+    const sessionDates = allDates.map(d => new Date(d + 'T00:00:00'));
+
+    // Same effective-first-date logic as getProgramWeekState
+    let effectiveFirstIdx = 0;
+    for (let i = 1; i < sessionDates.length; i++) {
+        const gapDays = Math.floor((sessionDates[i] - sessionDates[i - 1]) / 86400000);
+        if (gapDays >= 14) effectiveFirstIdx = i;
+    }
+    const effectiveFirstDate = sessionDates[effectiveFirstIdx];
+
+    const advancedSessionsInRun = getAdvancedSessionDates().filter(dateStr => {
+        return new Date(dateStr + 'T00:00:00') >= effectiveFirstDate;
+    });
+
+    if (!advancedSessionsInRun.length) return null;
+
+    // Replay the gating: walk advanced sessions, advance week on every 2nd
+    // session within window. Return the date of the session that hits
+    // week 6 with 2 sessions logged.
+    let programWeek = 4;
+    let windowAnchor = new Date(effectiveFirstDate);
+    windowAnchor.setDate(windowAnchor.getDate() + 28);
+    let sessionsInWeek = 0;
+
+    for (const sessionDateStr of advancedSessionsInRun) {
+        const sessionDate = new Date(sessionDateStr + 'T00:00:00');
+        if (sessionDate < windowAnchor) continue;
+
+        sessionsInWeek++;
+
+        if (sessionsInWeek >= 2) {
+            // This session is the 2nd in the current week
+            if (programWeek === 6) {
+                // Completion! This is the date.
+                return sessionDateStr;
+            }
+
+            // Otherwise advance and keep walking
+            const windowEnd = new Date(windowAnchor);
+            windowEnd.setDate(windowEnd.getDate() + 7);
+            const advanceDate = sessionDate < windowEnd
+                ? new Date(windowEnd)
+                : (() => { const d = new Date(sessionDate); d.setDate(d.getDate() + 1); return d; })();
+
+            programWeek++;
+            windowAnchor = advanceDate;
+            sessionsInWeek = (sessionDate >= advanceDate) ? 1 : 0;
+        }
+    }
+
+    return null;
+}
+
+/**
+ * Syncs the user_program_state row to whatever the current derived completion
+ * state is. Three cases:
+ *   - Derived: completed, no row exists       → INSERT
+ *   - Derived: completed, row exists, date differs → UPDATE
+ *   - Derived: completed, row exists, date matches → no-op
+ *   - Derived: not completed, row exists      → DELETE
+ *   - Derived: not completed, no row exists   → no-op
+ *
+ * Must be called AFTER loadCompletionHistory() so derived state is fresh.
  *
  * @param {'live' | 'manual_entry'} method - which save path triggered this
  */
-async function persistCompletionIfNeeded(method) {
-    // Already stored — nothing to do.
-    if (programCompletedAt) return;
+async function syncCompletionState(method) {
+    if (!currentUser) return;
 
-    // Re-evaluate completion from raw data. We can't use isProgramCompleted()
-    // here because it now consults the flag (which we know is unset).
-    const state = getProgramWeekState();
-    const justCompleted = state.completed === true ||
-        (state.programWeek === 6 && state.sessionsInCurrentWeek >= 2);
-
-    if (!justCompleted) return;
-
-    const nowISO = new Date().toISOString();
+    const earnedDate = _getCompletionEarnedDate();
+    const isCurrentlyCompleted = earnedDate !== null;
+    const hadRowBefore = programCompletedAt !== null;
 
     try {
-        const { error } = await window.supabaseClient
-            .from('user_program_state')
-            .insert({
-                user_id: currentUser.id,
-                completed_at: nowISO,
-                completion_method: method
-            });
+        if (isCurrentlyCompleted) {
+            // Stored as midnight UTC of the earned session date so research
+            // queries comparing dates work cleanly.
+            const earnedISO = new Date(earnedDate + 'T00:00:00Z').toISOString();
 
-        if (error) {
-            // 23505 = unique_violation. Another tab beat us to it; that's fine.
-            // Reload from DB to sync local state.
-            if (error.code === '23505') {
-                await loadProgramState();
+            // If the locally-cached value already matches, skip the round-trip.
+            if (programCompletedAt === earnedISO) return;
+
+            const { error } = await window.supabaseClient
+                .from('user_program_state')
+                .upsert({
+                    user_id: currentUser.id,
+                    completed_at: earnedISO,
+                    completion_method: method
+                }, {
+                    onConflict: 'user_id'
+                });
+
+            if (error) {
+                console.error('Error syncing completion state (upsert):', error);
                 return;
             }
-            console.error('Error persisting completion:', error);
-            return;
-        }
 
-        programCompletedAt = nowISO;
+            programCompletedAt = earnedISO;
+        } else if (hadRowBefore) {
+            // Derived state flipped to not-completed; clear the row.
+            const { error } = await window.supabaseClient
+                .from('user_program_state')
+                .delete()
+                .eq('user_id', currentUser.id);
+
+            if (error) {
+                console.error('Error syncing completion state (delete):', error);
+                return;
+            }
+
+            programCompletedAt = null;
+        }
+        // else: not completed, no row — nothing to do
     } catch (error) {
-        console.error('Exception persisting completion:', error);
+        console.error('Exception syncing completion state:', error);
     }
 }
 
@@ -1244,9 +1313,8 @@ function renderHomeGreeting() {
 
     el.textContent = name;
     const h1 = el.closest('h1');
-    if (h1 && !h1.dataset.greetingApplied) {
+    if (h1 && h1.firstChild && h1.firstChild.nodeType === Node.TEXT_NODE) {
         h1.firstChild.textContent = `${prefix} `;
-        h1.dataset.greetingApplied = 'true';
     }
 }
 
