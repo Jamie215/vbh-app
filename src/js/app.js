@@ -213,17 +213,22 @@ function getAdvancedSessionDates() {
 }
 
 /**
- * Replays session-gated progression on a slice of dates and returns true if
- * the user ever reached week 6 with 2+ sessions logged. Used to lock in
- * "completed" status so it survives later inactivity, edits, or gaps.
+ * Replays session-gated week-4-to-6 progression on the given session set
+ * starting from `fromDate`, ignoring time-gating (advancement always happens
+ * once 2 sessions land in a window). Returns the date string of the session
+ * that landed the user on week 6 with 2 sessions, or null if completion
+ * was never reached.
+ *
+ * Used to (a) lock in "completed" status so it survives later inactivity,
+ * edits, or gaps, and (b) compute the earned-completion date for
+ * user_program_state.
  */
-function _didEverComplete(advancedSessionDates, fromDate) {
-    if (!advancedSessionDates.length) return false;
+function _replayCompletion(advancedSessionDates, fromDate) {
+    if (!advancedSessionDates.length) return null;
 
     let programWeek = 4;
     let windowAnchor = new Date(fromDate);
     windowAnchor.setDate(windowAnchor.getDate() + 28);
-
     let sessionsInWeek = 0;
 
     for (const sessionDateStr of advancedSessionDates) {
@@ -234,12 +239,11 @@ function _didEverComplete(advancedSessionDates, fromDate) {
 
         if (sessionsInWeek >= 2) {
             // Completion: week 6 with 2 sessions
-            if (programWeek === 6) return true;
+            if (programWeek === 6) return sessionDateStr;
 
             // Otherwise advance and continue
             const windowEnd = new Date(windowAnchor);
             windowEnd.setDate(windowEnd.getDate() + 7);
-
             const advanceDate = sessionDate < windowEnd
                 ? new Date(windowEnd)
                 : (() => { const d = new Date(sessionDate); d.setDate(d.getDate() + 1); return d; })();
@@ -250,7 +254,7 @@ function _didEverComplete(advancedSessionDates, fromDate) {
         }
     }
 
-    return false;
+    return null;
 }
 
 /**
@@ -266,7 +270,8 @@ function _didEverComplete(advancedSessionDates, fromDate) {
  *   - If session 2 falls outside the window → advance the day after session 2.
  *   - New window starts on the advance date.
  *   - 14+ days of inactivity → reset to week 4.
- *   - When resetted, the windor anchor resets to the date of resumed activity.
+ *   - On resume after a 14+ day gap, effectiveFirstDate moves to the resumed
+*     session, so progression restarts from there.
  */
 function getProgramWeekState() {
     const empty = { programWeek: 0, calendarWeek: 0, windowAnchor: null, sessionsInCurrentWeek: 0 };
@@ -309,7 +314,7 @@ function getProgramWeekState() {
         return new Date(dateStr + 'T00:00:00') >= effectiveFirstDate;
     });
 
-    if (_didEverComplete(advancedSessionsInRun, effectiveFirstDate)) {
+    if (_replayCompletion(advancedSessionsInRun, effectiveFirstDate) !== null) {
         return {
             programWeek: 6,
             calendarWeek,
@@ -413,8 +418,6 @@ function _getCompletionEarnedDate() {
     if (allDates.length === 0) return null;
 
     const sessionDates = allDates.map(d => new Date(d + 'T00:00:00'));
-
-    // Same effective-first-date logic as getProgramWeekState
     let effectiveFirstIdx = 0;
     for (let i = 1; i < sessionDates.length; i++) {
         const gapDays = Math.floor((sessionDates[i] - sessionDates[i - 1]) / 86400000);
@@ -426,43 +429,7 @@ function _getCompletionEarnedDate() {
         return new Date(dateStr + 'T00:00:00') >= effectiveFirstDate;
     });
 
-    if (!advancedSessionsInRun.length) return null;
-
-    // Replay the gating: walk advanced sessions, advance week on every 2nd
-    // session within window. Return the date of the session that hits
-    // week 6 with 2 sessions logged.
-    let programWeek = 4;
-    let windowAnchor = new Date(effectiveFirstDate);
-    windowAnchor.setDate(windowAnchor.getDate() + 28);
-    let sessionsInWeek = 0;
-
-    for (const sessionDateStr of advancedSessionsInRun) {
-        const sessionDate = new Date(sessionDateStr + 'T00:00:00');
-        if (sessionDate < windowAnchor) continue;
-
-        sessionsInWeek++;
-
-        if (sessionsInWeek >= 2) {
-            // This session is the 2nd in the current week
-            if (programWeek === 6) {
-                // Completion! This is the date.
-                return sessionDateStr;
-            }
-
-            // Otherwise advance and keep walking
-            const windowEnd = new Date(windowAnchor);
-            windowEnd.setDate(windowEnd.getDate() + 7);
-            const advanceDate = sessionDate < windowEnd
-                ? new Date(windowEnd)
-                : (() => { const d = new Date(sessionDate); d.setDate(d.getDate() + 1); return d; })();
-
-            programWeek++;
-            windowAnchor = advanceDate;
-            sessionsInWeek = (sessionDate >= advanceDate) ? 1 : 0;
-        }
-    }
-
-    return null;
+    return _replayCompletion(advancedSessionsInRun, effectiveFirstDate);
 }
 
 /**
@@ -589,19 +556,6 @@ function showFinalSessionModal() {
         overlay.querySelector('div').style.transform = 'scale(1)';
     });
 }
-/**
- * Closes the final session modal and marks it as dismissed for this session.
- */
-function closeFinalSessionModal() {
-    const modal = document.getElementById('final-session-modal');
-    if (modal) {
-        modal.style.opacity = '0';
-        const inner = modal.querySelector('div');
-        if (inner) inner.style.transform = 'scale(0.9)';
-        setTimeout(() => modal.remove(), 300);
-    }
-    sessionStorage.setItem('dismissedFinalSessionModal', 'true');
-}
 
 /**
  * Checks if the user just completed the program by finishing all exercises
@@ -665,18 +619,23 @@ function showProgramCompletionModal() {
     });
 }
 
-/**
- * Closes the program completion modal.
- */
-function closeProgramCompletionModal() {
-    const modal = document.getElementById('program-completion-modal');
+function _closeFadeModal(modalId, dismissalKey) {
+    const modal = document.getElementById(modalId);
     if (modal) {
         modal.style.opacity = '0';
         const inner = modal.querySelector('div');
         if (inner) inner.style.transform = 'scale(0.9)';
         setTimeout(() => modal.remove(), 300);
     }
-    sessionStorage.setItem('dismissedCompletionModal', 'true');
+    sessionStorage.setItem(dismissalKey, 'true');
+}
+
+function closeFinalSessionModal() {
+    _closeFadeModal('final-session-modal', 'dismissedFinalSessionModal');
+}
+
+function closeProgramCompletionModal() {
+    _closeFadeModal('program-completion-modal', 'dismissedCompletionModal');
 }
 
 /**
@@ -1200,7 +1159,7 @@ function loadExerciseTable() {
     currentPlaylist.videos.forEach((video, index) => {
         // New structure with sets
         const row = document.createElement('tr');
-        row.className = `[&:last-child_td]:border-b-0 ${todayCompletedExercises[video.id] ? 'bg-green-100 hover:bg-green-200' : 'bg-white hover:bg-[#fafbfc]'}`;
+        row.className = `[&:last-child_td]:border-b-0 ${todayCompletedExercises[video.id] ? 'bg-green-50 hover:bg-green-100' : 'bg-white hover:bg-[#fafbfc]'}`;
         
         // Order column
         const orderCell = document.createElement('td');

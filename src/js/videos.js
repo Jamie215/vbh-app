@@ -9,23 +9,6 @@ let currentVideoProgress = {};
 // button until something actually changes.
 let originalVideoProgressSnapshot = null;
 
-// True if a set has a "completion-related" change vs its original state.
-//   - Completion status flipped
-//   - OR set is currently completed AND reps/seconds differ
-function _setHasMeaningfulChange(originalSet, currentSet) {
-    const orig = originalSet || {};
-    const curr = currentSet || {};
-    
-    if ((orig.completed ?? false) !== (curr.completed ?? false)) return true;
-    
-    if (curr.completed) {
-        if ((orig.reps ?? 0) !== (curr.reps ?? 0)) return true;
-        if ((orig.seconds ?? 0) !== (curr.seconds ?? 0)) return true;
-    }
-    
-    return false;
-}
-
 function onYouTubeIframeAPIReady() {
     console.log('YouTube API Ready');
 }
@@ -381,6 +364,7 @@ async function saveVideoProgress() {
         await loadTodaySession();
         await loadCompletionHistory();
         await syncCompletionState('live');
+
         updatePlaylistProgressRing();
         checkAndShowFinalSessionModal();
         loadExerciseTable();

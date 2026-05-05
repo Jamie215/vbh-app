@@ -115,6 +115,28 @@ async function loadTodaySession() {
     }   
 }
 
+/**
+ * True if a set has a "completion-related" change vs its original state.
+ *   - Completion status flipped
+ *   - OR set is currently completed AND reps/seconds differ
+ *
+ * Used by both the live-session save flow and the manual-entry flow to
+ * decide whether the Save button should be enabled.
+ */
+function _setHasMeaningfulChange(originalSet, currentSet) {
+    const orig = originalSet || {};
+    const curr = currentSet || {};
+
+    if ((orig.completed ?? false) !== (curr.completed ?? false)) return true;
+
+    if (curr.completed) {
+        if ((orig.reps ?? 0) !== (curr.reps ?? 0)) return true;
+        if ((orig.seconds ?? 0) !== (curr.seconds ?? 0)) return true;
+    }
+
+    return false;
+}
+
 // ==================== UI Update Functions ====================
 async function updateUIForAuthenticatedUser(user) {
     const signoutBtn = document.getElementById('signout-button');
