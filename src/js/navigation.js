@@ -47,6 +47,7 @@ function routeFromURL() {
         case '/progress':
             if (typeof showMyProgress === 'function') {
                 showMyProgress();
+                setFooterVisibility(true);
             } else {
                 showExercises();
             }

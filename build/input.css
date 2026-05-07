@@ -1,0 +1,352 @@
+/* ============================================================
+   TAILWIND DIRECTIVES — These get expanded by the CLI.
+   ============================================================ */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ============================================================
+   CUSTOM COMPONENT STYLES
+   These were previously in the <style type="text/tailwindcss">
+   block inside index.html. Keeping them in @layer components
+   means utility classes still override them when needed.
+   ============================================================ */
+@layer components {
+    /* ── Base nav link: shared by <a> and <button> ── */
+    .nav-link {
+        @apply flex items-center gap-2 py-2 px-4 text-[#64748b] no-underline text-base font-medium rounded-md transition-all duration-200;
+        font-family: inherit;
+        line-height: 1.5;
+    }
+    .nav-link:hover {
+        @apply text-[#1a1a2e] bg-[#f1f5f9];
+    }
+
+    /* Desktop: active link gets a purple underline */
+    .nav-link.active {
+        @apply text-brand border-b-2 border-brand rounded-none;
+        padding-bottom: calc(0.5rem - 2px);
+    }
+
+    /* ── Dropdown: shared ── */
+    .nav-dropdown { position: relative; }
+
+    /* When dropdown is open/hovered, prevent iframes from stealing mouse events */
+    .dropdown-active iframe {
+        pointer-events: none;
+    }
+
+    .nav-dropdown-toggle {
+        cursor: pointer;
+        border: none;
+        background: none;
+        font-family: inherit;
+    }
+    .nav-chevron {
+        font-size: 0.65rem;
+        transition: transform 0.2s ease;
+        margin-left: 2px;
+    }
+    .nav-dropdown.open .nav-chevron {
+        transform: rotate(180deg);
+    }
+
+    .nav-dropdown-menu {
+        display: none;
+        flex-direction: column;
+        min-width: 220px;
+    }
+
+    .nav-dropdown-item {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.6rem 1rem;
+        font-size: 0.9rem;
+        font-weight: 500;
+        color: #64748b;
+        text-decoration: none;
+        transition: all 0.15s ease;
+        white-space: nowrap;
+    }
+    .nav-dropdown-item:hover {
+        background: #f1f5f9;
+        color: #1a1a2e;
+    }
+    .nav-dropdown-item.active {
+        color: #7c3aed;
+        background: #f5f3ff;
+    }
+
+    /* ── Desktop (≥1024px): hover-open absolute dropdown ── */
+    @media (min-width: 1024px) {
+        .nav-dropdown:hover .nav-dropdown-menu,
+        .nav-dropdown.open .nav-dropdown-menu {
+            display: flex;
+        }
+        .nav-dropdown:hover .nav-chevron {
+            transform: rotate(180deg);
+        }
+
+        .nav-dropdown {
+            padding-bottom: 0.35rem;
+            margin-bottom: -0.35rem;
+        }
+        .nav-dropdown-menu {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            background: white;
+            border-radius: 0.5rem;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.1), 0 1px 3px rgba(0,0,0,0.06);
+            border: 1px solid #e9ecef;
+            padding: 0.35rem 0;
+            z-index: 200;
+        }
+        .nav-dropdown-item {
+            border-radius: 0.25rem;
+            margin: 0 0.25rem;
+        }
+    }
+
+    /* ── Mobile (≤1023px): inline expand ── */
+    @media (max-width: 1023px) {
+        #nav-links {
+            display: none;
+            flex-direction: column;
+            width: 100%;
+            order: 10;
+            gap: 0;
+            padding-top: 0.5rem;
+            border-top: 1px solid #e9ecef;
+            margin-top: 0.5rem;
+        }
+        #nav-links.open {
+            display: flex;
+        }
+        .nav-link {
+            @apply w-full py-3 px-4 rounded-md text-base;
+        }
+        .nav-link:hover {
+            @apply bg-[#f8fafc];
+        }
+        .nav-link.active {
+            @apply border-b-0 rounded-md bg-violet-50 text-brand;
+            padding-bottom: 0.75rem;
+        }
+
+        .nav-dropdown {
+            width: 100%;
+            padding-bottom: 0;
+            margin-bottom: 0;
+        }
+        .nav-dropdown-toggle {
+            width: 100%;
+            justify-content: flex-start;
+        }
+        .nav-dropdown.open .nav-dropdown-menu {
+            display: flex;
+        }
+        .nav-dropdown-menu {
+            padding-left: 1rem;
+        }
+        .nav-dropdown-item {
+            padding: 0.65rem 1rem;
+            font-size: 0.95rem;
+            border-radius: 0.375rem;
+        }
+        .nav-dropdown-item.active {
+            background: #f5f3ff;
+        }
+    }
+
+    /* ── Profile dropdown ── */
+    .profile-toggle {
+        display: flex;
+        align-items: center;
+        gap: 0.6rem;
+        cursor: pointer;
+        background: none;
+        border: none;
+        padding: 0.25rem;
+        border-radius: 0.5rem;
+        transition: all 0.15s ease;
+        font-family: inherit;
+    }
+    .profile-toggle:hover {
+        background: #f1f5f9;
+    }
+
+    .profile-dropdown-menu {
+        display: none;
+        position: absolute;
+        top: 100%;
+        right: 0;
+        margin-top: 0.35rem;
+        min-width: 160px;
+        background: white;
+        border-radius: 0.5rem;
+        box-shadow: 0 4px 16px rgba(0,0,0,0.1), 0 1px 3px rgba(0,0,0,0.06);
+        border: 1px solid #e9ecef;
+        padding: 0.35rem 0;
+        z-index: 200;
+        flex-direction: column;
+    }
+    #user-info.open .profile-dropdown-menu {
+        display: flex;
+    }
+
+    .profile-dropdown-item {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.6rem 1rem;
+        font-size: 0.9rem;
+        font-weight: 500;
+        color: #64748b;
+        text-decoration: none;
+        background: none;
+        border: none;
+        width: calc(100% - 0.5rem);
+        cursor: pointer;
+        transition: all 0.15s ease;
+        font-family: inherit;
+        white-space: nowrap;
+        border-radius: 0.25rem;
+        margin: 0 0.25rem;
+        box-sizing: border-box;
+    }
+    .profile-dropdown-item:hover {
+        background: #f1f5f9;
+        color: #1a1a2e;
+    }
+    .profile-dropdown-item.text-danger {
+        color: #dc3545;
+    }
+    .profile-dropdown-item.text-danger:hover {
+        background: #fef2f2;
+        color: #dc3545;
+    }
+
+    /* ── Detail tabs (progress view) ── */
+    .detail-tab {
+        @apply flex-1 py-3 px-4 bg-transparent border-b-2 border-transparent text-base font-medium text-[#64748b] cursor-pointer transition-all duration-200;
+        border-top: none; border-left: none; border-right: none;
+    }
+    .detail-tab:hover {
+        @apply text-[#1a1a2e] bg-[#f8fafc];
+    }
+    .detail-tab.active {
+        @apply text-brand border-brand;
+    }
+
+    /* ── Progress bar fill ── */
+    .program-progress-fill {
+        background: linear-gradient(90deg, #10b981, #059669);
+        transition: width 0.6s ease;
+    }
+    .program-progress-fill.completed {
+        background: linear-gradient(90deg, #7c3aed, #6d28d9);
+    }
+
+    /* ── Auth form inputs ── */
+    .auth-input {
+        @apply w-full py-3.5 px-4 border border-border-light rounded-lg text-base transition-all duration-200;
+    }
+    .auth-input:focus {
+        @apply outline-none border-brand;
+        box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.1);
+    }
+    .auth-input::placeholder {
+        @apply text-text-muted;
+    }
+
+    /* ── Form messages (JS toggles .error / .success) ── */
+    .form-message {
+        @apply text-center p-3 rounded-lg text-base mt-4;
+    }
+    .form-message:empty { display: none; }
+    .form-message.error {
+        @apply bg-red-100 text-red-600;
+    }
+    .form-message.success {
+        @apply bg-emerald-100 text-emerald-700;
+    }
+
+    /* ── JS-generated greeting text ── */
+    #user-greeting-section strong {
+        @apply text-text-primary;
+    }
+
+    /* ── Manual entry inputs ── */
+    .manual-entry-input {
+        @apply w-full py-2.5 px-3 border-[1.5px] border-border-light rounded-lg text-base text-text-primary bg-white cursor-pointer transition-all;
+        font-family: inherit;
+    }
+    .manual-entry-input:focus {
+        @apply outline-none border-brand;
+        box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.1);
+    }
+
+    /* ── Manual entry save button ── */
+    .manual-entry-save-btn {
+        @apply inline-flex items-center gap-2 py-2.5 px-6 text-white border-none rounded-lg text-base font-semibold cursor-pointer transition-all;
+        background: linear-gradient(135deg, #7c3aed, #6d28d9);
+    }
+    .manual-entry-save-btn:hover:not(:disabled) {
+        @apply -translate-y-px;
+        box-shadow: 0 4px 12px rgba(124, 58, 237, 0.3);
+    }
+    .manual-entry-save-btn:disabled {
+        @apply opacity-50 cursor-not-allowed;
+    }
+
+    /* ── Manual entry modal transition ── */
+    #manual-entry-modal.visible {
+        backdrop-filter: blur(4px);
+    }
+
+    /* ── Equipment badges (shared: app.js + manual_entry.js) ── */
+    .equipment-badge {
+        @apply inline-flex items-center gap-2 py-1.5 px-3.5 rounded-full text-base font-medium whitespace-nowrap;
+    }
+    .equipment-dot {
+        @apply w-2 h-2 rounded-full shrink-0;
+    }
+    .dot-support       { background-color: #22c55e; }
+    .dot-baseline      { background-color: #f97316; }
+    .dot-challenging   { background-color: #f62681; }
+    .dot-neutral       { background-color: #3b82f6; }
+    .dot-none          { background-color: #9ca3af; }
+
+    .badge-support      { background: #f0fdf4; color: #166534; }
+    .badge-baseline     { background: #fffbeb; color: #b45309; }
+    .badge-challenging  { background: #feebf4; color: #8C1946; }
+    .badge-neutral      { background: #eff6ff; color: #1d4ed8; }
+    .badge-none         { background: #f9fafb; color: #6b7280; }
+
+    .equipment-separator {
+        @apply inline-block mx-2 text-text-muted text-base font-normal;
+    }
+
+    /* ── Video thumbnail play overlay ── */
+    .video-thumb {
+        @apply relative w-[120px] h-[70px] shrink-0 cursor-pointer rounded-md overflow-hidden;
+        background: #e2e8f0;
+    }
+    .video-thumb img {
+        @apply w-full h-full object-cover transition-transform duration-200;
+    }
+    .video-thumb:hover img {
+        @apply scale-105;
+    }
+    .video-thumb::after {
+        content: '▶';
+        @apply absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-8 h-8 rounded-full flex items-center justify-center text-white text-base transition-colors duration-200;
+        background: rgba(0,0,0,0.6);
+        padding-left: 2px;
+    }
+    .video-thumb:hover::after {
+        background: rgba(124,58,237,0.9);
+    }
+}
