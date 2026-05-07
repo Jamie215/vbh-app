@@ -1088,7 +1088,7 @@ function showPlaylist(playlistId) {
     const formattedTitle = isAdvanced ? 'Advanced 4-6 Exercises' : 'Beginner 0-3 Exercises';
     
     if (titleEl) titleEl.textContent = formattedTitle;
-    if (descEl) descEl.innerHTML = `<strong><u>Instructions</u></strong>: Go through the below exercises at your own pace. Click to watch the videos to see how each exercise is done. Your progress is saved automatically when you click 'Done' in the exercise modal.`;
+    if (descEl) descEl.innerHTML = `<strong><u>Instructions</u></strong>: Go through the below exercises at your own pace. Click to watch the videos to see how each exercise is done. Your progress is saved when you click 'Save' in the exercise modal.`;
 
     // Initialize session progress for this playlist
     if (!sessionProgress[playlistId]) {
