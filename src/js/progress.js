@@ -43,6 +43,9 @@ function showMyProgress() {
     renderWorkoutHistoryChart();
     renderDetailPanel();
     loadRecentActivity();
+
+    const footer = document.getElementById('site-footer');
+    if (footer) footer.classList.toggle('hidden', false);
 }
 
 // ==================== Summary Stats ====================
