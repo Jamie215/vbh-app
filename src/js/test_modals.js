@@ -116,3 +116,14 @@ sessionStorage.removeItem('dismissedFinalSessionModal');
 sessionStorage.removeItem('dismissedCompletionModal');
 sessionStorage.removeItem('dismissedAlerts');
 renderProgressAlert();
+
+// Force the week-3 milestone banner to show (clears any dismissal first)
+const dismissed = JSON.parse(localStorage.getItem('clinicRemindersDismissed') || '[]');
+const idx = dismissed.indexOf('week-3');
+if (idx > -1) dismissed.splice(idx, 1);
+localStorage.setItem('clinicRemindersDismissed', JSON.stringify(dismissed));
+
+const _gam = getActiveClinicMilestone;
+getActiveClinicMilestone = () => 'week-3';
+renderClinicBanner();
+getActiveClinicMilestone = _gam;
