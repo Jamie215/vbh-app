@@ -1346,7 +1346,7 @@ function renderClinicBanner() {
     container.innerHTML = `
         <div class="flex items-center gap-3 py-3 px-4 mb-6 bg-white rounded-lg border border-border-light border-brand-dark">
             <i class="fa-solid fa-circle-info text-brand-dark shrink-0"></i>
-            <span class="flex-1 text-base">Reminder: Schedule or attend your next visit at ${userProfile?.clinic_name || 'your clinic'}</span>
+            <span class="flex-1 text-base">Reminder: Schedule or attend your next visit at your clinic</span>
             <button onclick="dismissClinicReminder()" class="w-7 h-7 rounded-full text-text-muted hover:bg-black/5 flex items-center justify-center bg-transparent border-none cursor-pointer" aria-label="Dismiss">
                 <i class="fa-solid fa-xmark"></i>
             </button>
