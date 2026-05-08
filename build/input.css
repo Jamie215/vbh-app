@@ -315,13 +315,13 @@
     }
     .dot-support       { background-color: #22c55e; }
     .dot-baseline      { background-color: #f97316; }
-    .dot-challenging   { background-color: #f62681; }
+    .dot-challenging   { background-color: #702FDA; }
     .dot-neutral       { background-color: #3b82f6; }
     .dot-none          { background-color: #9ca3af; }
 
     .badge-support      { background: #f0fdf4; color: #166534; }
     .badge-baseline     { background: #fffbeb; color: #b45309; }
-    .badge-challenging  { background: #feebf4; color: #8C1946; }
+    .badge-challenging  { background: #EFE5FF; color: #702FDA; }
     .badge-neutral      { background: #eff6ff; color: #1d4ed8; }
     .badge-none         { background: #f9fafb; color: #6b7280; }
 
