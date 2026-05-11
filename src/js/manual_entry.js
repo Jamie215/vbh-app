@@ -187,7 +187,7 @@ function renderManualEntryExercises() {
 }
 
 function renderVideoPlaylistCards(container) {
-    let html = '';
+    let html = `<p class="text-base text-text-secondary mt-1 mb-1">${manualEntryPlaylist.description}</p>`;
 
     manualEntryPlaylist.videos.forEach((video, index) => {
         const videoProgress = manualEntryProgress[video.id] || {};
@@ -271,7 +271,7 @@ function renderVideoPlaylistCards(container) {
 }
 
 function renderExternalActivityCards(container) {
-    let html = '';
+    let html = `<p class="text-base text-text-secondary mt-1 mb-1">${manualEntryPlaylist.description}</p>`;
 
     manualEntryPlaylist.others.forEach((activity, index) => {
         const progress = manualEntryProgress[activity.id] || { minutes: activity.minutes, completed: false };
@@ -296,7 +296,7 @@ function renderExternalActivityCards(container) {
                         <div class="items-center gap-3 mt-3 ${progress.completed ? 'flex' :'hidden'}"
                              id="manual_minutes_row_${activity.id}">
                             <p class="text-base mt-1 mb-2">How much time did you spend doing this activity?</p>
-                            <div class="flex flex-row items-center">
+                            <div class="flex flex-row items-center gap-3">
                                 <div class="flex flex-row items-center border border-border-light rounded-md overflow-hidden w-fit">
                                     <button type="button" class="rep-btn" onclick="manualDecrementMinutes('${activity.id}')">
                                         <i class="fa-solid fa-minus"></i>
@@ -312,7 +312,7 @@ function renderExternalActivityCards(container) {
                                         <i class="fa-solid fa-plus"></i>
                                     </button>
                                 </div>
-                                <span class="text-base font-medium text-text-tertiary">Minutes</span>
+                                <span class="text-base font-medium text-text-tertiary">minutes</span>
                             </div>
                         </div>
                     </div>
