@@ -293,7 +293,7 @@ function renderExternalActivityCards(container) {
                 <div class="flex-1 min-w-0">
                         <h4 class="text-base font-semibold text-text-primary">${activity.title}</h4>
                         ${descHTML}
-                        <div class="flex items-center gap-3 mt-3 visibility: ${progress.completed ? 'visible' :'invisible'}">
+                        <div class="items-center gap-3 mt-3 display: ${progress.completed ? 'flex' :'hidden'}">
                             <span class="text-base font-medium text-text-tertiary">Minutes</span>
                             <div class="flex items-center border border-border-light rounded-md overflow-hidden">
                                 <button type="button" class="rep-btn" onclick="manualDecrementMinutes('${activity.id}')">
@@ -511,6 +511,12 @@ function manualToggleExternalActivity(activityId) {
         completed: checkbox.checked
     };
 
+    // Toggle minutes row visibility without re-rendering
+    const minutesRow = document.getElementById(`manual_minutes_row_${activityId}`);
+    if (minutesRow) {
+        minutesRow.classList.toggle('hidden', !checkbox.checked);
+    }
+    
     updateManualEntrySaveState();
     renderManualEntryConflictWarning();
 }
