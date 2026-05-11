@@ -293,7 +293,8 @@ function renderExternalActivityCards(container) {
                 <div class="flex-1 min-w-0">
                         <h4 class="text-base font-semibold text-text-primary">${activity.title}</h4>
                         ${descHTML}
-                        <div class="items-center gap-3 mt-3 display: ${progress.completed ? 'flex' :'hidden'}">
+                        <div class="items-center gap-3 mt-3 ${progress.completed ? 'flex' :'hidden'}"
+                             id="manual_minutes_row_${activity.id}">
                             <span class="text-base font-medium text-text-tertiary">Minutes</span>
                             <div class="flex items-center border border-border-light rounded-md overflow-hidden">
                                 <button type="button" class="rep-btn" onclick="manualDecrementMinutes('${activity.id}')">
@@ -469,16 +470,19 @@ function manualDecrementMinutes(activityId) {
 }
 
 function manualUpdateMinutes(activityId) {
-    const checkbox = document.getElementById(`manual_external_${activityId}`);
-    if (!checkbox) return;
+    const input = document.getElementById(`manual_minutes_${activityId}`);
+    if (!input) return;
+
+    let value = parseInt(input.value) || 0;
+    value = Math.max(0, Math.min(600, value));
+    input.value = value;
 
     if (!manualEntryProgress[activityId]) manualEntryProgress[activityId] = {};
     manualEntryProgress[activityId] = {
         ...manualEntryProgress[activityId],
-        completed: checkbox.checked
+        minutes: value
     };
     updateManualEntrySaveState();
-    renderManualEntryConflictWarning();
 }
 
 function manualToggleSet(videoId, setNumber) {
@@ -516,7 +520,7 @@ function manualToggleExternalActivity(activityId) {
     if (minutesRow) {
         minutesRow.classList.toggle('hidden', !checkbox.checked);
     }
-    
+
     updateManualEntrySaveState();
     renderManualEntryConflictWarning();
 }
@@ -767,8 +771,8 @@ async function saveManualEntry() {
 
         if (hasAnyCompleted) {
             // Strip exercises with no completion — "uncheck = removed exercise"
+            const cleanedProgress = {};
             if (manualEntryPlaylist?.type === 'video') {
-                const cleanedProgress = {};
                 Object.keys(manualEntryProgress).forEach(videoId => {
                     const videoData = manualEntryProgress[videoId];
                     const hasCompleted = Object.keys(videoData).some(k =>
