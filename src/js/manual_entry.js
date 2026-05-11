@@ -293,9 +293,9 @@ function renderExternalActivityCards(container) {
                 <div class="flex-1 min-w-0">
                         <h4 class="text-base font-semibold text-text-primary">${activity.title}</h4>
                         ${descHTML}
-                        <div class="items-center gap-3 mt-3 ${progress.completed ? 'flex' :'hidden'}"
+                        <div class="gap-3 mt-3 ${progress.completed ? 'flex flex-col' :'hidden'}"
                              id="manual_minutes_row_${activity.id}">
-                            <p class="text-base mt-1 mb-2">How much time did you spend doing this activity?</p>
+                            <p class="text-base mt-1 mb-1">How much time did you spend doing this activity?</p>
                             <div class="flex flex-row items-center gap-3">
                                 <div class="flex flex-row items-center border border-border-light rounded-md overflow-hidden w-fit">
                                     <button type="button" class="rep-btn" onclick="manualDecrementMinutes('${activity.id}')">
@@ -616,7 +616,7 @@ function renderManualEntryConflictWarning() {
     } else if (isEditingThisPlaylist) {
         // Replacement case
         icon = 'fa-circle-info';
-        message = "You already have data for this playlist on this day. Saving will replace it with these entries.";
+        message = "You already have data for this playlist on this day. Any updates you make with saving will overwrite your current data.";
     } else if (hasOtherPlaylistData) {
         // Adding alongside another playlist on the same day
         icon = 'fa-circle-info';
