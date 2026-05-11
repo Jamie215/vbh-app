@@ -141,7 +141,8 @@ const PLAYLISTS = [
                 equipment: ["A Chair or Wall"],
                 thumbnail: 'https://img.youtube.com/vi/sY5n7wpVLXI/hqdefault.jpg',
             }
-        ]
+        ],
+        others: []
     },
     {
         id: 'advanced-4-6',
@@ -247,6 +248,44 @@ const PLAYLISTS = [
                 seconds: 30,
                 equipment: [],
                 thumbnail: 'https://img.youtube.com/vi/_IeZdX1-tLQ/hqdefault.jpg',
+            }
+        ],
+        others: []
+    },
+    {
+        id: 'external-activity',
+        title: 'Other - External Activity from HandsUp',
+        description: 'Other workouts apart from HandsUP program',
+        videos: [],
+        others: [
+            {
+                title: 'Running',
+                description: '',
+                minutes: 30
+            }, {
+                title: 'Another Aerobic Exercise',
+                description: 'Activities where you could talk but not sing, including biking, hiking, kayaking',
+                minutes: 30
+            }, {
+                title: 'Additional Strength Training',
+                description: 'Including an exercise class, physiotherapy exercises',
+                minutes: 30
+            }, {
+                title: 'Additional Flexibility or Range of Motion Exercises',
+                description: 'Including yoga, stretches, physiotherapy exercises',
+                minutes: 30
+            }, {
+                title: 'Additional Light Aerobic Activity',
+                description: 'Activities that allow you to sing while doing them, such as standing or light gardening',
+                minutes: 30
+            },{
+                title: 'High Intensity Sport',
+                description: 'Including tennis, pickleball, golfing - walking the course',
+                minutes: 30
+            }, {
+                title: 'Low Intensity Sport',
+                description: 'Including lawn bowling, golfing - driving the course, shuffleboard',
+                minutes: 30
             }
         ]
     }

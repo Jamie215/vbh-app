@@ -1593,7 +1593,7 @@ function renderTodayCard() {
             <p class="text-base opacity-90 mb-4">No workout logged this day.</p>
             ${showLogButton ? `
                 <button onclick="openManualEntryModal('${targetISO}')" class="mt-4 py-2 px-4 bg-white text-brand-dark rounded-md text-sm font-medium border-none cursor-pointer transition-all hover:-translate-y-px">
-                    <i class="fa-solid fa-plus"></i> Log Past Workout
+                    <i class="fa-solid fa-plus"></i> Log an Untracked Workout
                 </button>` : ''}
         `;
     } else {
