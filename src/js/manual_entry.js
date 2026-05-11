@@ -293,10 +293,10 @@ function renderExternalActivityCards(container) {
                 <div class="flex-1 min-w-0">
                         <h4 class="text-base font-semibold text-text-primary">${activity.title}</h4>
                         ${descHTML}
-                        <p class="text-base ${progress.completed ? 'flex':'hidden'}">How much time did you spend doing this activity?</p>
-                        <div class="items-center gap-3 mt-3 ${progress.completed ? 'flex flex-row' :'hidden'}"
+                        <div class="items-center gap-3 mt-3 ${progress.completed ? 'flex' :'hidden'}"
                              id="manual_minutes_row_${activity.id}">
-                            <div class="flex items-center border border-border-light rounded-md overflow-hidden">
+                            <p class="text-base mt-1 mb-2">How much time did you spend doing this activity?</p>
+                            <div class="flex flex-row items-center border border-border-light rounded-md overflow-hidden">
                                 <button type="button" class="rep-btn" onclick="manualDecrementMinutes('${activity.id}')">
                                     <i class="fa-solid fa-minus"></i>
                                 </button>
