@@ -13,6 +13,7 @@ const PLAYLISTS = [
         id: 'beginner-0-3',
         title: 'Beginner Weeks 0-3',
         description: 'Workout playlist for Week 0 to 3',
+        type: 'video',
         videos: [
             {
                 id: 'ABMlz_M3gFc',
@@ -148,6 +149,7 @@ const PLAYLISTS = [
         id: 'advanced-4-6',
         title: 'Advanced Weeks 4-6',
         description: 'Workout playlist for Week 4 to 6',
+        type: 'video',
         videos: [
             {
                 id: 'ABMlz_M3gFc',
@@ -255,34 +257,42 @@ const PLAYLISTS = [
     {
         id: 'external-activity',
         title: 'Other - External Activity from HandsUp',
-        description: 'Other workouts apart from HandsUP program',
+        description: 'Other workouts apart from HandsUP program. These are supplementary tracking and does not count towards program completion.',
+        type: 'external',
         videos: [],
         others: [
             {
+                id: 'running',
                 title: 'Running',
                 description: '',
                 minutes: 30
             }, {
+                id: 'aerobic-other',
                 title: 'Another Aerobic Exercise',
                 description: 'Activities where you could talk but not sing, including biking, hiking, kayaking',
                 minutes: 30
             }, {
+                id: 'strength-other',
                 title: 'Additional Strength Training',
                 description: 'Including an exercise class, physiotherapy exercises',
                 minutes: 30
             }, {
+                id: 'flexibility-rom-other',
                 title: 'Additional Flexibility or Range of Motion Exercises',
                 description: 'Including yoga, stretches, physiotherapy exercises',
                 minutes: 30
             }, {
+                id: 'light-aerobic-other',
                 title: 'Additional Light Aerobic Activity',
                 description: 'Activities that allow you to sing while doing them, such as standing or light gardening',
                 minutes: 30
             },{
+                id:'high-intensity',
                 title: 'High Intensity Sport',
                 description: 'Including tennis, pickleball, golfing - walking the course',
                 minutes: 30
             }, {
+                id: 'low-intensity',
                 title: 'Low Intensity Sport',
                 description: 'Including lawn bowling, golfing - driving the course, shuffleboard',
                 minutes: 30

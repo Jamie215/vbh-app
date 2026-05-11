@@ -35,6 +35,13 @@ function openManualEntryModal(prefillDate = null) {
     // Reset playlist selector
     const playlistSelect = document.getElementById('manual-entry-playlist');
     if (playlistSelect) {
+        playlistSelect.innerHTML = '<option value="">Select a workout...</option>';
+        PLAYLISTS.forEach(p => {
+            const opt = document.createElement('option');
+            opt.value = p.id;
+            opt.textContent = p.title;
+            playlistSelect.appendChild(opt);
+        });
         playlistSelect.value = '';
         playlistSelect.disabled = true;
     }
@@ -100,6 +107,8 @@ async function onManualEntryDateChange() {
             playlistSelect.value = 'advanced-4-6';
         } else if (existingDay?.['beginner-0-3']) {
             playlistSelect.value = 'beginner-0-3';
+        } else if (existingDay?.['external-activity']) {
+            playlistSelect.value = 'external-activity';
         } else {
             playlistSelect.value = calculateUserWeek() >= 4 ? 'advanced-4-6' : 'beginner-0-3';
         }
@@ -122,16 +131,26 @@ function onManualEntryPlaylistChange() {
 
     // Initialize progress for all exercises
     manualEntryProgress = {};
-    manualEntryPlaylist.videos.forEach(video => {
-        manualEntryProgress[video.id] = {};
-        for (let i = 1; i <= video.sets; i++) {
-            manualEntryProgress[video.id][`set${i}`] = {
-                reps: video.reps,
-                seconds: video.seconds,
+    if (manualEntryPlaylist.type === 'video') {
+        manualEntryPlaylist.videos.forEach(video => {
+            manualEntryProgress[video.id] = {};
+            for (let i = 1; i <= video.sets; i++) {
+                manualEntryProgress[video.id][`set${i}`] = {
+                    reps: video.reps,
+                    seconds: video.seconds,
+                    completed: false
+                };
+            }
+        });
+    } else {
+        manualEntryPlaylist.others.forEach(activity => {
+            manualEntryProgress[activity.id] = {};
+            manualEntryProgress[activity.id] = {
+                minutes: activity.minutes,
                 completed: false
             };
-        }
-    });
+        });
+    }
 
     // Load existing data if the date has prior progress for this playlist
     const selectedDate = dateInput?.value;
@@ -146,6 +165,8 @@ function onManualEntryPlaylistChange() {
 
     originalManualEntryProgressSnapshot = JSON.stringify(manualEntryProgress);
 
+    if (activePreviewVideoId) closeVideoPreview();
+
     renderManualEntryExercises();
     renderManualEntryConflictWarning();
     updateManualEntrySaveState();
@@ -156,6 +177,16 @@ function renderManualEntryExercises() {
     const container = document.getElementById('manual-entry-exercises');
     if (!container || !manualEntryPlaylist) return;
 
+    if (manualEntryPlaylist.type === 'video') {
+        renderVideoPlaylistCards(container);
+        return;
+    } else {
+        renderExternalActivityCards(container);
+        return;
+    }
+}
+
+function renderVideoPlaylistCards(container) {
     let html = '';
 
     manualEntryPlaylist.videos.forEach((video, index) => {
@@ -239,6 +270,57 @@ function renderManualEntryExercises() {
     container.innerHTML = html;
 }
 
+function renderExternalActivityCards(container) {
+    let html = '';
+
+    manualEntryPlaylist.others.forEach((activity, index) => {
+        const progress = manualEntryProgress[activity.id] || { minutes: activity.minutes, completed: false };
+        const descHTML = activity.description
+            ? `<p class="text-base text-text-secondary mt-1">${activity.description}</p>`
+            : '';
+
+        html += `
+            <div class="bg-subtle border border-border-light rounded-[10px] p-4 px-5 mb-3">
+                <div class="flex items-start gap-3">
+                    <span class="w-7 h-7 rounded-full bg-gradient-to-br from-[#667eea] to-[#764ba2] text-white text-base font-bold flex items-center justify-center shrink-0 mt-0.5">${index + 1}</span>
+                    <div class="flex-1 min-w-0">
+                        <h4 class="text-base font-semibold text-text-primary">${activity.title}</h4>
+                        ${descHTML}
+                        <div class="flex items-center gap-3 mt-3">
+                            <span class="text-base font-medium text-text-tertiary">Minutes</span>
+                            <div class="flex items-center border border-border-light rounded-md overflow-hidden">
+                                <button type="button" class="rep-btn" onclick="manualDecrementMinutes('${activity.id}')">
+                                    <i class="fa-solid fa-minus"></i>
+                                </button>
+                                <input type="number"
+                                       id="manual_minutes_${activity.id}"
+                                       class="rep-input"
+                                       value="${progress.minutes ?? 0}"
+                                       min="0"
+                                       max="600"
+                                       onchange="manualUpdateMinutes('${activity.id}')">
+                                <button type="button" class="rep-btn" onclick="manualIncrementMinutes('${activity.id}')">
+                                    <i class="fa-solid fa-plus"></i>
+                                </button>
+                            </div>
+                            <label class="relative flex items-center justify-center cursor-pointer ml-auto">
+                                <input type="checkbox"
+                                       class="set-checkbox"
+                                       id="manual_external_${activity.id}"
+                                       ${progress.completed ? 'checked' : ''}
+                                       onchange="manualToggleExternalActivity('${activity.id}')">
+                                <span class="checkmark-box"><i class="fa-solid fa-check"></i></span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+    });
+
+    container.innerHTML = html;
+}
+
 // ==================== Tap-to-Preview Video ====================
 function toggleVideoPreview(videoId) {
     const wrapper = document.getElementById(`manual-preview-${videoId}`);
@@ -298,7 +380,7 @@ function closeVideoPreview() {
     }
 }
 
-// ==================== Rep/Set Controls ====================
+// ==================== Rep/Set Controls ===================
 function manualIncrementReps(videoId, setNumber, isTimeBased) {
     const input = document.getElementById(`manual_reps_${videoId}_set${setNumber}`);
     if (!input) return;
@@ -353,6 +435,51 @@ function manualUpdateReps(videoId, setNumber, isTimeBased) {
     };
 
     updateManualEntrySaveState();
+}
+
+function manualIncrementMinutes(activityId) {
+    const input = document.getElementById(`manual_minutes_${activityId}`);
+    if (!input) return;
+
+    let value = parseInt(input.value) || 0;
+    value = Math.min(600, value + 5);
+    input.value = value;
+
+    if (!manualEntryProgress[activityId]) manualEntryProgress[activityId] = {};
+    manualEntryProgress[activityId] = {
+        ...manualEntryProgress[activityId],
+        minutes: value
+    };
+    updateManualEntrySaveState();
+}
+
+function manualDecrementMinutes(activityId) {
+    const input = document.getElementById(`manual_minutes_${activityId}`);
+    if (!input) return;
+
+    let value = parseInt(input.value) || 0;
+    value = Math.max(0, value - 5);
+    input.value = value;
+
+    if (!manualEntryProgress[activityId]) manualEntryProgress[activityId] = {};
+    manualEntryProgress[activityId] = {
+        ...manualEntryProgress[activityId],
+        minutes: value
+    };
+    updateManualEntrySaveState();
+}
+
+function manualUpdateMinutes(activityId) {
+    const checkbox = document.getElementById(`manual_external_${activityId}`);
+    if (!checkbox) return;
+
+    if (!manualEntryProgress[activityId]) manualEntryProgress[activityId] = {};
+    manualEntryProgress[activityId] = {
+        ...manualEntryProgress[activityId],
+        completed: checkbox.checked
+    };
+    updateManualEntrySaveState();
+    renderManualEntryConflictWarning();
 }
 
 function manualToggleSet(videoId, setNumber) {
@@ -445,16 +572,21 @@ function renderManualEntryConflictWarning() {
     const hasOtherPlaylistData = Object.keys(dayData).some(pid => pid !== playlistId);
 
     // Is anything currently checked in the form?
-    const hasAnyCompletedSet = manualEntryProgress && Object.values(manualEntryProgress).some(videoData =>
-        Object.keys(videoData).some(k => k.startsWith('set') && videoData[k]?.completed)
-    );
+    let hasAnyCompleted;
+    if (manualEntryPlaylist?.type === 'video') {
+        hasAnyCompleted = manualEntryProgress && Object.values(manualEntryProgress).some(videoData =>
+            Object.keys(videoData).some(k => k.startsWith('set') && videoData[k]?.completed)
+        );
+    } else {
+        hasAnyCompleted = Object.values(manualEntryProgress).some(a => a?.completed);
+    };
 
     let icon, message;
 
-    if (isEditingThisPlaylist && !hasAnyCompletedSet) {
+    if (isEditingThisPlaylist && !hasAnyCompleted) {
         // Deletion case
         icon = 'fa-triangle-exclamation';
-        message = "Saving with no sets checked will <strong>clear this playlist's data</strong> for this day.";
+        message = "Saving with nothing checked will <strong>clear this playlist's data</strong> for this day.";
     } else if (isEditingThisPlaylist) {
         // Replacement case
         icon = 'fa-circle-info';
@@ -479,19 +611,26 @@ function _manualEntryHasChanges() {
     if (originalManualEntryProgressSnapshot === null) return false;
     
     const original = JSON.parse(originalManualEntryProgressSnapshot);
-    
-    for (const videoId of Object.keys(manualEntryProgress)) {
-        const currentVideo = manualEntryProgress[videoId] || {};
-        const originalVideo = original[videoId] || {};
-        
-        for (const setKey of Object.keys(currentVideo)) {
-            if (!setKey.startsWith('set')) continue;
-            if (_setHasMeaningfulChange(originalVideo[setKey], currentVideo[setKey])) {
+
+    if (manualEntryPlaylist?.type === 'video') {
+        for (const videoId of Object.keys(manualEntryProgress)) {
+            const currentVideo = manualEntryProgress[videoId] || {};
+            const originalVideo = original[videoId] || {};
+            
+            for (const setKey of Object.keys(currentVideo)) {
+                if (!setKey.startsWith('set')) continue;
+                if (_setHasMeaningfulChange(originalVideo[setKey], currentVideo[setKey])) {
+                    return true;
+                }
+            }
+        }
+    } else {
+        for (const activityId of Object.keys(manualEntryProgress)) {
+            if (_externalHasMeaningfulChange(original[activityId], manualEntryProgress[activityId])) {
                 return true;
             }
         }
     }
-    
     return false;
 }
 
@@ -574,15 +713,20 @@ async function saveManualEntry() {
     const weekBefore = calculateUserWeek();
     const completedBefore = isProgramCompleted();
 
-    // Did the user mark any set as completed across all exercises?
-    const hasAnyCompletedSet = Object.values(manualEntryProgress).some(videoData =>
-        Object.keys(videoData).some(k =>
-            k.startsWith('set') && videoData[k]?.completed
-        )
-    );
+    // Did the user mark anything completed?
+    let hasAnyCompleted;
+    if (manualEntryPlaylist?.type === 'video') {
+        hasAnyCompleted = Object.values(manualEntryProgress).some(videoData =>
+            Object.keys(videoData).some(k =>
+                k.startsWith('set') && videoData[k]?.completed
+            )
+        );
+    } else {
+        hasAnyCompleted = Object.values(manualEntryProgress).some(a => a?.completed);
+    }
 
     // Confirm the destructive case before doing anything irreversible.
-    const isDeletingPlaylist = !hasAnyCompletedSet && completionHistory?.[selectedDate]?.[playlistId];
+    const isDeletingPlaylist = !hasAnyCompleted && completionHistory?.[selectedDate]?.[playlistId];
     if (isDeletingPlaylist) {
         const ok = confirm("Save with no sets checked? This will clear this playlist's data for this day.");
         if (!ok) return;
@@ -602,18 +746,26 @@ async function saveManualEntry() {
             progressData = JSON.parse(JSON.stringify(completionHistory[selectedDate]));
         }
 
-        if (hasAnyCompletedSet) {
-            // Strip exercises with no completed sets — "uncheck = removed exercise"
-            const cleanedProgress = {};
-            Object.keys(manualEntryProgress).forEach(videoId => {
-                const videoData = manualEntryProgress[videoId];
-                const hasCompleted = Object.keys(videoData).some(k =>
-                    k.startsWith('set') && videoData[k]?.completed
-                );
-                if (hasCompleted) {
-                    cleanedProgress[videoId] = videoData;
-                }
-            });
+        if (hasAnyCompleted) {
+            // Strip exercises with no completion — "uncheck = removed exercise"
+            if (manualEntryPlaylist?.type === 'video') {
+                const cleanedProgress = {};
+                Object.keys(manualEntryProgress).forEach(videoId => {
+                    const videoData = manualEntryProgress[videoId];
+                    const hasCompleted = Object.keys(videoData).some(k =>
+                        k.startsWith('set') && videoData[k]?.completed
+                    );
+                    if (hasCompleted) {
+                        cleanedProgress[videoId] = videoData;
+                    }
+                });
+            } else {
+                Object.keys(manualEntryProgress).forEach(activityId => {
+                    if (manualEntryProgress[activityId]?.completed) {
+                        cleanedProgress[activityId] = manualEntryProgress[activityId];
+                    }
+                });
+            }
             progressData[playlistId] = cleanedProgress;
         } else {
             // Editing existing data and unchecked everything → delete this playlist for the day

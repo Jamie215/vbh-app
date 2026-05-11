@@ -137,6 +137,23 @@ function _setHasMeaningfulChange(originalSet, currentSet) {
     return false;
 }
 
+/**
+ * Parallel of _setHasMeaningfulChange for external activities.
+ * True if completion flipped, OR currently completed and minutes differ.
+ */
+function _externalHasMeaningfulChange(originalActivity, currentActivity) {
+    const orig = originalActivity || {};
+    const curr = currentActivity || {};
+
+    if ((orig.completed ?? false) !== (curr.completed ?? false)) return true;
+
+    if (curr.completed) {
+        if ((orig.minutes ?? 0) !== (curr.minutes ?? 0)) return true;
+    }
+
+    return false;
+}
+
 // ==================== UI Update Functions ====================
 async function updateUIForAuthenticatedUser(user) {
     const signoutBtn = document.getElementById('signout-button');
