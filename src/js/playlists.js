@@ -257,7 +257,7 @@ const PLAYLISTS = [
     {
         id: 'external-activity',
         title: 'Other - External Activity from HandsUp',
-        description: 'Other workouts apart from HandsUP program. These are supplementary tracking and does not count towards program completion.',
+        description: 'Note: These are supplementary tracking and does not count towards program completion.',
         type: 'external',
         videos: [],
         others: [

@@ -187,7 +187,7 @@ function renderManualEntryExercises() {
 }
 
 function renderVideoPlaylistCards(container) {
-    let html = `<p class="text-base text-text-secondary mt-1 mb-1">${manualEntryPlaylist.description}</p>`;
+    let html = '';
 
     manualEntryPlaylist.videos.forEach((video, index) => {
         const videoProgress = manualEntryProgress[video.id] || {};
@@ -271,7 +271,7 @@ function renderVideoPlaylistCards(container) {
 }
 
 function renderExternalActivityCards(container) {
-    let html = `<p class="text-base text-text-secondary mt-1 mb-1">${manualEntryPlaylist.description}</p>`;
+    let html = `<p class="text-base text-text-secondary mt-1 mb-2">${manualEntryPlaylist.description}</p>`;
 
     manualEntryPlaylist.others.forEach((activity, index) => {
         const progress = manualEntryProgress[activity.id] || { minutes: activity.minutes, completed: false };
