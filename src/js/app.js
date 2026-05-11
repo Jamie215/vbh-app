@@ -1606,19 +1606,17 @@ function renderTodayCard() {
     } else {
         // Today (any count) or past day with any activity
         bottomContent = `
-            <div class="flex flex-row items-center justify-center gap-4">
+            <div class="flex flex-row items-center justify-between gap-4">
                 <div class="flex flex-col">
-                    <p class="text-[3rem] font-bold leading-none mb-1">${counts.exercises}</p>
+                    <p class="text-[3.5rem] font-bold leading-none mb-1">${counts.exercises}</p>
                     <p class="text-base opacity-90">
-                        <i class="fa-solid fa-dumbbell fa-rotate-by mr-1" style="--fa-rotate-angle: 135deg;"></i>
                         Program ${counts.exercises === 1 ? 'Exercise' : 'Exercises'} Completed
                     </p>
                 </div>
-                <div class="h-14 w-0.5 bg-white/20 max-md:hidden"></div>
+                <div class="h-16 w-1 bg-white"></div>
                 <div class="flex flex-col">
-                    <p class="text-[3rem] font-bold leading-none mb-1">${counts.activities}</p>
-                    <p class="text-sm opacity-90">
-                        <i class="fa-solid fa-person-running mr-1"></i>
+                    <p class="text-[3.5rem] font-bold leading-none mb-1">${counts.activities}</p>
+                    <p class="text-base opacity-90">
                         External ${counts.activities === 1 ? 'Activity' : 'Activities'} Logged
                     </p>
                 </div>
