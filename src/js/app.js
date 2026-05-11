@@ -1594,7 +1594,7 @@ function renderTodayCard() {
     const showLogButton = !isToday && _isDateEligibleForManualEntry(targetISO);
 
     let bottomContent;
-    if (total && !isToday) {
+    if (!total && !isToday) {
         // Past day with no activity — show invitation to log
         bottomContent = `
             <p class="text-base opacity-90 mb-4">No workout logged this day.</p>
