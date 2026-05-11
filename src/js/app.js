@@ -962,7 +962,7 @@ function loadPlaylists() {
 
     loadTodaysWorkout();
 
-    PLAYLISTS.forEach(playlist => {
+    PLAYLISTS.filter(p => p.type === 'video').forEach(playlist => {
         const card = createPlaylistCard(playlist);
         grid.appendChild(card);
     });
@@ -1070,6 +1070,11 @@ function showPlaylist(playlistId) {
     currentPlaylist = PLAYLISTS.find(p => p.id === playlistId);
     if (!currentPlaylist) return;
 
+    // External playlists aren't browsable
+    if (currentPlaylist.type !== 'video') {
+        showExercises();
+        return;
+    }
     pushRoute('/exercises/' + playlistId);
     hideAllViews();
 
@@ -1297,11 +1302,12 @@ function _dayHasAnyCompletedExercise(dayProgress) {
     if (!dayProgress) return false;
     for (const playlistId of Object.keys(dayProgress)) {
         const pp = dayProgress[playlistId];
-        for (const videoId of Object.keys(pp)) {
-            const vp = pp[videoId];
-            if (vp && typeof vp === 'object' && !Array.isArray(vp)) {
-                if (Object.keys(vp).some(k => k.startsWith('set') && vp[k]?.completed)) return true;
-            } else if (typeof vp === 'number' && vp > 0) {
+        for (const itemId of Object.keys(pp)) {
+            const ip = pp[itemId];
+            if (ip && typeof ip === 'object' && !Array.isArray(ip)) {
+                if (ip.completed === true) return true;
+                if (Object.keys(ip).some(k => k.startsWith('set') && ip[k]?.completed)) return true;
+            } else if (typeof ip === 'number' && ip > 0) {
                 return true;
             }
         }
@@ -1577,7 +1583,7 @@ function renderTodayCard() {
     const dayName = target.toLocaleDateString('en-US', { weekday: 'long' });
     const month = target.toLocaleDateString('en-US', { month: 'long' });
     const date = target.getDate();
-    const count = _countCompletedExercisesForDate(targetISO);
+    const counts = _countCompletedForDate(targetISO);
 
     const headerLabel = isToday
         ? `Today, ${dayName} ${month} ${date}`
@@ -1587,7 +1593,7 @@ function renderTodayCard() {
     const showLogButton = !isToday && _isDateEligibleForManualEntry(targetISO);
 
     let bottomContent;
-    if (count === 0 && !isToday) {
+    if ((counts.exercises + counts.activities) === 0 && !isToday) {
         // Past day with no activity — show invitation to log
         bottomContent = `
             <p class="text-base opacity-90 mb-4">No workout logged this day.</p>
@@ -1597,11 +1603,23 @@ function renderTodayCard() {
                 </button>` : ''}
         `;
     } else {
-        // Today (any count) or past day with activity
+        // Today (any count) or past day with any activity
         bottomContent = `
-            <div class="flex flex-col">
-                <p class="text-[3.5rem] font-bold leading-none mb-1">${count}</p>
-                <p class="text-base opacity-90"><i class="fa-solid fa-dumbbell fa-rotate-by mr-1" style="--fa-rotate-angle: 135deg;"></i> Exercises Completed</p>
+            <div class="flex flex-col gap-4">
+                <div class="flex flex-col">
+                    <p class="text-[3.5rem] font-bold leading-none mb-1">${counts.exercises}</p>
+                    <p class="text-base opacity-90">
+                        <i class="fa-solid fa-dumbbell fa-rotate-by mr-1" style="--fa-rotate-angle: 135deg;"></i>
+                        Program ${counts.exercises === 1 ? 'Exercise' : 'Exercises'} Completed
+                    </p>
+                </div>
+                <div class="flex flex-col">
+                    <p class="text-2xl font-semibold leading-none mb-1">${counts.activities}</p>
+                    <p class="text-sm opacity-80">
+                        <i class="fa-solid fa-person-running mr-1"></i>
+                        External ${counts.activities === 1 ? 'Activity' : 'Activities'} Logged
+                    </p>
+                </div>
             </div>
             ${showLogButton ? `
                 <button onclick="openManualEntryModal('${targetISO}')" class="mt-4 py-2 px-4 bg-white text-brand-dark rounded-md text-sm font-medium border-none cursor-pointer transition-all hover:-translate-y-px">
@@ -1624,22 +1642,28 @@ function renderTodayCard() {
 }
 
 // Counts completed exercises for an arbitrary date
-function _countCompletedExercisesForDate(iso) {
+function _countCompletedForDate(iso) {
     const dayProgress = completionHistory?.[iso];
-    if (!dayProgress) return 0;
-    let count = 0;
+    if (!dayProgress) return { exercises: 0, activities: 0};
+    
+    let exercises = 0;
+    let activities = 0;
+    
     for (const playlistId of Object.keys(dayProgress)) {
+        const playlist = PLAYLISTS.find(p => p.id === playlistId);
+        const isExternal = playlist?.type === 'external';
         const pp = dayProgress[playlistId];
-        for (const videoId of Object.keys(pp)) {
-            const vp = pp[videoId];
-            if (vp && typeof vp === 'object' && !Array.isArray(vp)) {
-                if (Object.keys(vp).some(k => k.startsWith('set') && vp[k]?.completed)) count++;
-            } else if (typeof vp === 'number' && vp > 0) {
-                count++;
-            }
+
+        for (const itemId of Object.keys(pp)) {
+            const ip = pp[itemId];
+            if (ip && typeof ip === 'object' && !Array.isArray(ip)) {
+                if (isExternal) {
+                    if (ip.completed === true) activities++;
+                } else if (Object.keys(ip).some(k => k.startsWith('set') && ip[k]?.completed)) exercises++;
+            } 
         }
     }
-    return count;
+    return { exercises, activities };
 }
 
 // ---------- Education home card ----------
