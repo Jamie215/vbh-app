@@ -293,7 +293,8 @@ function renderExternalActivityCards(container) {
                 <div class="flex-1 min-w-0">
                         <h4 class="text-base font-semibold text-text-primary">${activity.title}</h4>
                         ${descHTML}
-                        <div class="items-center gap-3 mt-3 ${progress.completed ? 'flex' :'hidden'}"
+                        <p class="text-base ${progress.completed ? 'flex':'hidden'}">How much time did you spend doing this activity?</p>
+                        <div class="items-center gap-3 mt-3 ${progress.completed ? 'flex flex-row' :'hidden'}"
                              id="manual_minutes_row_${activity.id}">
                             <span class="text-base font-medium text-text-tertiary">Minutes</span>
                             <div class="flex items-center border border-border-light rounded-md overflow-hidden">
