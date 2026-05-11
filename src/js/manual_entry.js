@@ -501,6 +501,20 @@ function manualToggleSet(videoId, setNumber) {
     renderManualEntryConflictWarning();
 }
 
+function manualToggleExternalActivity(activityId) {
+    const checkbox = document.getElementById(`manual_external_${activityId}`);
+    if (!checkbox) return;
+
+    if (!manualEntryProgress[activityId]) manualEntryProgress[activityId] = {};
+    manualEntryProgress[activityId] = {
+        ...manualEntryProgress[activityId],
+        completed: checkbox.checked
+    };
+
+    updateManualEntrySaveState();
+    renderManualEntryConflictWarning();
+}
+
 // True iff every set for this exercise is currently marked completed.
 function _manualEntryAllSetsCompleted(videoId, totalSets) {
     if (!totalSets) return false;
