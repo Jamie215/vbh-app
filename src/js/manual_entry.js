@@ -293,7 +293,7 @@ function renderExternalActivityCards(container) {
                 <div class="flex-1 min-w-0">
                         <h4 class="text-base font-semibold text-text-primary">${activity.title}</h4>
                         ${descHTML}
-                        <div class="flex items-center gap-3 mt-3 visibility: ${progress.completed ? 'visible' :'hidden'}">
+                        <div class="flex items-center gap-3 mt-3 visibility: ${progress.completed ? 'visible' :'invisible'}">
                             <span class="text-base font-medium text-text-tertiary">Minutes</span>
                             <div class="flex items-center border border-border-light rounded-md overflow-hidden">
                                 <button type="button" class="rep-btn" onclick="manualDecrementMinutes('${activity.id}')">
