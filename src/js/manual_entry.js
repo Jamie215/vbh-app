@@ -276,17 +276,24 @@ function renderExternalActivityCards(container) {
     manualEntryPlaylist.others.forEach((activity, index) => {
         const progress = manualEntryProgress[activity.id] || { minutes: activity.minutes, completed: false };
         const descHTML = activity.description
-            ? `<p class="text-base text-text-secondary mt-1">${activity.description}</p>`
+            ? `<p class="text-base text-text-secondary mt-1 mb-2">${activity.description}</p>`
             : '';
 
         html += `
             <div class="bg-subtle border border-border-light rounded-[10px] p-4 px-5 mb-3">
                 <div class="flex items-start gap-3">
-                    <span class="w-7 h-7 rounded-full bg-gradient-to-br from-[#667eea] to-[#764ba2] text-white text-base font-bold flex items-center justify-center shrink-0 mt-0.5">${index + 1}</span>
-                    <div class="flex-1 min-w-0">
+                <label class="relative flex items-center justify-center cursor-pointer ml-auto">
+                    <input type="checkbox"
+                            class="set-checkbox"
+                            id="manual_external_${activity.id}"
+                            ${progress.completed ? 'checked' : ''}
+                            onchange="manualToggleExternalActivity('${activity.id}')">
+                    <span class="checkmark-box"><i class="fa-solid fa-check"></i></span>
+                </label>    
+                <div class="flex-1 min-w-0">
                         <h4 class="text-base font-semibold text-text-primary">${activity.title}</h4>
                         ${descHTML}
-                        <div class="flex items-center gap-3 mt-3">
+                        <div class="flex items-center gap-3 mt-3 visibility: ${progress.completed ? 'visible' :'hidden'}">
                             <span class="text-base font-medium text-text-tertiary">Minutes</span>
                             <div class="flex items-center border border-border-light rounded-md overflow-hidden">
                                 <button type="button" class="rep-btn" onclick="manualDecrementMinutes('${activity.id}')">
@@ -303,14 +310,6 @@ function renderExternalActivityCards(container) {
                                     <i class="fa-solid fa-plus"></i>
                                 </button>
                             </div>
-                            <label class="relative flex items-center justify-center cursor-pointer ml-auto">
-                                <input type="checkbox"
-                                       class="set-checkbox"
-                                       id="manual_external_${activity.id}"
-                                       ${progress.completed ? 'checked' : ''}
-                                       onchange="manualToggleExternalActivity('${activity.id}')">
-                                <span class="checkmark-box"><i class="fa-solid fa-check"></i></span>
-                            </label>
                         </div>
                     </div>
                 </div>
