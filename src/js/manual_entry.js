@@ -296,20 +296,22 @@ function renderExternalActivityCards(container) {
                         <div class="items-center gap-3 mt-3 ${progress.completed ? 'flex' :'hidden'}"
                              id="manual_minutes_row_${activity.id}">
                             <p class="text-base mt-1 mb-2">How much time did you spend doing this activity?</p>
-                            <div class="flex flex-row items-center border border-border-light rounded-md overflow-hidden">
-                                <button type="button" class="rep-btn" onclick="manualDecrementMinutes('${activity.id}')">
-                                    <i class="fa-solid fa-minus"></i>
-                                </button>
-                                <input type="number"
-                                       id="manual_minutes_${activity.id}"
-                                       class="rep-input"
-                                       value="${progress.minutes ?? 0}"
-                                       min="0"
-                                       max="600"
-                                       onchange="manualUpdateMinutes('${activity.id}')">
-                                <button type="button" class="rep-btn" onclick="manualIncrementMinutes('${activity.id}')">
-                                    <i class="fa-solid fa-plus"></i>
-                                </button>
+                            <div class="flex flex-row items-center">
+                                <div class="flex flex-row items-center border border-border-light rounded-md overflow-hidden w-fit">
+                                    <button type="button" class="rep-btn" onclick="manualDecrementMinutes('${activity.id}')">
+                                        <i class="fa-solid fa-minus"></i>
+                                    </button>
+                                    <input type="number"
+                                        id="manual_minutes_${activity.id}"
+                                        class="rep-input"
+                                        value="${progress.minutes ?? 0}"
+                                        min="0"
+                                        max="600"
+                                        onchange="manualUpdateMinutes('${activity.id}')">
+                                    <button type="button" class="rep-btn" onclick="manualIncrementMinutes('${activity.id}')">
+                                        <i class="fa-solid fa-plus"></i>
+                                    </button>
+                                </div>
                                 <span class="text-base font-medium text-text-tertiary">Minutes</span>
                             </div>
                         </div>
