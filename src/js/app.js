@@ -1606,7 +1606,7 @@ function renderTodayCard() {
     } else {
         // Today (any count) or past day with any activity
         bottomContent = `
-            <div class="flex flex-row items-center justify-between gap-4 p-8">
+            <div class="flex flex-row items-center justify-center gap-8">
                 <div class="flex flex-col">
                     <p class="text-[3.5rem] font-bold leading-none mb-1">${counts.exercises}</p>
                     <p class="text-base opacity-90">
