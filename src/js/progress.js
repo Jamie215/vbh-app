@@ -481,55 +481,45 @@ function _aggregateExternal(dateStrs) {
 
 // ---------- Chart factories ----------
 // Builds a wrap-flowed HTML legend below a chart's canvas. Each pill toggles
-// the corresponding segment's visibility via Chart.js's getDataVisibility /
-// toggleDataVisibility API — these flip a per-index hidden flag the chart
-// reads on each draw, so toggling redraws the chart and triggers any plugin
-// hooks (e.g., the donut center text recomputes its visible total).
+// the corresponding segment's visibility via Chart.js's data visibility API.
 //
-// State is per-chart-instance and resets every time _renderBreakdownBlocks
-// destroys and re-creates charts, which is exactly the requested behavior:
-// switch tabs or click a different day → fresh state.
+// Visual state is controlled by a single `is-hidden` class on the pill,
+// rather than inline styles — inline styles on inner spans were getting
+// overridden by Tailwind utilities and were hard to reason about.
 function _renderCustomLegend(containerId, chart, labels, colors) {
     const container = document.getElementById(containerId);
     if (!container) return;
 
     container.innerHTML = '';
-    container.className = 'flex flex-wrap gap-x-3 gap-y-1.5 mt-2 px-1';
+    container.className = 'flex flex-wrap gap-x-3 gap-y-1.5 mt-3 px-1';
 
     labels.forEach((label, index) => {
         const pill = document.createElement('button');
         pill.type = 'button';
-        // Inline button reset: Tailwind doesn't strip default button styling
-        // and we want these to feel like inline interactive labels, not buttons.
-        pill.className = 'inline-flex items-center gap-1.5 bg-transparent border-none p-0 text-sm cursor-pointer transition-opacity hover:opacity-70';
+        pill.className = 'legend-pill';
 
         const swatch = document.createElement('span');
-        swatch.className = 'inline-block w-3 h-3 rounded-sm shrink-0';
-        swatch.style.backgroundColor = colors[index];
+        swatch.className = 'legend-swatch';
+        swatch.style.setProperty('--swatch-color', colors[index]);
 
         const text = document.createElement('span');
-        text.className = 'text-text-primary';
+        text.className = 'legend-label';
         text.textContent = label;
 
         pill.appendChild(swatch);
         pill.appendChild(text);
 
-        // Sync visual state with chart's current visibility — needed when
-        // re-rendering legends after the chart has loaded.
-        const syncVisualState = () => {
+        // Reflect chart's current visibility on this pill.
+        const sync = () => {
             const visible = chart.getDataVisibility(index);
-            swatch.style.opacity = visible ? '1' : '0.25';
-            swatch.style.outline = visible ? 'none' : `1.5px solid ${colors[index]}`;
-            text.style.textDecoration = visible ? 'none' : 'line-through';
-            text.style.color = visible ? '' : '#94a3b8';
+            pill.classList.toggle('is-hidden', !visible);
         };
-        syncVisualState();
+        sync();
 
         pill.addEventListener('click', () => {
-            // Works for both polar and doughnut — both use index-based visibility.
             chart.toggleDataVisibility(index);
             chart.update();
-            syncVisualState();
+            sync();
         });
 
         container.appendChild(pill);
@@ -736,7 +726,9 @@ function _renderBreakdownBlocks(container, headerHTML, programByPlaylist, extern
                     <h5 class="text-base font-semibold text-text-primary m-0">${label}</h5>
                 </div>
                 <div class="flex-1 min-h-0 relative">
-                    <canvas id="detail-polar-${pid}"></canvas>
+                    <div class="absolute inset-0">
+                        <canvas id="detail-polar-${pid}"></canvas>
+                    </div>
                 </div>
                 <div id="detail-polar-${pid}-legend" class="shrink-0"></div>
             </div>
