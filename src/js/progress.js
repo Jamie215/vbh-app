@@ -542,16 +542,7 @@ function _createProgramPolar(canvasId, playlistId, programData, isAllTime) {
                     labels: {
                         font: { size: 10 },
                         boxWidth: 10,
-                        padding: 5,
-                        // Truncate long exercise names — full title is still
-                        // shown in the tooltip on hover.
-                        generateLabels: (chart) => {
-                            const original = Chart.defaults.plugins.legend.labels.generateLabels(chart);
-                            return original.map(label => ({
-                                ...label,
-                                text: label.text.length > 22 ? label.text.slice(0, 20) + '…' : label.text
-                            }));
-                        }
+                        padding: 5
                     }
                 },
                 tooltip: {
