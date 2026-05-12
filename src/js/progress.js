@@ -731,10 +731,8 @@ function _renderBreakdownBlocks(container, headerHTML, programByPlaylist, extern
                     <span class="w-3 h-3 rounded-full" style="background:${dotColor}"></span>
                     <h5 class="text-base font-semibold text-text-primary m-0">${label}</h5>
                 </div>
-                <div class="h-[280px] relative">
-                    <div class="absolute inset-0">
-                        <canvas id="detail-polar-${pid}"></canvas>
-                    </div>
+                <div class="h-[280px] relative shrink-0">
+                    <canvas id="detail-polar-${pid}"></canvas>
                 </div>
                 ${_buildAccordionHTML(`detail-polar-${pid}-accordion`, 'Exercise Types', itemCount)}
             </div>
@@ -749,10 +747,8 @@ function _renderBreakdownBlocks(container, headerHTML, programByPlaylist, extern
                     <span class="w-3 h-3 rounded-full" style="background:${CATEGORY_COLORS.external}"></span>
                     <h5 class="text-base font-semibold text-text-primary m-0">External Activities</h5>
                 </div>
-                <div class="h-[240px] relative">
-                    <div class="absolute inset-0">
-                        <canvas id="detail-donut-external"></canvas>
-                    </div>
+                <div class="h-[240px] relative shrink-0">
+                    <canvas id="detail-donut-external"></canvas>
                 </div>
                 ${_buildAccordionHTML('detail-donut-external-accordion', 'Activity Types', itemCount)}
             </div>
