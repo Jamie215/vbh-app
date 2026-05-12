@@ -491,7 +491,7 @@ function _renderCustomLegend(containerId, chart, labels, colors) {
     if (!container) return;
 
     container.innerHTML = '';
-    container.className = 'flex flex-wrap gap-x-3 gap-y-1.5 mt-3 px-1';
+    container.className = 'grid grid-cols-2 gap-x-3 gap-y-2 mt-3 px-1';
 
     labels.forEach((label, index) => {
         const pill = document.createElement('button');
