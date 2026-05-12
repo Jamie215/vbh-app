@@ -857,7 +857,6 @@ async function saveManualEntry() {
                 loadProgressStats();
                 renderWorkoutHistoryChart();
                 renderDetailPanel();
-                loadRecentActivity();
             }
 
             // Home view shows the "week started" phrase, total days, calendar

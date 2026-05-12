@@ -15,6 +15,63 @@ let chartData = {
     detailedData: {}
 };
 
+// Centralized color map for category-coded visualizations across the progress
+// view. Single source of truth so chart segments, lines, bars, and detail
+// panels stay consistent.
+const CATEGORY_COLORS = {
+    beginner: '#10b981',  // green
+    advanced: '#8b5cf6',  // purple
+    external: '#f59e0b',  // amber
+    program:  '#475569'   // slate gray — combined program-sets line
+};
+
+// Total program sets completed across all time. Walks completionHistory and
+// counts every set with completed:true across both beginner and advanced
+// playlists. External activities are excluded.
+function _getTotalProgramSetsCompleted() {
+    if (!completionHistory) return 0;
+    let total = 0;
+    for (const dateStr of Object.keys(completionHistory)) {
+        const dayProgress = completionHistory[dateStr];
+        for (const playlistId of Object.keys(dayProgress)) {
+            const playlist = PLAYLISTS.find(p => p.id === playlistId);
+            if (!playlist || playlist.type !== 'video') continue;
+            const playlistProgress = dayProgress[playlistId];
+            for (const videoId of Object.keys(playlistProgress)) {
+                const videoProgress = playlistProgress[videoId];
+                if (!videoProgress || typeof videoProgress !== 'object') continue;
+                for (const setKey of Object.keys(videoProgress)) {
+                    if (setKey.startsWith('set') && videoProgress[setKey]?.completed) {
+                        total++;
+                    }
+                }
+            }
+        }
+    }
+    return total;
+}
+
+// Total minutes from external activities marked completed across all time.
+function _getTotalExternalMinutes() {
+    if (!completionHistory) return 0;
+    let total = 0;
+    for (const dateStr of Object.keys(completionHistory)) {
+        const dayProgress = completionHistory[dateStr];
+        for (const playlistId of Object.keys(dayProgress)) {
+            const playlist = PLAYLISTS.find(p => p.id === playlistId);
+            if (!playlist || playlist.type !== 'external') continue;
+            const playlistProgress = dayProgress[playlistId];
+            for (const activityId of Object.keys(playlistProgress)) {
+                const activity = playlistProgress[activityId];
+                if (activity?.completed === true) {
+                    total += activity.minutes || 0;
+                }
+            }
+        }
+    }
+    return total;
+}
+
 // ==================== Show My Progress View ====================
 function showMyProgress() {
     if (!currentUser) {
@@ -42,7 +99,6 @@ function showMyProgress() {
     loadProgressStats();
     renderWorkoutHistoryChart();
     renderDetailPanel();
-    loadRecentActivity();
 
     const footer = document.getElementById('site-footer');
     if (footer) footer.classList.toggle('hidden', false);
@@ -50,12 +106,17 @@ function showMyProgress() {
 
 // ==================== Summary Stats ====================
 function loadProgressStats() {
-    // Total workout days
-    const totalDays = completionHistory ? Object.keys(completionHistory).length : 0;
-    const totalDaysEl = document.getElementById('total-workout-days');
-    if (totalDaysEl) totalDaysEl.textContent = totalDays;
+    // Total program sets completed
+    const totalSets = _getTotalProgramSetsCompleted();
+    const totalSetsEl = document.getElementById('total-program-sets');
+    if (totalSetsEl) totalSetsEl.textContent = totalSets;
 
-    // Program program bar
+    // Total external activity minutes
+    const totalMinutes = _getTotalExternalMinutes();
+    const totalMinutesEl = document.getElementById('total-external-minutes');
+    if (totalMinutesEl) totalMinutesEl.textContent = totalMinutes;
+
+    // Program progress bar
     const currentWeek = calculateUserWeek();
     const completed = isProgramCompleted();
     const progressFill = document.getElementById('program-progress-fill');
@@ -63,25 +124,26 @@ function loadProgressStats() {
     const progressLabel = document.getElementById('program-progress-label');
 
     if (progressFill && progressText && progressLabel) {
-        if(completed) {
+        if (completed) {
             progressFill.style.width = '100%';
             progressFill.classList.add('completed');
             progressText.textContent = 'Complete!';
-            if (progressLabel) progressLabel.textContent = 'Program Completed 🎉';
+            progressLabel.textContent = 'Program Completed 🎉';
         } else {
             const percentage = Math.round((currentWeek / 6) * 100);
             progressFill.style.width = `${percentage}%`;
             progressFill.classList.remove('completed');
             progressText.textContent = `Week ${currentWeek} of 6`;
-            if (progressLabel) progressLabel.textContent = 'Program Progress';
+            progressLabel.textContent = 'Program Progress';
         }
     }
 }
 
 // ==================== Workout History Chart ====================
-// Each bar is height 0-3, representing categorical attendance for the day:
-// did the user log any beginner / advanced / external activity. The detail
-// panel surfaces the rich breakdown (sets, reps, minutes) when a bar is clicked.
+// Combo chart over every date with logged activity:
+//   - Slate line: total program sets completed that day (beginner + advanced)
+//   - Amber bars: count of external activities logged that day
+// Clicking a bar or line point selects that date in the detail panel.
 function renderWorkoutHistoryChart() {
     const canvas = document.getElementById('workout-history-chart');
     if (!canvas) return;
@@ -99,7 +161,7 @@ function renderWorkoutHistoryChart() {
             chartContainer.innerHTML = `
                 <canvas id="workout-history-chart"></canvas>
                 <div class="absolute inset-0 flex flex-col items-center justify-center text-text-secondary text-center">
-                    <i class="fa-solid fa-chart-bar text-5xl text-border-medium mb-4"></i>
+                    <i class="fa-solid fa-chart-line text-5xl text-border-medium mb-4"></i>
                     <p class="text-base max-w-[300px]">No workout data yet. Complete some exercises to see your progress chart!</p>
                 </div>
             `;
@@ -107,132 +169,90 @@ function renderWorkoutHistoryChart() {
         return;
     }
 
-    // Get sorted dates (last 14 sessions max for readability)
-    const sortedDates = Object.keys(completionHistory).sort().slice(-14);
+    // All recorded dates, oldest → newest
+    const sortedDates = Object.keys(completionHistory).sort();
     chartData.sortedDates = sortedDates;
 
-    // Build per-date attendance (0/1 per category) and detailed breakdown for the panel
-    const beginnerData = [];
-    const advancedData = [];
-    const externalData = [];
-    chartData.detailedData = {};
+    const programSetsPerDay = [];
+    const externalCountPerDay = [];
 
     sortedDates.forEach(dateStr => {
         const dayProgress = completionHistory[dateStr];
-
-        chartData.detailedData[dateStr] = {
-            beginner: { exercises: [], totalSets: 0 },
-            advanced: { exercises: [], totalSets: 0 },
-            external: { activities: [], totalCount: 0 }
-        };
-
-        let hasBeginner = false;
-        let hasAdvanced = false;
-        let hasExternal = false;
+        let programSets = 0;
+        let externalCount = 0;
 
         Object.keys(dayProgress).forEach(playlistId => {
             const playlist = PLAYLISTS.find(p => p.id === playlistId);
             if (!playlist) return;
 
-            // External playlist: each completed activity is recorded for the detail panel,
-            // but only contributes a single "did anything external" bit to the main chart.
             if (playlist.type === 'external') {
                 Object.keys(dayProgress[playlistId]).forEach(activityId => {
-                    const activity = playlist.others.find(a => a.id === activityId);
-                    if (!activity) return;
-
-                    const progress = dayProgress[playlistId][activityId];
-                    if (progress?.completed === true) {
-                        hasExternal = true;
-                        chartData.detailedData[dateStr].external.activities.push({
-                            title: activity.title,
-                            minutes: progress.minutes || 0
-                        });
-                        chartData.detailedData[dateStr].external.totalCount++;
+                    if (dayProgress[playlistId][activityId]?.completed === true) {
+                        externalCount++;
                     }
                 });
                 return;
             }
 
-            // Video playlist
-            const isAdvanced = playlistId.includes('advanced');
-            const targetData = isAdvanced
-                ? chartData.detailedData[dateStr].advanced
-                : chartData.detailedData[dateStr].beginner;
-
+            // Video playlist — sum completed sets across all exercises
             Object.keys(dayProgress[playlistId]).forEach(videoId => {
-                const video = playlist.videos.find(v => v.id === videoId);
-                if (!video) return;
-
                 const videoProgress = dayProgress[playlistId][videoId];
-                let completedSets = 0;
-                let repsData = [];
-
-                if (videoProgress && typeof videoProgress === 'object') {
-                    Object.keys(videoProgress).forEach(setKey => {
-                        if (setKey.startsWith('set') && videoProgress[setKey]?.completed) {
-                            completedSets++;
-                            repsData.push({
-                                set: setKey.replace('set', 'Set '),
-                                reps: videoProgress[setKey].reps || 0,
-                                seconds: videoProgress[setKey].seconds || 0
-                            });
-                        }
-                    });
-                }
-
-                if (completedSets > 0) {
-                    if (isAdvanced) hasAdvanced = true;
-                    else hasBeginner = true;
-
-                    targetData.exercises.push({
-                        title: video.title,
-                        sets: completedSets,
-                        repsData: repsData
-                    });
-                    targetData.totalSets += completedSets;
-                }
+                if (!videoProgress || typeof videoProgress !== 'object') return;
+                Object.keys(videoProgress).forEach(setKey => {
+                    if (setKey.startsWith('set') && videoProgress[setKey]?.completed) {
+                        programSets++;
+                    }
+                });
             });
         });
 
-        beginnerData.push(hasBeginner ? 1 : 0);
-        advancedData.push(hasAdvanced ? 1 : 0);
-        externalData.push(hasExternal ? 1 : 0);
+        programSetsPerDay.push(programSets);
+        externalCountPerDay.push(externalCount);
     });
 
-    // Format date labels
     chartData.dateLabels = sortedDates.map(dateStr => {
         const date = new Date(dateStr + 'T00:00:00');
         return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
     });
 
-    // Create the chart
+    // Both axes start at 0; their max scales to the larger of the two so that
+    // sets and activity-counts share visual space even though they're
+    // categorically different units.
+    const maxVal = Math.max(
+        ...programSetsPerDay,
+        ...externalCountPerDay,
+        1  // floor so a quiet day doesn't collapse the y-axis
+    );
+
     const ctx = canvas.getContext('2d');
     workoutHistoryChart = new Chart(ctx, {
+        // Base type 'bar' lets us mix in a line dataset; Chart.js handles the rest.
         type: 'bar',
         data: {
             labels: chartData.dateLabels,
             datasets: [
                 {
-                    label: 'Beginner 0-3',
-                    data: beginnerData,
-                    backgroundColor: '#10b981',
-                    borderColor: '#10b981',
-                    borderWidth: 1
+                    type: 'line',
+                    label: 'Program sets completed',
+                    data: programSetsPerDay,
+                    borderColor: CATEGORY_COLORS.program,
+                    backgroundColor: CATEGORY_COLORS.program,
+                    borderWidth: 2,
+                    tension: 0.25,
+                    pointRadius: 4,
+                    pointHoverRadius: 6,
+                    yAxisID: 'y',
+                    order: 0  // draw on top of bars
                 },
                 {
-                    label: 'Advanced 4-6',
-                    data: advancedData,
-                    backgroundColor: '#8b5cf6',
-                    borderColor: '#8b5cf6',
-                    borderWidth: 1
-                },
-                {
-                    label: 'External Activities',
-                    data: externalData,
-                    backgroundColor: '#f59e0b',
-                    borderColor: '#f59e0b',
-                    borderWidth: 1
+                    type: 'bar',
+                    label: 'External activities logged',
+                    data: externalCountPerDay,
+                    backgroundColor: CATEGORY_COLORS.external,
+                    borderColor: CATEGORY_COLORS.external,
+                    borderWidth: 1,
+                    yAxisID: 'y',
+                    order: 1  // draw behind line
                 }
             ]
         },
@@ -240,33 +260,28 @@ function renderWorkoutHistoryChart() {
             responsive: true,
             maintainAspectRatio: false,
             onClick: (event, elements) => {
+                // Either dataset can drive selection — they share the same index space.
                 if (elements.length > 0) {
-                    const index = elements[0].index;
-                    const clickedDate = chartData.sortedDates[index];
+                    const clickedDate = chartData.sortedDates[elements[0].index];
                     handleBarClick(clickedDate);
                 }
             },
             scales: {
                 x: {
-                    stacked: true,
                     grid: { display: false },
                     ticks: { font: { size: 11 } }
                 },
                 y: {
-                    stacked: true,
                     beginAtZero: true,
-                    max: 3,
+                    suggestedMax: maxVal,
+                    ticks: {
+                        precision: 0,  // integer ticks only — both metrics are counts
+                        font: { size: 11 }
+                    },
                     title: {
                         display: true,
-                        text: 'Activity Categories',
+                        text: 'Sets / Activities',
                         font: { size: 12, weight: '500' }
-                    },
-                    ticks: {
-                        stepSize: 1,
-                        font: { size: 11 },
-                        // Y-axis numerals would imply a quantitative metric; height
-                        // here is just "how many categories of activity happened."
-                        callback: () => ''
                     }
                 }
             },
@@ -277,23 +292,22 @@ function renderWorkoutHistoryChart() {
                     labels: {
                         boxWidth: 12,
                         padding: 15,
-                        font: { size: 11 }
+                        font: { size: 11 },
+                        usePointStyle: true
                     }
                 },
                 tooltip: {
                     enabled: true,
-                    // Drop zero-height segments from the tooltip popup
-                    filter: (item) => item.raw === 1,
                     callbacks: {
-                        title: function(context) {
-                            return chartData.dateLabels[context[0].dataIndex];
+                        title: (context) => chartData.dateLabels[context[0].dataIndex],
+                        label: (context) => {
+                            const value = context.raw;
+                            if (context.dataset.type === 'line') {
+                                return `${value} program ${value === 1 ? 'set' : 'sets'}`;
+                            }
+                            return `${value} external ${value === 1 ? 'activity' : 'activities'}`;
                         },
-                        label: function(context) {
-                            return context.raw === 1 ? `${context.dataset.label}: logged` : null;
-                        },
-                        footer: function() {
-                            return 'Click for breakdown';
-                        }
+                        footer: () => 'Click for breakdown'
                     },
                     backgroundColor: 'rgba(26, 26, 46, 0.95)',
                     titleFont: { size: 13, weight: '600' },
@@ -686,131 +700,6 @@ function renderAllTimeView(container) {
             }
         }
     });
-}
-
-// ==================== Recent Activity Feed ====================
-function loadRecentActivity() {
-    const activityFeed = document.getElementById('activity-feed');
-    if (!activityFeed) return;
-
-    if (!completionHistory || Object.keys(completionHistory).length === 0) {
-        activityFeed.innerHTML = `
-            <div class="py-12 text-center text-text-secondary">
-                <i class="fa-solid fa-dumbbell text-4xl text-border-medium mb-4"></i>
-                <p class="text-base max-w-[300px] mx-auto">No workout activity yet. Start your first workout to see your progress here!</p>
-            </div>
-        `;
-        return;
-    }
-
-    const sortedDates = Object.keys(completionHistory).sort().reverse().slice(0, 7);
-
-    let activityHTML = '';
-
-    sortedDates.forEach(dateStr => {
-        const progress = completionHistory[dateStr];
-        const formattedDate = formatActivityDate(dateStr);
-        const sessionStats = calculateSessionStats(progress);
-
-        activityHTML += `
-            <div class="px-6 py-4 border-b border-border-subtle last:border-b-0 flex items-start gap-4 hover:bg-[#fafbfc] max-md:flex-col max-md:gap-2">
-                <div class="flex items-center gap-2 min-w-[120px] shrink-0 max-md:min-w-0">
-                    <i class="fa-solid fa-calendar-day text-brand text-base"></i>
-                    <span class="font-semibold text-text-primary text-base">${formattedDate}</span>
-                </div>
-                <div class="flex flex-col gap-1">
-                    ${sessionStats.filter(stat => stat.completedCount > 0).map(stat => `
-                        <div class="flex items-center gap-3">
-                            <span class="font-medium text-text-tertiary text-base">${stat.playlistName}</span>
-                            <span class="text-success text-base font-medium">
-                                ${stat.isExternal
-                                    ? `${stat.completedCount} ${stat.completedCount === 1 ? 'activity' : 'activities'} logged`
-                                    : `${stat.completedCount}/${stat.totalExercises} exercises`}
-                            </span>
-                        </div>
-                    `).join('')}
-                </div>
-            </div>
-        `;
-    });
-
-    activityFeed.innerHTML = activityHTML;
-}
-
-function formatActivityDate(dateStr) {
-    const date = new Date(dateStr + 'T00:00:00');
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-
-    const yesterday = new Date(today);
-    yesterday.setDate(yesterday.getDate() - 1);
-
-    const dateOnly = new Date(date);
-    dateOnly.setHours(0, 0, 0, 0);
-
-    if (dateOnly.getTime() === today.getTime()) {
-        return 'Today';
-    } else if (dateOnly.getTime() === yesterday.getTime()) {
-        return 'Yesterday';
-    } else {
-        return date.toLocaleDateString('en-US', {
-            weekday: 'short',
-            month: 'short',
-            day: 'numeric'
-        });
-    }
-}
-
-function calculateSessionStats(progress) {
-    const stats = [];
-
-    Object.keys(progress).forEach(playlistId => {
-        const playlist = PLAYLISTS.find(p => p.id === playlistId);
-        if (!playlist) return;
-
-        const playlistProgress = progress[playlistId];
-
-        if (playlist.type === 'external') {
-            const completedCount = Object.values(playlistProgress)
-                .filter(a => a?.completed === true).length;
-
-            if (completedCount > 0) {
-                stats.push({
-                    playlistName: 'External Activities',
-                    completedCount: completedCount,
-                    totalExercises: completedCount,
-                    isExternal: true
-                });
-            }
-            return;
-        }
-
-        // Video playlist
-        let completedCount = 0;
-        playlist.videos.forEach(video => {
-            const videoProgress = playlistProgress[video.id];
-
-            if (videoProgress) {
-                if (typeof videoProgress === 'object' && !Array.isArray(videoProgress)) {
-                    const hasCompletedSet = Object.keys(videoProgress).some(key => {
-                        return key.startsWith('set') && videoProgress[key]?.completed === true;
-                    });
-                    if (hasCompletedSet) completedCount++;
-                } else if (typeof videoProgress === 'number' && videoProgress > 0) {
-                    completedCount++;
-                }
-            }
-        });
-
-        const isAdvanced = playlistId.includes('advanced');
-        stats.push({
-            playlistName: isAdvanced ? 'Advanced 4-6' : 'Beginner 0-3',
-            completedCount: completedCount,
-            totalExercises: playlist.videos.length
-        });
-    });
-
-    return stats;
 }
 
 console.log('Progress module loaded');
