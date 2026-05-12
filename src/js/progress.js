@@ -606,7 +606,7 @@ function _createProgramPolar(canvasId, playlistId, programData, isAllTime) {
         }
     });
     detailPanelCharts.push(chart);
-    _renderCustomLegend(`${canvasId}-legend`, chart, labels, entries.map(e => color));
+    _renderCustomLegend(`${canvasId}-accordion-legend`, chart, labels, entries.map(e => color));
 }
 
 // Donut chart for external activities with a custom toggleable legend below.
@@ -685,15 +685,15 @@ function _createExternalDonut(canvasId, externalData, isAllTime) {
         }]
     });
     detailPanelCharts.push(chart);
-    _renderCustomLegend(`${canvasId}-legend`, chart, labels, segmentColors);
+    _renderCustomLegend(`${canvasId}-accordion-legend`, chart, labels, segmentColors);
 }
 
 // ---------- View renderers ----------
 
-// Shared block-renderer used by both Day View and All Time. Stacks program
-// polars (one per playlist with records) followed by an external donut.
-// Each block is flex-1 so they share the panel's vertical space evenly,
-// which means no inner scrolling and charts that actually fill the panel.
+// Stacks program polars and the external donut inside the details panel.
+// Each block has a fixed-height chart and an accordion below it that
+// reveals the toggleable legend. Accordions are closed by default — the
+// panel stays compact until the user opts into the detail.
 function _renderBreakdownBlocks(container, headerHTML, programByPlaylist, externalData, isAllTime) {
     const hasProgram = Object.keys(programByPlaylist).some(pid => Object.keys(programByPlaylist[pid]).length > 0);
     const hasExternal = Object.keys(externalData).length > 0;
@@ -709,43 +709,52 @@ function _renderBreakdownBlocks(container, headerHTML, programByPlaylist, extern
         return;
     }
 
-    // Build all blocks first, then mount; this guarantees the canvas DOM
-    // exists before we ask Chart.js to find it by ID.
     let blocksHTML = headerHTML;
 
     const orderedPlaylistIds = ['beginner-0-3', 'advanced-4-6'];
     orderedPlaylistIds.forEach(pid => {
-        if (!programByPlaylist[pid] || Object.keys(programByPlaylist[pid]).length === 0) return;
+        const programEntries = programByPlaylist[pid];
+        if (!programEntries || Object.keys(programEntries).length === 0) return;
+
         const isAdvanced = pid === 'advanced-4-6';
         const label = isAdvanced ? 'Advanced 4-6' : 'Beginner 0-3';
         const dotColor = isAdvanced ? CATEGORY_COLORS.advanced : CATEGORY_COLORS.beginner;
+
+        // Count = every exercise in the playlist (the polar always shows all
+        // of them, including zero-radius slivers for untouched ones).
+        const playlist = PLAYLISTS.find(p => p.id === pid);
+        const itemCount = playlist ? playlist.videos.length : 0;
+
         blocksHTML += `
-            <div class="flex-1 min-h-0 flex flex-col">
-                <div class="flex items-center gap-2 mb-2 shrink-0">
+            <div class="shrink-0">
+                <div class="flex items-center gap-2 mb-2">
                     <span class="w-3 h-3 rounded-full" style="background:${dotColor}"></span>
                     <h5 class="text-base font-semibold text-text-primary m-0">${label}</h5>
                 </div>
-                <div class="flex-1 min-h-0 relative">
+                <div class="h-[280px] relative">
                     <div class="absolute inset-0">
                         <canvas id="detail-polar-${pid}"></canvas>
                     </div>
                 </div>
-                <div id="detail-polar-${pid}-legend" class="shrink-0"></div>
+                ${_buildAccordionHTML(`detail-polar-${pid}-accordion`, 'Exercise Types', itemCount)}
             </div>
         `;
     });
 
     if (hasExternal) {
+        const itemCount = Object.keys(externalData).length;
         blocksHTML += `
-            <div class="flex-1 min-h-0 flex flex-col">
-                <div class="flex items-center gap-2 mb-2 shrink-0">
+            <div class="shrink-0">
+                <div class="flex items-center gap-2 mb-2">
                     <span class="w-3 h-3 rounded-full" style="background:${CATEGORY_COLORS.external}"></span>
                     <h5 class="text-base font-semibold text-text-primary m-0">External Activities</h5>
                 </div>
-                <div class="flex-1 min-h-0 relative">
-                    <canvas id="detail-donut-external"></canvas>
+                <div class="h-[240px] relative">
+                    <div class="absolute inset-0">
+                        <canvas id="detail-donut-external"></canvas>
+                    </div>
                 </div>
-                <div id="detail-donut-external-legend" class="shrink-0"></div>
+                ${_buildAccordionHTML('detail-donut-external-accordion', 'Activity Types', itemCount)}
             </div>
         `;
     }
@@ -753,9 +762,7 @@ function _renderBreakdownBlocks(container, headerHTML, programByPlaylist, extern
     container.innerHTML = blocksHTML;
 
     // Defer chart mounting one frame so flex layout settles before Chart.js
-    // reads container dimensions. Without this, charts created inside flex-1
-    // containers can occasionally measure a stale zero height and fail to
-    // render until the next resize event.
+    // reads container dimensions.
     requestAnimationFrame(() => {
         orderedPlaylistIds.forEach(pid => {
             if (!programByPlaylist[pid] || Object.keys(programByPlaylist[pid]).length === 0) return;
@@ -765,6 +772,43 @@ function _renderBreakdownBlocks(container, headerHTML, programByPlaylist, extern
             _createExternalDonut('detail-donut-external', externalData, isAllTime);
         }
     });
+}
+
+// Markup for one collapsible accordion. The chart-factory functions populate
+// the inner legend container after the chart mounts. Toggle behavior is
+// wired up by the click handler we attach inline.
+function _buildAccordionHTML(idPrefix, label, count) {
+    return `
+        <div class="mt-3 border-t border-border-subtle pt-2">
+            <button type="button"
+                    id="${idPrefix}-toggle"
+                    class="flex items-center gap-2 w-full text-left bg-transparent border-none p-1 cursor-pointer hover:bg-subtle rounded transition-colors"
+                    aria-expanded="false"
+                    aria-controls="${idPrefix}-body"
+                    onclick="_toggleAccordion('${idPrefix}')">
+                <i class="fa-solid fa-chevron-right text-xs text-text-secondary transition-transform" id="${idPrefix}-chevron"></i>
+                <span class="text-sm font-medium text-text-primary">${label}</span>
+                <span class="text-sm text-text-secondary">(${count})</span>
+            </button>
+            <div id="${idPrefix}-body" class="hidden pt-2 pb-1">
+                <div id="${idPrefix}-legend"></div>
+            </div>
+        </div>
+    `;
+}
+
+// Toggles an accordion open/closed by id prefix. Pure DOM toggling, no state
+// to track — open state is read directly from the DOM if anyone needs it.
+function _toggleAccordion(idPrefix) {
+    const body = document.getElementById(`${idPrefix}-body`);
+    const chevron = document.getElementById(`${idPrefix}-chevron`);
+    const toggle = document.getElementById(`${idPrefix}-toggle`);
+    if (!body) return;
+
+    const wasHidden = body.classList.contains('hidden');
+    body.classList.toggle('hidden');
+    if (chevron) chevron.style.transform = wasHidden ? 'rotate(90deg)' : 'rotate(0deg)';
+    if (toggle)  toggle.setAttribute('aria-expanded', wasHidden ? 'true' : 'false');
 }
 
 function renderDayView(container, dateStr) {
