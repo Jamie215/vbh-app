@@ -539,11 +539,7 @@ function _createProgramPolar(canvasId, playlistId, programData, isAllTime) {
             plugins: {
                 legend: {
                     position: 'right',
-                    labels: {
-                        font: { size: 10 },
-                        boxWidth: 10,
-                        padding: 5
-                    }
+                    labels: { font: { size: 18 }, boxWidth: 18, padding: 8 }
                 },
                 tooltip: {
                     callbacks: {
@@ -595,7 +591,7 @@ function _createExternalDonut(canvasId, externalData, isAllTime) {
             plugins: {
                 legend: {
                     position: 'right',
-                    labels: { font: { size: 10 }, boxWidth: 10, padding: 6 }
+                    labels: { font: { size: 18 }, boxWidth: 18, padding: 8 }
                 },
                 tooltip: {
                     callbacks: {
@@ -633,12 +629,12 @@ function _createExternalDonut(canvasId, externalData, isAllTime) {
                 // Big number
                 ctx.font = 'bold 22px -apple-system, BlinkMacSystemFont, sans-serif';
                 ctx.fillStyle = '#1a1a2e';
-                ctx.fillText(String(totalMinutes), cx, cy - 8);
+                ctx.fillText(String(totalMinutes), cx, cy - 10);
 
                 // Small label
-                ctx.font = '11px -apple-system, BlinkMacSystemFont, sans-serif';
+                ctx.font = '16px -apple-system, BlinkMacSystemFont, sans-serif';
                 ctx.fillStyle = '#64748b';
-                ctx.fillText('total minutes', cx, cy + 12);
+                ctx.fillText('total minutes', cx, cy + 14);
 
                 ctx.restore();
             }
@@ -681,8 +677,8 @@ function _renderBreakdownBlocks(container, headerHTML, programByPlaylist, extern
         blocksHTML += `
             <div class="flex-1 min-h-0 flex flex-col">
                 <div class="flex items-center gap-2 mb-2 shrink-0">
-                    <span class="w-2.5 h-2.5 rounded-full" style="background:${dotColor}"></span>
-                    <h5 class="text-sm font-semibold text-text-primary m-0">${label}</h5>
+                    <span class="w-3 h-3 rounded-full" style="background:${dotColor}"></span>
+                    <h5 class="text-base font-semibold text-text-primary m-0">${label}</h5>
                 </div>
                 <div class="flex-1 min-h-0 relative">
                     <canvas id="detail-polar-${pid}"></canvas>
@@ -695,8 +691,8 @@ function _renderBreakdownBlocks(container, headerHTML, programByPlaylist, extern
         blocksHTML += `
             <div class="flex-1 min-h-0 flex flex-col">
                 <div class="flex items-center gap-2 mb-2 shrink-0">
-                    <span class="w-2.5 h-2.5 rounded-full" style="background:${CATEGORY_COLORS.external}"></span>
-                    <h5 class="text-sm font-semibold text-text-primary m-0">External Activities</h5>
+                    <span class="w-3 h-3 rounded-full" style="background:${CATEGORY_COLORS.external}"></span>
+                    <h5 class="text-base font-semibold text-text-primary m-0">External Activities</h5>
                 </div>
                 <div class="flex-1 min-h-0 relative">
                     <canvas id="detail-donut-external"></canvas>
