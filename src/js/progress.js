@@ -480,9 +480,67 @@ function _aggregateExternal(dateStrs) {
 }
 
 // ---------- Chart factories ----------
+// Builds a wrap-flowed HTML legend below a chart's canvas. Each pill toggles
+// the corresponding segment's visibility via Chart.js's getDataVisibility /
+// toggleDataVisibility API — these flip a per-index hidden flag the chart
+// reads on each draw, so toggling redraws the chart and triggers any plugin
+// hooks (e.g., the donut center text recomputes its visible total).
+//
+// State is per-chart-instance and resets every time _renderBreakdownBlocks
+// destroys and re-creates charts, which is exactly the requested behavior:
+// switch tabs or click a different day → fresh state.
+function _renderCustomLegend(containerId, chart, labels, colors) {
+    const container = document.getElementById(containerId);
+    if (!container) return;
+
+    container.innerHTML = '';
+    container.className = 'flex flex-wrap gap-x-3 gap-y-1.5 mt-2 px-1';
+
+    labels.forEach((label, index) => {
+        const pill = document.createElement('button');
+        pill.type = 'button';
+        // Inline button reset: Tailwind doesn't strip default button styling
+        // and we want these to feel like inline interactive labels, not buttons.
+        pill.className = 'inline-flex items-center gap-1.5 bg-transparent border-none p-0 text-sm cursor-pointer transition-opacity hover:opacity-70';
+
+        const swatch = document.createElement('span');
+        swatch.className = 'inline-block w-3 h-3 rounded-sm shrink-0';
+        swatch.style.backgroundColor = colors[index];
+
+        const text = document.createElement('span');
+        text.className = 'text-text-primary';
+        text.textContent = label;
+
+        pill.appendChild(swatch);
+        pill.appendChild(text);
+
+        // Sync visual state with chart's current visibility — needed when
+        // re-rendering legends after the chart has loaded.
+        const syncVisualState = () => {
+            const visible = chart.getDataVisibility(index);
+            swatch.style.opacity = visible ? '1' : '0.25';
+            swatch.style.outline = visible ? 'none' : `1.5px solid ${colors[index]}`;
+            text.style.textDecoration = visible ? 'none' : 'line-through';
+            text.style.color = visible ? '' : '#94a3b8';
+        };
+        syncVisualState();
+
+        pill.addEventListener('click', () => {
+            // Works for both polar and doughnut — both use index-based visibility.
+            chart.toggleDataVisibility(index);
+            chart.update();
+            syncVisualState();
+        });
+
+        container.appendChild(pill);
+    });
+}
 
 // Polar area chart for one program. Always shows every exercise in the
-// playlist (in playlist order)
+// playlist (in playlist order). Custom HTML legend is rendered below the
+// canvas — click any item to toggle that segment's visibility. State resets
+// on every render so context switches (Day → All Time, different day, etc.)
+// start fresh.
 function _createProgramPolar(canvasId, playlistId, programData, isAllTime) {
     const canvas = document.getElementById(canvasId);
     if (!canvas) return;
@@ -494,8 +552,7 @@ function _createProgramPolar(canvasId, playlistId, programData, isAllTime) {
     const color = isAdvanced ? CATEGORY_COLORS.advanced : CATEGORY_COLORS.beginner;
 
     // Iterate the full playlist in canonical order. Each video either has
-    // aggregated data or gets a synthetic zero entry. This is what keeps
-    // segment positions stable from session to session.
+    // aggregated data or gets a synthetic zero entry.
     const entries = playlist.videos.map(video => {
         const logged = programData[video.id];
         if (logged) return logged;
@@ -511,14 +568,12 @@ function _createProgramPolar(canvasId, playlistId, programData, isAllTime) {
     const actualData = entries.map(e => e.completedSets);
 
     // Floor zero-radius slices at ~8% of the largest value so untouched
-    // exercises remain visible. Floor is data-relative, not absolute, so the
-    // sliver stays proportional whether the user did 1 set or 50.
+    // exercises remain visible.
     const maxValue = Math.max(...actualData, 1);
     const floorValue = maxValue * 0.08;
     const displayData = actualData.map(v => v > 0 ? v : floorValue);
 
-    // Faded fill for floored slices signals "not attempted" before the user
-    // even hovers; saturated fill for real data segments.
+    // Faded fill for floored slices signals "not attempted" before hover.
     const backgroundColor = entries.map(e => e.completedSets > 0 ? color + 'B3' : color + '33');
     const borderColor      = entries.map(e => e.completedSets > 0 ? color : color + '66');
 
@@ -537,10 +592,7 @@ function _createProgramPolar(canvasId, playlistId, programData, isAllTime) {
                 }
             },
             plugins: {
-                legend: {
-                    position: 'right',
-                    labels: { font: { size: 18 }, boxWidth: 18, padding: 8 }
-                },
+                legend: { display: false },  // replaced by custom HTML legend below
                 tooltip: {
                     callbacks: {
                         label: (ctx) => {
@@ -551,7 +603,6 @@ function _createProgramPolar(canvasId, playlistId, programData, isAllTime) {
                                 }
                                 return `${entry.title}: ${entry.completedSets} sets across ${entry.sessionCount} ${entry.sessionCount === 1 ? 'session' : 'sessions'}`;
                             }
-                            // Day View: "X/N sets" where N is the per-session recommendation
                             return `${entry.title}: ${entry.completedSets}/${entry.recommendedSets} sets`;
                         }
                     },
@@ -565,10 +616,10 @@ function _createProgramPolar(canvasId, playlistId, programData, isAllTime) {
         }
     });
     detailPanelCharts.push(chart);
+    _renderCustomLegend(`${canvasId}-legend`, chart, labels, entries.map(e => color));
 }
 
-// Donut chart for external activities. Center text drawn by an inline plugin
-// since we don't want to pull in chartjs-plugin-datalabels.
+// Donut chart for external activities with a custom toggleable legend below.
 function _createExternalDonut(canvasId, externalData, isAllTime) {
     const canvas = document.getElementById(canvasId);
     if (!canvas) return;
@@ -576,23 +627,29 @@ function _createExternalDonut(canvasId, externalData, isAllTime) {
     const entries = Object.values(externalData);
     const labels = entries.map(e => e.title);
     const data = entries.map(e => e.totalMinutes);
-    const totalMinutes = data.reduce((a, b) => a + b, 0);
+    const segmentColors = entries.map((_, i) => EXTERNAL_PALETTE[i % EXTERNAL_PALETTE.length]);
 
-    const backgroundColor = entries.map((_, i) => EXTERNAL_PALETTE[i % EXTERNAL_PALETTE.length]);
+    // Recompute the center total from currently-visible segments only, so
+    // toggling a segment off updates the donut's center text in real time.
+    const computeVisibleTotal = (chart) => {
+        let total = 0;
+        chart.data.datasets[0].data.forEach((value, i) => {
+            if (!chart.getDataVisibility(i)) return;
+            total += value;
+        });
+        return total;
+    };
 
     const ctx = canvas.getContext('2d');
     const chart = new Chart(ctx, {
         type: 'doughnut',
-        data: { labels, datasets: [{ data, backgroundColor, borderColor: '#fff', borderWidth: 2 }] },
+        data: { labels, datasets: [{ data, backgroundColor: segmentColors, borderColor: '#fff', borderWidth: 2 }] },
         options: {
             responsive: true,
             maintainAspectRatio: false,
             cutout: '62%',
             plugins: {
-                legend: {
-                    position: 'right',
-                    labels: { font: { size: 18 }, boxWidth: 18, padding: 8 }
-                },
+                legend: { display: false },  // replaced by custom HTML legend below
                 tooltip: {
                     callbacks: {
                         label: (ctx) => {
@@ -614,33 +671,31 @@ function _createExternalDonut(canvasId, externalData, isAllTime) {
         },
         plugins: [{
             id: 'donutCenterText',
-            // Drawing in afterDraw (not beforeDraw) so the center text stays
-            // on top of the doughnut arcs in every Chart.js version.
             afterDraw: (chart) => {
                 const { ctx, chartArea } = chart;
                 if (!chartArea) return;
                 const cx = (chartArea.left + chartArea.right) / 2;
                 const cy = (chartArea.top + chartArea.bottom) / 2;
+                const visibleTotal = computeVisibleTotal(chart);
 
                 ctx.save();
                 ctx.textAlign = 'center';
                 ctx.textBaseline = 'middle';
 
-                // Big number
-                ctx.font = 'bold 22px -apple-system, BlinkMacSystemFont, sans-serif';
+                ctx.font = 'bold 28px -apple-system, BlinkMacSystemFont, sans-serif';
                 ctx.fillStyle = '#1a1a2e';
-                ctx.fillText(String(totalMinutes), cx, cy - 10);
+                ctx.fillText(String(visibleTotal), cx, cy - 10);
 
-                // Small label
-                ctx.font = '16px -apple-system, BlinkMacSystemFont, sans-serif';
+                ctx.font = '13px -apple-system, BlinkMacSystemFont, sans-serif';
                 ctx.fillStyle = '#64748b';
-                ctx.fillText('total minutes', cx, cy + 14);
+                ctx.fillText('Total Min', cx, cy + 14);
 
                 ctx.restore();
             }
         }]
     });
     detailPanelCharts.push(chart);
+    _renderCustomLegend(`${canvasId}-legend`, chart, labels, segmentColors);
 }
 
 // ---------- View renderers ----------
@@ -683,6 +738,7 @@ function _renderBreakdownBlocks(container, headerHTML, programByPlaylist, extern
                 <div class="flex-1 min-h-0 relative">
                     <canvas id="detail-polar-${pid}"></canvas>
                 </div>
+                <div id="detail-polar-${pid}-legend" class="shrink-0"></div>
             </div>
         `;
     });
@@ -697,6 +753,7 @@ function _renderBreakdownBlocks(container, headerHTML, programByPlaylist, extern
                 <div class="flex-1 min-h-0 relative">
                     <canvas id="detail-donut-external"></canvas>
                 </div>
+                <div id="detail-donut-external-legend" class="shrink-0"></div>
             </div>
         `;
     }
