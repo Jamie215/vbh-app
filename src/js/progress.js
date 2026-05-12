@@ -660,6 +660,8 @@ function _createExternalDonut(canvasId, externalData, isAllTime) {
 
 // Shared block-renderer used by both Day View and All Time. Stacks program
 // polars (one per playlist with records) followed by an external donut.
+// Each block is flex-1 so they share the panel's vertical space evenly,
+// which means no inner scrolling and charts that actually fill the panel.
 function _renderBreakdownBlocks(container, headerHTML, programByPlaylist, externalData, isAllTime) {
     const hasProgram = Object.keys(programByPlaylist).some(pid => Object.keys(programByPlaylist[pid]).length > 0);
     const hasExternal = Object.keys(externalData).length > 0;
@@ -679,19 +681,19 @@ function _renderBreakdownBlocks(container, headerHTML, programByPlaylist, extern
     // exists before we ask Chart.js to find it by ID.
     let blocksHTML = headerHTML;
 
-    const orderedPlaylistIds = ['beginner-0-3', 'advanced-4-6'];  // stable order regardless of insertion
+    const orderedPlaylistIds = ['beginner-0-3', 'advanced-4-6'];
     orderedPlaylistIds.forEach(pid => {
         if (!programByPlaylist[pid] || Object.keys(programByPlaylist[pid]).length === 0) return;
         const isAdvanced = pid === 'advanced-4-6';
         const label = isAdvanced ? 'Advanced 4-6' : 'Beginner 0-3';
         const dotColor = isAdvanced ? CATEGORY_COLORS.advanced : CATEGORY_COLORS.beginner;
         blocksHTML += `
-            <div class="shrink-0">
-                <div class="flex items-center gap-2 mb-2">
+            <div class="flex-1 min-h-0 flex flex-col">
+                <div class="flex items-center gap-2 mb-2 shrink-0">
                     <span class="w-2.5 h-2.5 rounded-full" style="background:${dotColor}"></span>
                     <h5 class="text-sm font-semibold text-text-primary m-0">${label}</h5>
                 </div>
-                <div class="h-[200px] relative">
+                <div class="flex-1 min-h-0 relative">
                     <canvas id="detail-polar-${pid}"></canvas>
                 </div>
             </div>
@@ -700,12 +702,12 @@ function _renderBreakdownBlocks(container, headerHTML, programByPlaylist, extern
 
     if (hasExternal) {
         blocksHTML += `
-            <div class="shrink-0">
-                <div class="flex items-center gap-2 mb-2">
+            <div class="flex-1 min-h-0 flex flex-col">
+                <div class="flex items-center gap-2 mb-2 shrink-0">
                     <span class="w-2.5 h-2.5 rounded-full" style="background:${CATEGORY_COLORS.external}"></span>
                     <h5 class="text-sm font-semibold text-text-primary m-0">External Activities</h5>
                 </div>
-                <div class="h-[200px] relative">
+                <div class="flex-1 min-h-0 relative">
                     <canvas id="detail-donut-external"></canvas>
                 </div>
             </div>
@@ -714,14 +716,19 @@ function _renderBreakdownBlocks(container, headerHTML, programByPlaylist, extern
 
     container.innerHTML = blocksHTML;
 
-    // Mount charts now that canvases exist in the DOM
-    orderedPlaylistIds.forEach(pid => {
-        if (!programByPlaylist[pid] || Object.keys(programByPlaylist[pid]).length === 0) return;
-        _createProgramPolar(`detail-polar-${pid}`, pid, programByPlaylist[pid], isAllTime);
+    // Defer chart mounting one frame so flex layout settles before Chart.js
+    // reads container dimensions. Without this, charts created inside flex-1
+    // containers can occasionally measure a stale zero height and fail to
+    // render until the next resize event.
+    requestAnimationFrame(() => {
+        orderedPlaylistIds.forEach(pid => {
+            if (!programByPlaylist[pid] || Object.keys(programByPlaylist[pid]).length === 0) return;
+            _createProgramPolar(`detail-polar-${pid}`, pid, programByPlaylist[pid], isAllTime);
+        });
+        if (hasExternal) {
+            _createExternalDonut('detail-donut-external', externalData, isAllTime);
+        }
     });
-    if (hasExternal) {
-        _createExternalDonut('detail-donut-external', externalData, isAllTime);
-    }
 }
 
 function renderDayView(container, dateStr) {
