@@ -295,7 +295,7 @@
                     </div>
                 </div>
                 <div class="bg-white rounded-card p-6 flex items-center gap-4 shadow-card border border-border">
-                    <div class="w-[50px] h-[50px] rounded-card bg-gradient-to-br from-[#fbbf24] to-[#f59e0b] flex items-center justify-center shrink-0">
+                    <div class="w-[50px] h-[50px] rounded-card bg-gradient-to-br from-[#667eea] to-[#764ba2] flex items-center justify-center shrink-0">
                         <i class="fa-solid fa-stopwatch text-xl text-white"></i>
                     </div>
                     <div class="flex flex-col">
@@ -332,12 +332,12 @@
                         </div>
                     </div>
                     <!-- Right: Detail breakdown panel -->
-                    <div class="bg-white rounded-card shadow-card border border-border flex flex-col h-[350px] max-lg:h-[300px] max-md:h-[280px] max-[480px]:h-[260px]">
-                        <div class="flex border-b border-border px-2 pt-2">
+                    <div class="bg-white rounded-card shadow-card border border-border flex flex-col h-[350px] max-lg:h-auto max-lg:min-h-[350px]">
+                        <div class="flex border-b border-border shrink-0 px-2 pt-2">
                             <button class="detail-tab active" id="tab-day-view" onclick="switchDetailView('day')">Day View</button>
                             <button class="detail-tab" id="tab-all-time" onclick="switchDetailView('alltime')">All Time</button>
                         </div>
-                        <div class="detail-content flex-1 p-4 overflow-y-auto flex flex-col" id="detail-panel-content">
+                        <div class="detail-content flex-1 p-4 overflow-y-auto flex flex-col gap-4 min-h-0" id="detail-panel-content">
                             <!-- Content populated by JavaScript -->
                         </div>
                     </div>
