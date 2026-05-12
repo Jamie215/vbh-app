@@ -481,28 +481,51 @@ function _aggregateExternal(dateStrs) {
 
 // ---------- Chart factories ----------
 
-// Polar area chart for one program. Day View tooltip = "X/N sets",
-// All Time tooltip = "X sets across Y sessions".
+// Polar area chart for one program. Always shows every exercise in the
+// playlist (in playlist order)
 function _createProgramPolar(canvasId, playlistId, programData, isAllTime) {
     const canvas = document.getElementById(canvasId);
     if (!canvas) return;
 
+    const playlist = PLAYLISTS.find(p => p.id === playlistId);
+    if (!playlist) return;
+
     const isAdvanced = playlistId.includes('advanced');
     const color = isAdvanced ? CATEGORY_COLORS.advanced : CATEGORY_COLORS.beginner;
 
-    const entries = Object.values(programData);
-    const labels = entries.map(e => e.title);
-    const data = entries.map(e => e.completedSets);
+    // Iterate the full playlist in canonical order. Each video either has
+    // aggregated data or gets a synthetic zero entry. This is what keeps
+    // segment positions stable from session to session.
+    const entries = playlist.videos.map(video => {
+        const logged = programData[video.id];
+        if (logged) return logged;
+        return {
+            title: video.title,
+            completedSets: 0,
+            sessionCount: 0,
+            recommendedSets: video.sets
+        };
+    });
 
-    // All segments share the program's color; transparency lets adjacent
-    // segments separate visually without needing distinct hues per exercise.
-    const backgroundColor = entries.map(() => color + 'B3');  // ~70% opacity
-    const borderColor = entries.map(() => color);
+    const labels = entries.map(e => e.title);
+    const actualData = entries.map(e => e.completedSets);
+
+    // Floor zero-radius slices at ~8% of the largest value so untouched
+    // exercises remain visible. Floor is data-relative, not absolute, so the
+    // sliver stays proportional whether the user did 1 set or 50.
+    const maxValue = Math.max(...actualData, 1);
+    const floorValue = maxValue * 0.08;
+    const displayData = actualData.map(v => v > 0 ? v : floorValue);
+
+    // Faded fill for floored slices signals "not attempted" before the user
+    // even hovers; saturated fill for real data segments.
+    const backgroundColor = entries.map(e => e.completedSets > 0 ? color + 'B3' : color + '33');
+    const borderColor      = entries.map(e => e.completedSets > 0 ? color : color + '66');
 
     const ctx = canvas.getContext('2d');
     const chart = new Chart(ctx, {
         type: 'polarArea',
-        data: { labels, datasets: [{ data, backgroundColor, borderColor, borderWidth: 1 }] },
+        data: { labels, datasets: [{ data: displayData, backgroundColor, borderColor, borderWidth: 1 }] },
         options: {
             responsive: true,
             maintainAspectRatio: false,
@@ -516,16 +539,32 @@ function _createProgramPolar(canvasId, playlistId, programData, isAllTime) {
             plugins: {
                 legend: {
                     position: 'right',
-                    labels: { font: { size: 10 }, boxWidth: 10, padding: 6 }
+                    labels: {
+                        font: { size: 10 },
+                        boxWidth: 10,
+                        padding: 5,
+                        // Truncate long exercise names — full title is still
+                        // shown in the tooltip on hover.
+                        generateLabels: (chart) => {
+                            const original = Chart.defaults.plugins.legend.labels.generateLabels(chart);
+                            return original.map(label => ({
+                                ...label,
+                                text: label.text.length > 22 ? label.text.slice(0, 20) + '…' : label.text
+                            }));
+                        }
+                    }
                 },
                 tooltip: {
                     callbacks: {
                         label: (ctx) => {
                             const entry = entries[ctx.dataIndex];
                             if (isAllTime) {
-                                const sessions = entry.sessionCount;
-                                return `${entry.title}: ${entry.completedSets} sets across ${sessions} ${sessions === 1 ? 'session' : 'sessions'}`;
+                                if (entry.sessionCount === 0) {
+                                    return `${entry.title}: Not yet attempted`;
+                                }
+                                return `${entry.title}: ${entry.completedSets} sets across ${entry.sessionCount} ${entry.sessionCount === 1 ? 'session' : 'sessions'}`;
                             }
+                            // Day View: "X/N sets" where N is the per-session recommendation
                             return `${entry.title}: ${entry.completedSets}/${entry.recommendedSets} sets`;
                         }
                     },

@@ -283,63 +283,67 @@
                 <p class="text-text-secondary text-base">Track your fitness journey and see how far you've come.</p>
             </section>
 
-            <!-- Summary Stats Cards -->
-            <section class="grid grid-cols-[repeat(auto-fit,minmax(220px,1fr))] gap-6 mb-8 max-md:grid-cols-1">
-                <div class="bg-white rounded-card p-6 flex items-center gap-4 shadow-card border border-border">
-                    <div class="w-[50px] h-[50px] rounded-card bg-gradient-to-br from-[#667eea] to-[#764ba2] flex items-center justify-center shrink-0">
-                        <i class="fa-solid fa-list-check text-xl text-white"></i>
-                    </div>
-                    <div class="flex flex-col">
-                        <span class="text-[2rem] font-bold text-text-primary leading-tight" id="total-program-sets">0</span>
-                        <span class="text-base text-text-secondary font-medium">Total Program Sets Completed</span>
-                    </div>
-                </div>
-                <div class="bg-white rounded-card p-6 flex items-center gap-4 shadow-card border border-border">
-                    <div class="w-[50px] h-[50px] rounded-card bg-gradient-to-br from-[#667eea] to-[#764ba2] flex items-center justify-center shrink-0">
-                        <i class="fa-solid fa-stopwatch text-xl text-white"></i>
-                    </div>
-                    <div class="flex flex-col">
-                        <span class="text-[2rem] font-bold text-text-primary leading-tight" id="total-external-minutes">0</span>
-                        <span class="text-base text-text-secondary font-medium">Total External Activity Minutes</span>
-                    </div>
-                </div>
-                <div class="bg-white rounded-card p-6 flex items-center gap-4 shadow-card border border-border">
-                    <div class="w-[50px] h-[50px] rounded-card bg-gradient-to-br from-[#667eea] to-[#764ba2] flex items-center justify-center shrink-0">
-                        <i class="fa-solid fa-chart-line text-xl text-white"></i>
-                    </div>
-                    <div class="flex flex-col flex-1 min-w-0">
-                        <span class="text-base text-text-secondary font-medium" id="program-progress-label">Program Progress</span>
-                        <div class="flex items-center gap-3 mt-2">
-                            <div class="flex-1 h-2.5 bg-gray-200 rounded-full overflow-hidden">
-                                <div class="program-progress-fill h-full rounded-full w-0" id="program-progress-fill"></div>
+            <!-- Main 2-column layout: stats / progress / chart on left, detail panel on right -->
+            <section class="grid grid-cols-1 lg:grid-cols-[1fr_minmax(360px,440px)] gap-6 mb-8">
+                <!-- LEFT COLUMN: 3 stacked rows -->
+                <div class="flex flex-col gap-6 min-w-0">
+                    <!-- Row 1: Two stats cards side-by-side -->
+                    <div class="grid grid-cols-2 gap-6 max-md:grid-cols-1">
+                        <div class="bg-white rounded-card p-6 flex items-center gap-4 shadow-card border border-border">
+                            <div class="w-[50px] h-[50px] rounded-card bg-gradient-to-br from-[#667eea] to-[#764ba2] flex items-center justify-center shrink-0">
+                                <i class="fa-solid fa-list-check text-xl text-white"></i>
                             </div>
-                            <span class="text-base font-semibold text-text-primary whitespace-nowrap" id="program-progress-text">Week 0 of 6</span>
+                            <div class="flex flex-col">
+                                <span class="text-[2rem] font-bold text-text-primary leading-tight" id="total-program-sets">0</span>
+                                <span class="text-base text-text-secondary font-medium">Total Program Sets Completed</span>
+                            </div>
+                        </div>
+                        <div class="bg-white rounded-card p-6 flex items-center gap-4 shadow-card border border-border">
+                            <div class="w-[50px] h-[50px] rounded-card bg-gradient-to-br from-[#fbbf24] to-[#f59e0b] flex items-center justify-center shrink-0">
+                                <i class="fa-solid fa-stopwatch text-xl text-white"></i>
+                            </div>
+                            <div class="flex flex-col">
+                                <span class="text-[2rem] font-bold text-text-primary leading-tight" id="total-external-minutes">0</span>
+                                <span class="text-base text-text-secondary font-medium">Total External Activity Minutes</span>
+                            </div>
                         </div>
                     </div>
-                </div>
-            </section>
 
-            <!-- Workout History Chart -->
-            <section class="mb-8">
-                <div class="flex items-center gap-3 mb-6">
-                    <h2 class="text-xl font-semibold text-text-primary flex items-center gap-2"><i class="fa-solid fa-chart-bar text-brand"></i> Workout History</h2>
-                </div>
-                <div class="grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-6">
-                    <!-- Left: Main stacked bar chart -->
-                    <div class="min-w-0">
-                        <div class="chart-container bg-white rounded-card p-6 shadow-card border border-border h-[350px] relative max-md:h-[280px] max-md:p-4 max-[480px]:h-[250px]" id="history-chart-container">
+                    <!-- Row 2: Program progress bar -->
+                    <div class="bg-white rounded-card p-6 flex items-center gap-4 shadow-card border border-border">
+                        <div class="w-[50px] h-[50px] rounded-card bg-gradient-to-br from-[#667eea] to-[#764ba2] flex items-center justify-center shrink-0">
+                            <i class="fa-solid fa-chart-line text-xl text-white"></i>
+                        </div>
+                        <div class="flex flex-col flex-1 min-w-0">
+                            <span class="text-base text-text-secondary font-medium" id="program-progress-label">Program Progress</span>
+                            <div class="flex items-center gap-3 mt-2">
+                                <div class="flex-1 h-2.5 bg-gray-200 rounded-full overflow-hidden">
+                                    <div class="program-progress-fill h-full rounded-full w-0" id="program-progress-fill"></div>
+                                </div>
+                                <span class="text-base font-semibold text-text-primary whitespace-nowrap" id="program-progress-text">Week 0 of 6</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Row 3: Workout history chart -->
+                    <div>
+                        <div class="flex items-center gap-3 mb-6">
+                            <h2 class="text-xl font-semibold text-text-primary flex items-center gap-2"><i class="fa-solid fa-chart-line text-brand"></i> Workout History</h2>
+                        </div>
+                        <div class="chart-container bg-white rounded-card p-6 shadow-card border border-border h-[350px] relative max-md:h-[280px] max-md:p-4" id="history-chart-container">
                             <canvas id="workout-history-chart"></canvas>
                         </div>
                     </div>
-                    <!-- Right: Detail breakdown panel -->
-                    <div class="bg-white rounded-card shadow-card border border-border flex flex-col h-[350px] max-lg:h-auto max-lg:min-h-[350px]">
-                        <div class="flex border-b border-border shrink-0 px-2 pt-2">
-                            <button class="detail-tab active" id="tab-day-view" onclick="switchDetailView('day')">Day View</button>
-                            <button class="detail-tab" id="tab-all-time" onclick="switchDetailView('alltime')">All Time</button>
-                        </div>
-                        <div class="detail-content flex-1 p-4 overflow-y-auto flex flex-col gap-4 min-h-0" id="detail-panel-content">
-                            <!-- Content populated by JavaScript -->
-                        </div>
+                </div>
+
+                <!-- RIGHT COLUMN: Detail panel spanning the full height of the left column -->
+                <div class="bg-white rounded-card shadow-card border border-border flex flex-col min-h-[500px] max-lg:min-h-[400px]">
+                    <div class="flex border-b border-border shrink-0 px-2 pt-2">
+                        <button class="detail-tab active" id="tab-day-view" onclick="switchDetailView('day')">Day View</button>
+                        <button class="detail-tab" id="tab-all-time" onclick="switchDetailView('alltime')">All Time</button>
+                    </div>
+                    <div class="detail-content flex-1 p-4 overflow-y-auto flex flex-col gap-4 min-h-0" id="detail-panel-content">
+                        <!-- Content populated by JavaScript -->
                     </div>
                 </div>
             </section>
