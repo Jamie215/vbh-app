@@ -1395,6 +1395,7 @@ function renderTotalDaysCard() {
     const total = completionHistory ? Object.keys(completionHistory).length : 0;
     container.innerHTML = `
         <h3 class="text-base font-semibold text-text-primary mb-3">Total Days of Workout</h3>
+        <p class="text-base text-text-secondary leading-relaxed">Combined log of expercise programs and external activities</p> 
         <span class="text-[2.5rem] font-bold text-brand-dark leading-none">${total}</span>
         <span class="text-base text-text-secondary mt-1">Days</span>
     `;
@@ -1606,7 +1607,7 @@ function renderTodayCard() {
     } else {
         // Today (any count) or past day with any activity
         bottomContent = `
-            <div class="flex flex-row items-center justify-center gap-8">
+            <div class="flex flex-row items-center justify-center gap-8 mb-2">
                 <div class="flex flex-col">
                     <p class="text-[3.5rem] font-bold leading-none mb-1">${counts.exercises}</p>
                     <p class="text-base opacity-90">
