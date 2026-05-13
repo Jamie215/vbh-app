@@ -1394,7 +1394,7 @@ function renderTotalDaysCard() {
     if (!container) return;
     const total = completionHistory ? Object.keys(completionHistory).length : 0;
     container.innerHTML = `
-        <h3 class="text-base font-semibold text-text-primary mb-3">Total Days of <br>Exercise Program & External Activities</h3>
+        <h3 class="text-base font-semibold text-text-primary mb-3">Total Days of<br>Exercise Program & External Activities</h3>
         <span class="text-[2.5rem] font-bold text-brand-dark leading-none">${total}</span>
         <span class="text-base text-text-secondary mt-1">Days</span>
     `;
@@ -1610,19 +1610,13 @@ function renderTodayCard() {
                 <div class="flex flex-col">
                     <p class="text-[3.5rem] font-bold leading-none mb-1">${counts.exercises}</p>
                     <p class="text-base opacity-90">
-                        Program ${counts.exercises === 1 ? 'Exercise' : 'Exercises'}
-                    </p>
-                    <p class="text-base opacity-90">
-                        Completed
+                        Program ${counts.exercises === 1 ? 'Exercise' : 'Exercises'}<br>Completed
                     </p>
                 </div>
                 <div class="flex flex-col">
                     <p class="text-[3.5rem] font-bold leading-none mb-1">${counts.activities}</p>
                     <p class="text-base opacity-90">
-                        External ${counts.activities === 1 ? 'Activity' : 'Activities'}
-                    </p>
-                    <p class="text-base opacity-90">
-                        Logged
+                        External ${counts.activities === 1 ? 'Activity' : 'Activities'}<br>Logged
                     </p>
                 </div>
             </div>
