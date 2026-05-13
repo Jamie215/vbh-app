@@ -289,13 +289,12 @@
                     #progress-grid {
                         grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1fr);
                         grid-template-rows: auto auto auto;
-                        align-items: start;
                     }
                     #progress-grid > .pg-sets-card     { grid-column: 1;          grid-row: 1; }
                     #progress-grid > .pg-minutes-card  { grid-column: 2;          grid-row: 1; }
                     #progress-grid > .pg-progress-card { grid-column: 1 / span 2; grid-row: 2; }
                     #progress-grid > .pg-history       { grid-column: 1 / span 2; grid-row: 3; }
-                    #progress-grid > .pg-details       { grid-column: 3;          grid-row: 1 / span 3; }                
+                    #progress-grid > .pg-details       { grid-column: 3;          grid-row: 1 / span 3; align-self: start; }
                 }
 
                 /* Custom toggleable legend for detail panel charts */
