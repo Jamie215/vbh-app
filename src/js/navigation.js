@@ -368,7 +368,7 @@ async function loadEducationProgress() {
             .maybeSingle();
 
         if (error) {
-            console.error('Error loading education progress:', error);
+            logError(error, { operation: 'load_education_progress' });
             return;
         }
 
@@ -378,7 +378,7 @@ async function loadEducationProgress() {
             window.eduBookmark = data.bookmark || '';
         }
     } catch (error) {
-        console.error('Exception loading education progress:', error);
+        logError(error, { operation: 'load_education_progress' });
     }
 }
 
@@ -401,7 +401,7 @@ window.saveEducationProgress = function (progress) {
                     onConflict: 'user_id'
                 });
         } catch (error) {
-            console.error('Exception saving education progress:', error);
+            logError(error, { operation: 'save_education_progress' });
         }
     }, 1000);
 };

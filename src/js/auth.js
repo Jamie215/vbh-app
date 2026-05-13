@@ -62,7 +62,7 @@ async function signUp() {
             document.getElementById('signup-password').value = '';
         }
     } catch (error) {
-        console.error('Sign up error:', error);
+        logError(error, { operation: 'auth_signup' });
         showMessage('signup-message', 'An error occurred. Please try again.', true);
     }
 }
@@ -101,39 +101,21 @@ async function signIn() {
             handlePostSignIn(data.user);
         }
     } catch (error) {
-        console.error('Sign in error:', error);
+        logError(error, { operation: 'auth_signin' });
         showMessage('signin-message', 'An error occurred. Please try again.', true);
     }
 }
 
-// Handle post sign-in setup (called directly from signIn, not from onAuthStateChange)
+// Handle post sign-in setup (called directly from signIn, not from onAuthStateChange).
+// Each loader handles its own errors via logError internally — we don't wrap them.
 async function handlePostSignIn(user) {
     console.log('handlePostSignIn: Setting up user session...');
     currentUser = user;
-    
-    try {
-        await updateUIForAuthenticatedUser(user);
-    } catch (e) {
-        console.error('handlePostSignIn: Error updating UI:', e);
-    }
-    
-    try {
-        await loadTodaySession();
-    } catch (e) {
-        console.error('handlePostSignIn: Error loading today session:', e);
-    }
-    
-    try {
-        await loadCompletionHistory();
-    } catch (e) {
-        console.error('handlePostSignIn: Error loading completion history:', e);
-    }
 
-    try {
-        await loadProgramState();
-    } catch (e) {
-        console.error('handlePostSignIn: Error loading program state:', e);
-    }
+    await updateUIForAuthenticatedUser(user);
+    await loadTodaySession();
+    await loadCompletionHistory();
+    await loadProgramState();
 
     hideLoadingScreen();
     routeAfterAuth();
@@ -153,7 +135,7 @@ async function signOut() {
         }
         // onAuthStateChange will fire SIGNED_OUT synchronously
     } catch (error) {
-        console.error('Sign out error:', error);
+        logError(error, { operation: 'auth_signout' });
         alert('An error occurred while signing out.');
     }
 }
@@ -216,7 +198,7 @@ async function sendPasswordReset() {
             document.getElementById('forgot-email').value = '';
         }
     } catch (error) {
-        console.error('Password reset error:', error);
+        logError(error, { operation: 'auth_password_reset_request' });
         showMessage('forgot-message', 'An error occurred. Please try again.', true);
     } finally {
         if (submitBtn) {
@@ -284,7 +266,7 @@ async function updatePassword() {
             }, 2000);
         }
     } catch (error) {
-        console.error('Password update error:', error);
+        logError(error, { operation: 'auth_password_update' });
         showMessage('reset-message', 'An error occurred. Please try again.', true);
     } finally {
         if (submitBtn) {

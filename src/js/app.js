@@ -31,7 +31,10 @@ document.addEventListener('DOMContentLoaded', () => {
     initializeSession();
 });
 
-// Initialize session on page load
+// Initialize session on page load.
+// Each loader handles its own errors via logError internally — we don't
+// wrap them in try/catch here. Anything that escapes falls through to
+// the window-level unhandledrejection listener.
 async function initializeSession() {
     console.log('initializeSession: Starting...');
 
@@ -46,7 +49,7 @@ async function initializeSession() {
         console.log('initializeSession: getSession completed', { hasSession: !!session, error });
         
         if (error) {
-            console.error('initializeSession: Session error:', error);
+            logError(error, { operation: 'init_get_session' });
             hideLoadingScreen();
             showAuthPage();
             return;
@@ -56,35 +59,11 @@ async function initializeSession() {
             console.log('initializeSession: User is authenticated, loading data...');
             currentUser = session.user;
             
-            try {
-                await updateUIForAuthenticatedUser(session.user);
-            } catch (e) {
-                console.error('initializeSession: Error in updateUIForAuthenticatedUser:', e);
-            }
-            
-            try {
-                await loadTodaySession();
-            } catch (e) {
-                console.error('initializeSession: Error in loadTodaySession:', e);
-            }
-            
-            try {
-                await loadCompletionHistory();
-            } catch (e) {
-                console.error('initializeSession: Error in loadCompletionHistory:', e);
-            }
-
-            try {
-                await loadProgramState();
-            } catch (e) {
-                console.error('initializeSession: Error in loadProgramState:', e);
-            }
-
-            try {
-                await loadEducationProgress();
-            } catch (e) {
-                console.error('initializeSession: Error in loadEducationProgress:', e);
-            }
+            await updateUIForAuthenticatedUser(session.user);
+            await loadTodaySession();
+            await loadCompletionHistory();
+            await loadProgramState();
+            await loadEducationProgress();
             
             hideLoadingScreen();
             routeAfterAuth();
@@ -96,7 +75,7 @@ async function initializeSession() {
             showAuthPage();
         }
     } catch (error) {
-        console.error('initializeSession: Exception:', error);
+        logError(error, { operation: 'init_outer' });
         hideLoadingScreen();
         showAuthPage();
     }
@@ -472,7 +451,11 @@ async function syncCompletionState(method) {
                 });
 
             if (error) {
-                console.error('Error syncing completion state (upsert):', error);
+                logError(error, {
+                    operation: 'sync_completion_upsert',
+                    program_week: calculateUserWeek(),
+                    method
+                });
                 return;
             }
 
@@ -485,7 +468,11 @@ async function syncCompletionState(method) {
                 .eq('user_id', currentUser.id);
 
             if (error) {
-                console.error('Error syncing completion state (delete):', error);
+                logError(error, {
+                    operation: 'sync_completion_delete',
+                    program_week: calculateUserWeek(),
+                    method
+                });
                 return;
             }
 
@@ -493,7 +480,11 @@ async function syncCompletionState(method) {
         }
         // else: not completed, no row — nothing to do
     } catch (error) {
-        console.error('Exception syncing completion state:', error);
+        logError(error, {
+            operation: 'sync_completion_outer',
+            program_week: calculateUserWeek(),
+            method
+        });
     }
 }
 

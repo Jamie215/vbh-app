@@ -830,7 +830,12 @@ async function saveManualEntry() {
         }
 
         if (dbError) {
-            console.error('Error saving manual entry:', dbError);
+            logError(dbError, {
+                operation: 'save_manual_entry',
+                session_date: selectedDate,
+                playlist_id: playlistId,
+                is_delete: isEmpty
+            });
             alert('Error saving workout. Please try again.');
             if (saveBtn) {
                 saveBtn.disabled = false;
@@ -897,7 +902,11 @@ async function saveManualEntry() {
         }, 800);
 
     } catch (error) {
-        console.error('Exception saving manual entry:', error);
+        logError(error, {
+            operation: 'save_manual_entry',
+            session_date: selectedDate,
+            playlist_id: playlistId
+        });
         alert('Error saving workout. Please try again.');
         if (saveBtn) {
             saveBtn.disabled = false;

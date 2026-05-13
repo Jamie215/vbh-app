@@ -351,7 +351,11 @@ async function saveVideoProgress() {
         }
 
         if (dbError) {
-            console.error('Error saving progress:', dbError);
+            logError(dbError, {
+                operation: 'save_video_progress',
+                video_id: videoId,
+                playlist_id: playlistId
+            });
             alert('Error saving progress. Please try again.');
             if (doneBtn) {
                 doneBtn.disabled = false;
@@ -379,7 +383,11 @@ async function saveVideoProgress() {
         }, 500);
 
     } catch (error) {
-        console.error('Exception saving progress:', error);
+        logError(error, {
+            operation: 'save_video_progress',
+            video_id: videoId,
+            playlist_id: playlistId
+        });
         alert('Error saving progress. Please try again.');
         if (doneBtn) {
             doneBtn.disabled = false;
