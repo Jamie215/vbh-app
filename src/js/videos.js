@@ -62,7 +62,7 @@ function openVideoPlayer() {
     const isTimeBased = currentVideo.reps === 0 && currentVideo.seconds > 0;
     
     if (titleEl) titleEl.textContent = currentVideo.title;
-    if (descEl) descEl.textContent = `Recommended: ${currentVideo.sets} sets of ${isTimeBased ? `${currentVideo.seconds} seconds` : `${currentVideo.reps} reps`}`;
+    if (descEl) descEl.textContent = `Recommended: ${currentVideo.sets} sets of ${isTimeBased ? `${currentVideo.seconds} seconds` : `${currentVideo.reps} reps`} ${currentVideo.needsEachSide ? '(each side)' : ''}`;
     
     // Render the set tracking panel
     renderSetTrackingPanel();
