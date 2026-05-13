@@ -115,6 +115,7 @@ async function onManualEntryDateChange() {
         onManualEntryPlaylistChange();
     }
 
+    renderManualEntryExercises();
     renderManualEntryConflictWarning();
     updateManualEntrySaveState();
 }
