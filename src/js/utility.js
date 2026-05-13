@@ -32,6 +32,162 @@ function clearAuthMessages() {
     });
 }
 
+// ==================== Error Logging ====================
+// Forensic error logging to Supabase. Designed for an unmaintained
+// research app — captures enough context for a future maintainer to
+// investigate, with PII scrubbing and rate limits so it can't hurt
+// the user even if something goes wrong with logging itself.
+//
+// To review errors: open the Supabase dashboard → Table Editor →
+// error_log. The service role bypasses RLS so all rows are visible.
+// Join to auth.users on user_id to correlate to participants.
+
+const ERROR_LOG_SESSION_CAP = 20;  // max errors logged per page session
+let _errorLogCount = 0;
+
+// Maps the current URL path to a view identifier for error context.
+// Mirrors the mapping in navigation.js routeFromURL().
+function _getCurrentView() {
+    const path = window.location.pathname;
+    if (path === '/') return 'home';
+    if (path === '/exercises') return 'exercises';
+    if (path.startsWith('/exercises/')) {
+        if (path === '/exercises/how-to-use') return 'how-to-use';
+        if (path === '/exercises/progress') return 'progress';
+        return 'playlist';
+    }
+    if (path === '/education') return 'education';
+    if (path === '/login' || path === '/signup' ||
+        path === '/forgot-password' || path === '/reset-password') return 'auth';
+    return 'unknown';
+}
+
+// Strip likely-PII patterns from a string before logging.
+// Order matters: do specific (dynamic) patterns before generic regex.
+function _scrubPII(text) {
+    if (!text || typeof text !== 'string') return text;
+    let scrubbed = text;
+
+    // Dynamic: strip the current user's actual name and email if they
+    // appear verbatim. .split().join() avoids regex-escaping issues for
+    // names containing apostrophes, hyphens, periods, etc.
+    if (currentUser?.email) {
+        scrubbed = scrubbed.split(currentUser.email).join('[user_email]');
+    }
+    if (userProfile?.full_name) {
+        scrubbed = scrubbed.split(userProfile.full_name).join('[user_name]');
+    }
+
+    // Generic patterns
+    return scrubbed
+        // Email addresses
+        .replace(/[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/g, '[email]')
+        // Supabase recovery / access tokens in URLs
+        .replace(/access_token=[^&\s]+/g, 'access_token=[redacted]')
+        .replace(/refresh_token=[^&\s]+/g, 'refresh_token=[redacted]')
+        // JWT-shaped strings (three base64 chunks separated by dots)
+        .replace(/eyJ[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+/g, '[jwt]');
+}
+
+// Computes a stable fingerprint for grouping similar errors.
+// First line of message + first stack frame is usually enough to
+// identify "the same bug" without splitting minor variations.
+function _computeFingerprint(message, stack) {
+    const firstMsgLine = (message || 'unknown').split('\n')[0].slice(0, 200);
+    const firstStackLine = stack
+        ? (stack.split('\n').find(l => l.trim().startsWith('at ')) || '').slice(0, 200)
+        : '';
+    return `${firstMsgLine}::${firstStackLine}`;
+}
+
+/**
+ * Log an error to Supabase for forensic review.
+ *
+ * Always also logs to console.error so live debugging works.
+ * Silently swallows logging failures — we never want to break the
+ * app because we couldn't log a bug.
+ *
+ * @param {Error|string} error - the error caught
+ * @param {object} [extraContext] - optional ad-hoc context to merge
+ *   into app_context for this specific call site (e.g. operation
+ *   name, IDs, parameters relevant to the failure)
+ */
+async function logError(error, extraContext) {
+    // Always log to console first — independent of DB success
+    console.error(error);
+
+    // Rate limit per session to protect the DB and free-tier limits
+    if (_errorLogCount >= ERROR_LOG_SESSION_CAP) return;
+    _errorLogCount++;
+
+    try {
+        const message = _scrubPII(
+            error instanceof Error ? error.message : String(error)
+        );
+        const stack = error instanceof Error ? _scrubPII(error.stack || '') : null;
+        const fingerprint = _computeFingerprint(message, stack);
+
+        const appContext = { view: _getCurrentView() };
+        if (extraContext && typeof extraContext === 'object') {
+            Object.assign(appContext, extraContext);
+        }
+
+        // Fire-and-forget: don't await, don't block the caller.
+        // The .then catches insert errors silently.
+        window.supabaseClient
+            .from('error_log')
+            .insert({
+                user_id: currentUser?.id ?? null,
+                message: message.slice(0, 2000),
+                stack: stack ? stack.slice(0, 5000) : null,
+                fingerprint: fingerprint.slice(0, 500),
+                url_path: window.location.pathname,
+                user_agent: navigator.userAgent?.slice(0, 500) ?? null,
+                app_context: appContext
+            })
+            .then(({ error: insertError }) => {
+                if (insertError) {
+                    console.warn('logError: insert failed', insertError);
+                }
+            });
+    } catch (e) {
+        // Anything thrown synchronously (supabaseClient missing, etc.)
+        // gets swallowed. console.error already ran above.
+        console.warn('logError: exception during logging', e);
+    }
+}
+
+// ==================== Global Error Listeners ====================
+// Catch errors that escape try/catch blocks so we get visibility
+// into bugs we didn't anticipate. Wrapped in try/catch so the
+// listener itself can never become a source of new errors.
+
+window.addEventListener('error', (event) => {
+    try {
+        const err = event.error || new Error(event.message || 'Unknown error');
+        logError(err, {
+            source: 'window.error',
+            filename: event.filename,
+            lineno: event.lineno,
+            colno: event.colno
+        });
+    } catch (e) {
+        console.warn('window.error listener failed', e);
+    }
+});
+
+window.addEventListener('unhandledrejection', (event) => {
+    try {
+        const reason = event.reason;
+        const err = reason instanceof Error
+            ? reason
+            : new Error(typeof reason === 'string' ? reason : JSON.stringify(reason));
+        logError(err, { source: 'unhandled_promise' });
+    } catch (e) {
+        console.warn('unhandledrejection listener failed', e);
+    }
+});
+
 // ==================== Data Loading Functions ====================
 async function loadCompletionHistory() {
     if (!currentUser) return;
@@ -44,7 +200,7 @@ async function loadCompletionHistory() {
             .order('session_date', { ascending: true });
 
         if (error) {
-            console.error('Error loading completion history:', error);
+            logError(error, { operation: 'load_completion_history' });
             return;
         }
 
@@ -55,7 +211,7 @@ async function loadCompletionHistory() {
             }
         });
     } catch (error) {
-        console.error('Exception in loadCompletionHistory:', error);
+        logError(error, { operation: 'load_completion_history' });
     }   
 }
 
@@ -70,13 +226,13 @@ async function loadProgramState() {
             .maybeSingle();
 
         if (error) {
-            console.error('Error loading program state:', error);
+            logError(error, { operation: 'load_program_state' });
             return;
         }
 
         programCompletedAt = data?.completed_at ?? null;
     } catch (error) {
-        console.error('Exception in loadProgramState:', error);
+        logError(error, { operation: 'load_program_state' });
     }
 }
 
@@ -94,7 +250,7 @@ async function loadTodaySession() {
             .maybeSingle();
 
         if (error) {
-            console.error('Error loading session:', error);
+            logError(error, { operation: 'load_today_session' });
             return;
         }
 
@@ -111,7 +267,7 @@ async function loadTodaySession() {
             });
         }
     } catch (error) {
-        console.error('Exception in loadTodaySession:', error);
+        logError(error, { operation: 'load_today_session' });
     }   
 }
 
@@ -166,12 +322,12 @@ async function updateUIForAuthenticatedUser(user) {
             .rpc('get_my_profile');
         
         if (error) {
-            console.error('Error fetching profile:', error);
+            logError(error, { operation: 'fetch_profile' });
         } else {
             profile = data?.[0] || null;
         }
     } catch (error) {
-        console.error('Exception fetching profile:', error);
+        logError(error, { operation: 'fetch_profile' });
     }
 
     userProfile = profile;
