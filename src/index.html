@@ -288,13 +288,13 @@
                 @media (min-width: 1024px) {
                     #progress-grid {
                         grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1fr);
-                        grid-template-rows: auto auto auto;
+                        grid-template-rows: 1fr 1fr 1fr;
                     }
                     #progress-grid > .pg-sets-card     { grid-column: 1;          grid-row: 1; }
                     #progress-grid > .pg-minutes-card  { grid-column: 2;          grid-row: 1; }
                     #progress-grid > .pg-progress-card { grid-column: 1 / span 2; grid-row: 2; }
                     #progress-grid > .pg-history       { grid-column: 1 / span 2; grid-row: 3; }
-                    #progress-grid > .pg-details       { grid-column: 3;          grid-row: 1 / span 3; align-self: start; }
+                    #progress-grid > .pg-details       { grid-column: 3;          grid-row: 1 / span 3; }
                 }
 
                 /* Custom toggleable legend for detail panel charts */
@@ -389,7 +389,7 @@
                     <div class="flex items-center gap-3 mb-4">
                         <h2 class="text-xl font-semibold text-text-primary flex items-center gap-2"><i class="fa-solid fa-chart-line text-brand"></i> Workout History</h2>
                     </div>
-                    <div class="chart-container bg-white rounded-card p-6 shadow-card border border-border h-[350px] relative max-md:h-[280px] max-md:p-4" id="history-chart-container">
+                    <div class="chart-container bg-white rounded-card p-6 shadow-card border border-border flex-1 min-h-[350px] relative max-md:min-h-[280px] max-md:p-4" id="history-chart-container">
                         <canvas id="workout-history-chart"></canvas>
                     </div>
                 </div>
