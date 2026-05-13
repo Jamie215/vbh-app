@@ -112,12 +112,16 @@ async function onManualEntryDateChange() {
         } else {
             playlistSelect.value = calculateUserWeek() >= 4 ? 'advanced-4-6' : 'beginner-0-3';
         }
-        onManualEntryPlaylistChange();
     }
-
-    renderManualEntryExercises();
-    renderManualEntryConflictWarning();
-    updateManualEntrySaveState();
+    
+    // Always reload progress
+    if (playlistSelect?.value) {
+        onManualEntryPlaylistChange();
+    } else {
+        renderManualEntryExercises();
+        renderManualEntryConflictWarning();
+        updateManualEntrySaveState();
+    }
 }
 
 function onManualEntryPlaylistChange() {
