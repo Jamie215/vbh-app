@@ -1610,13 +1610,19 @@ function renderTodayCard() {
                 <div class="flex flex-col">
                     <p class="text-[3.5rem] font-bold leading-none mb-1">${counts.exercises}</p>
                     <p class="text-base opacity-90">
-                        Program ${counts.exercises === 1 ? 'Exercise' : 'Exercises'} Completed
+                        Program ${counts.exercises === 1 ? 'Exercise' : 'Exercises'}
+                    </p>
+                    <p class="text-base opacity-90">
+                        Completed
                     </p>
                 </div>
                 <div class="flex flex-col">
                     <p class="text-[3.5rem] font-bold leading-none mb-1">${counts.activities}</p>
                     <p class="text-base opacity-90">
-                        External ${counts.activities === 1 ? 'Activity' : 'Activities'} Logged
+                        External ${counts.activities === 1 ? 'Activity' : 'Activities'}
+                    </p>
+                    <p class="text-base opacity-90">
+                        Logged
                     </p>
                 </div>
             </div>
