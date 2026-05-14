@@ -759,7 +759,13 @@ async function saveManualEntry() {
     // Confirm the destructive case before doing anything irreversible.
     const isDeletingPlaylist = !hasAnyCompleted && completionHistory?.[selectedDate]?.[playlistId];
     if (isDeletingPlaylist) {
-        const ok = confirm("Save with no sets checked? This will clear this playlist's data for this day.");
+        const ok = await showConfirm({
+            title: 'Clear this playlist?',
+            message: 'Saving with no sets checked will clear this playlist\'s data for this day.',
+            confirmText: 'Clear & Save',
+            cancelText: 'Keep Editing',
+            variant: 'warning'
+        });
         if (!ok) return;
     }
 
@@ -836,7 +842,11 @@ async function saveManualEntry() {
                 playlist_id: playlistId,
                 is_delete: isEmpty
             });
-            alert('Error saving workout. Please try again.');
+            await showAlert({
+                title: 'Save Failed',
+                message: 'There was a problem saving your workout. Please try again.',
+                variant: 'danger'
+            });
             if (saveBtn) {
                 saveBtn.disabled = false;
                 saveBtn.innerHTML = '<i class="fa-solid fa-floppy-disk"></i> Save Workout';
@@ -907,7 +917,11 @@ async function saveManualEntry() {
             session_date: selectedDate,
             playlist_id: playlistId
         });
-        alert('Error saving workout. Please try again.');
+        await showAlert({
+            title: 'Save Failed',
+            message: 'There was a problem saving your workout. Please try again.',
+            variant: 'danger'
+        });
         if (saveBtn) {
             saveBtn.disabled = false;
             saveBtn.innerHTML = '<i class="fa-solid fa-floppy-disk"></i> Save Workout';
