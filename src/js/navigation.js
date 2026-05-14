@@ -344,11 +344,6 @@ function showHowToUse() {
         buttonText: 'OK',
         variant: 'info'
     });
-
-    // Reset since we're not actually navigating to a new view yet
-    // Remove these two lines once the real How to Use view exists:
-    updateNavActiveState('exercises');
-    showExercises();
 }
 
 
