@@ -1,6 +1,5 @@
-// Modal system - promise-based replacement for native alert() and confirm().
-// Visual pattern matches the existing final-session and program-completion modals.
-//
+// Modal system for alerts and confirms
+
 // Usage:
 //   await showAlert({ title, message, variant, buttonText, icon })
 //   const ok = await showConfirm({ title, message, variant, confirmText, cancelText, icon })
@@ -16,9 +15,9 @@ let _modalCounter = 0;
 
 const _MODAL_VARIANTS = {
     info: {
-        iconBg: 'linear-gradient(135deg, #667eea, #764ba2)',
+        iconBg: '#667eea',
         icon: 'fa-circle-info',
-        primaryBg: 'linear-gradient(135deg, #667eea, #764ba2)',
+        primaryBg: '#667eea',
         primaryShadow: 'rgba(102,126,234,0.3)'
     },
     danger: {
