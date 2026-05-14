@@ -328,7 +328,7 @@ function showExercises() {
 
 // ==================== How to Use ====================
 
-function showHowToUse() {
+async function showHowToUse() {
     if (!currentUser) {
         showAuthPage();
         return;
