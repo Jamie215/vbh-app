@@ -124,19 +124,33 @@ async function handlePostSignIn(user) {
 
 // Sign out
 async function signOut() {
-    const confirmed = confirm('Are you sure you want to sign out?');
+    const confirmed = await showConfirm({
+        title: 'Sign out?',
+        message: "You'll need to log back in to continue using HandsUP.",
+        confirmText: 'Sign Out',
+        cancelText: 'Cancel',
+        variant: 'danger'
+    });
     if (!confirmed) return;
 
     try {
         const { error } = await window.supabaseClient.auth.signOut();
-        
+
         if (error) {
-            alert('Error signing out: ' + error.message);
+            await showAlert({
+                title: 'Sign Out Failed',
+                message: 'There was a problem signing you out: ' + error.message,
+                variant: 'danger'
+            });
         }
         // onAuthStateChange will fire SIGNED_OUT synchronously
     } catch (error) {
         logError(error, { operation: 'auth_signout' });
-        alert('An error occurred while signing out.');
+        await showAlert({
+            title: 'Sign Out Failed',
+            message: 'An error occurred while signing out. Please try again.',
+            variant: 'danger'
+        });
     }
 }
 
