@@ -119,6 +119,7 @@ async function handlePostSignIn(user) {
     await loadTodaySession();
     await loadCompletionHistory();
     await loadProgramState();
+    await loadEducationProgress();
 
     hideLoadingScreen();
     routeAfterAuth();
