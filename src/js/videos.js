@@ -356,7 +356,11 @@ async function saveVideoProgress() {
                 video_id: videoId,
                 playlist_id: playlistId
             });
-            alert('Error saving progress. Please try again.');
+            await showAlert({
+                title: 'Save Failed',
+                message: 'There was a problem saving your progress.<br>Please try again.',
+                variant: 'danger'
+            });
             if (doneBtn) {
                 doneBtn.disabled = false;
                 doneBtn.innerHTML = 'Save';
@@ -388,7 +392,11 @@ async function saveVideoProgress() {
             video_id: videoId,
             playlist_id: playlistId
         });
-        alert('Error saving progress. Please try again.');
+        await showAlert({
+            title: 'Save Failed',
+            message: 'There was a problem saving your progress.<br>Please try again.',
+            variant: 'danger'
+        });
         if (doneBtn) {
             doneBtn.disabled = false;
             doneBtn.innerHTML = 'Save';

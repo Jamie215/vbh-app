@@ -338,7 +338,12 @@ function showHowToUse() {
     updateNavActiveState('how-to-use');
 
     // Placeholder — replace with actual view when ready
-    alert('How to Use page coming soon!');
+    await showAlert({
+        title: 'How to Use',
+        message: 'How to Use page coming soon!',
+        buttonText: 'OK',
+        variant: 'info'
+    });
 
     // Reset since we're not actually navigating to a new view yet
     // Remove these two lines once the real How to Use view exists:
