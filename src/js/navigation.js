@@ -373,7 +373,6 @@ async function loadEducationProgress() {
         }
 
         if (data) {
-            console.log('Loaded education progress:', data);
             window.eduProgress = data.progress || null;
             window.eduBookmark = data.bookmark || '';
         }
