@@ -426,22 +426,44 @@ async function showEducation() {
     const educationView = document.getElementById('education-view');
     const navbar = document.getElementById('navbar');
     const iframe = document.getElementById('education-iframe');
+    const loader = document.getElementById('education-loader');
 
     if (educationView) educationView.classList.remove('hidden');
     if (navbar) navbar.classList.remove('hidden');
 
-    // Load progress then set iframe src (only once)
-    if (iframe && !iframe.src) {
-        try {
-            await loadEducationProgress();
-        } catch (e) {
-            console.warn('Could not load education progress, starting fresh:', e);
+    // Set up the loader before kicking off the iframe load
+    if (iframe && loader) {
+        const showLoader = () => {
+            loader.style.display = 'flex';
+            loader.style.opacity = '1';
+            loader.style.pointerEvents = 'auto';
+            iframe.style.opacity = '0';
+        };
+
+        const hideLoader = () => {
+            loader.style.opacity = '0';
+            loader.style.pointerEvents = 'none';
+            iframe.style.opacity = '1';
+            // Remove from layout after fade so it doesn't intercept clicks
+            setTimeout(() => { loader.style.display = 'none'; }, 300);
+        };
+
+        // Load progress then set iframe src (only once)
+        if (!iframe.src) {
+            showLoader();
+
+            try {
+                await loadEducationProgress();
+            } catch (e) {
+                console.warn('Could not load education progress, starting fresh:', e);
+            }
+            iframe.src = 'education/content/index.html';
+        } else {
+            hideLoader();
         }
-        iframe.src = 'education/content/index.html';
     }
 
     updateNavActiveState('education');
-
     setFooterVisibility(false);
 }
 
@@ -454,8 +476,15 @@ function hideEducation() {
 // Only used on sign-out to fully tear down the iframe
 function unloadEducationIframe() {
     const iframe = document.getElementById('education-iframe');
+    const loader = document.getElementById('education-loader');
     if (iframe) {
         iframe.removeAttribute('src');
+        iframe.style.opacity = '0';
+    }
+    if (loader) {
+        loader.style.display = 'flex';
+        loader.style.opacity = '1';
+        loader.style.pointerEvents = 'auto';
     }
     window.eduProgress = null;
     window.eduBookmark = '';

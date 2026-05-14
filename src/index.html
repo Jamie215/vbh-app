@@ -408,7 +408,20 @@
 
         <!-- Education Section -->
         <main id="education-view" class="hidden">
-            <iframe id="education-iframe" class="education-iframe" title="Education Modules"></iframe>
+            <div id="education-frame-wrapper" class="relative w-full h-full">
+                <!-- Loader -->
+                <div id="education-loader"
+                    class="absolute inset-0 flex flex-col items-center justify-center bg-surface z-10 transition-opacity duration-300">
+                    <img src="/assets/img/icon.png" alt="HandsUP" class="w-16 h-16 object-contain mb-4">
+                    <div class="w-10 h-10 border-4 border-gray-200 border-t-brand rounded-full animate-spin mb-4"></div>
+                    <p class="text-text-secondary text-base">Loading education module…</p>
+                </div>
+
+                <!-- Iframe (starts at opacity-0 so it can load without flashing partial content) -->
+                <iframe id="education-iframe"
+                        class="education-iframe opacity-0 transition-opacity duration-300"
+                        title="Education Modules"></iframe>
+            </div>
         </main>
 
         <!-- Sitewide Footer -->
