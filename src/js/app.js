@@ -1385,7 +1385,7 @@ function renderTotalDaysCard() {
     if (!container) return;
     const total = completionHistory ? Object.keys(completionHistory).length : 0;
     container.innerHTML = `
-        <h3 class="text-base font-semibold text-text-primary text-left mb-3">Total Days of<br>Exercise Program & External Activities</h3>
+        <h3 class="text-base font-semibold text-text-primary text-center mb-3">Total Days of<br>Exercise Program & External Activities</h3>
         <span class="text-[2.5rem] font-bold text-brand-dark leading-none">${total}</span>
         <span class="text-base text-text-secondary mt-1">Days</span>
     `;
