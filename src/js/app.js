@@ -1578,7 +1578,7 @@ function renderTodayCard() {
     const total = counts.exercises + counts.activities;
 
     const headerLabel = isToday
-        ? `Today, ${dayName} ${month} ${date}`
+        ? `Today, ${dayName}, ${month} ${date}`
         : `${dayName}, ${month} ${date}`;
 
     // Show log-past-workout button only for past dates within manual entry window
