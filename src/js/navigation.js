@@ -23,6 +23,9 @@ function pushRoute(path, state = {}) {
  */
 function routeFromURL() {
     const path = window.location.pathname;
+    
+    // Scroll to top on route change
+    window.scrollTo(0, 0);
 
     // Dynamic route: /exercises/:playlistId
     const playlistMatch = path.match(/^\/exercises\/(.+)$/);
