@@ -334,8 +334,8 @@ function showHowToUse() {
         return;
     }
 
-    pushRoute('/exercises/how-to-use');
-    updateNavActiveState('how-to-use');
+    // pushRoute('/exercises/how-to-use');
+    // updateNavActiveState('how-to-use');
 
     // Placeholder — replace with actual view when ready
     await showAlert({
