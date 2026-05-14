@@ -448,7 +448,6 @@ async function showEducation() {
             setTimeout(() => { loader.style.display = 'none'; }, 300);
         };
 
-        // Load progress then set iframe src (only once)
         if (!iframe.src) {
             showLoader();
 
@@ -457,6 +456,50 @@ async function showEducation() {
             } catch (e) {
                 console.warn('Could not load education progress, starting fresh:', e);
             }
+
+            // Multi-signal readiness detection — whichever fires first wins
+            let settled = false;
+            const finish = (reason) => {
+                if (settled) return;
+                settled = true;
+                console.log('Education iframe ready via:', reason);
+                clearInterval(pollTimer);
+                clearTimeout(fallbackTimer);
+                iframe.removeEventListener('load', onLoad);
+                hideLoader();
+            };
+
+            const onLoad = () => finish('load-event');
+
+            // Signal 1: native load event (keep it, in case it does fire)
+            iframe.addEventListener('load', onLoad, { once: true });
+
+            // Signal 2: poll the iframe's document for a Rise-rendered element.
+            // Same-origin, so contentDocument is accessible.
+            // Rise renders its lesson content into elements with class names like
+            // `.lesson`, `.cs-main`, or `[data-block-kind]`. We poll for ANY of
+            // them to appear AND readyState to be 'complete'.
+            const pollTimer = setInterval(() => {
+                try {
+                    const doc = iframe.contentDocument;
+                    if (!doc) return;
+                    if (doc.readyState !== 'complete') return;
+
+                    // Rise-specific markers — at least one of these should exist once rendered
+                    const hasContent = doc.querySelector('.lesson, .cs-main, [data-block-kind], main');
+                    if (hasContent) {
+                        finish('poll');
+                    }
+                } catch (err) {
+                    // Cross-origin error shouldn't happen here, but if it does,
+                    // we can't poll — rely on the load event + fallback instead
+                    clearInterval(pollTimer);
+                }
+            }, 250);
+
+            // Signal 3: fallback after 20s — never get stuck
+            const fallbackTimer = setTimeout(() => finish('fallback-timeout'), 20000);
+
             iframe.src = 'education/content/index.html';
         } else {
             hideLoader();
