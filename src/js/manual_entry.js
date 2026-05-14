@@ -21,7 +21,6 @@ function openManualEntryModal(prefillDate = null) {
     if (dateInput) {
         const today = new Date();
         const maxDate = new Date(today);
-        maxDate.setDate(maxDate.getDate() - 1); // Yesterday at most
 
         dateInput.value = prefillDate ||'';
         dateInput.max = maxDate.toISOString().split('T')[0];
