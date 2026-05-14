@@ -66,7 +66,7 @@ function _showModal({
         ` : '';
 
         overlay.innerHTML = `
-            <div class="bg-white rounded-2xl py-8 px-8 max-w-[440px] w-full text-center scale-90 transition-transform duration-300" style="box-shadow: 0 20px 60px rgba(0,0,0,0.15);" role="dialog" aria-modal="true" aria-labelledby="${modalId}-title">
+            <div class="bg-white rounded-2xl p-8 max-w-[440px] w-full text-center scale-90 transition-transform duration-300" style="box-shadow: 0 20px 60px rgba(0,0,0,0.15);" role="dialog" aria-modal="true" aria-labelledby="${modalId}-title">
                 <div class="w-14 h-14 rounded-full flex items-center justify-center mx-auto mb-4" style="background: ${v.iconBg};">
                     <i class="fa-solid ${displayIcon} text-2xl text-white"></i>
                 </div>

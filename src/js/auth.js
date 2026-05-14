@@ -139,7 +139,7 @@ async function signOut() {
         if (error) {
             await showAlert({
                 title: 'Sign Out Failed',
-                message: 'There was a problem signing you out: ' + error.message,
+                message: 'There was a problem signing you out: ' + error.message + '. Please try again.',
                 variant: 'danger'
             });
         }
