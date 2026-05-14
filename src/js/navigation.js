@@ -25,7 +25,7 @@ function routeFromURL() {
     const path = window.location.pathname;
     
     // Scroll to top on route change (for mobile view)
-    document.activeElement.blur()
+    document.activeElement?.blur()
     window.scrollTo(0, 0);
 
     // Dynamic route: /exercises/:playlistId

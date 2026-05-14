@@ -69,6 +69,9 @@ async function signUp() {
 
 // Sign in existing user
 async function signIn() {
+    // Dismiss mobile keyboard immediately so the viewport restores while the async auth call is in flight
+    document.activeElement?.blur();
+
     const email = document.getElementById('login-email').value.trim();
     const password = document.getElementById('login-password').value;
 
