@@ -22,21 +22,21 @@ const _MODAL_VARIANTS = {
         primaryShadow: 'rgba(102,126,234,0.3)'
     },
     danger: {
-        iconBg: 'linear-gradient(135deg, #ef4444, #dc2626)',
+        iconBg: '#ef4444',
         icon: 'fa-triangle-exclamation',
-        primaryBg: 'linear-gradient(135deg, #ef4444, #dc2626)',
+        primaryBg: '#ef4444',
         primaryShadow: 'rgba(239,68,68,0.3)'
     },
     success: {
-        iconBg: 'linear-gradient(135deg, #10b981, #059669)',
+        iconBg: '#10b981',
         icon: 'fa-circle-check',
-        primaryBg: 'linear-gradient(135deg, #10b981, #059669)',
+        primaryBg: '#10b981',
         primaryShadow: 'rgba(16,185,129,0.3)'
     },
     warning: {
-        iconBg: 'linear-gradient(135deg, #f59e0b, #f97316)',
+        iconBg: '#f59e0b',
         icon: 'fa-triangle-exclamation',
-        primaryBg: 'linear-gradient(135deg, #f59e0b, #f97316)',
+        primaryBg: '#f59e0b',
         primaryShadow: 'rgba(245,158,11,0.3)'
     }
 };

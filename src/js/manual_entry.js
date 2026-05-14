@@ -844,7 +844,7 @@ async function saveManualEntry() {
             });
             await showAlert({
                 title: 'Save Failed',
-                message: 'There was a problem saving your workout. Please try again.',
+                message: 'There was a problem saving your workout.<br>Please try again.',
                 variant: 'danger'
             });
             if (saveBtn) {
@@ -919,7 +919,7 @@ async function saveManualEntry() {
         });
         await showAlert({
             title: 'Save Failed',
-            message: 'There was a problem saving your workout. Please try again.',
+            message: 'There was a problem saving your workout.<br>Please try again.',
             variant: 'danger'
         });
         if (saveBtn) {
