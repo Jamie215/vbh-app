@@ -153,10 +153,10 @@ function hasEducationProgress() {
  * Used for discrepancy comparison against the session-gated program week.
  */
 function calculateCalendarWeek() {
-    if (!completionHistory || Object.keys(completionHistory).length === 0) return 0;
+    if (!completionHistory || Object.keys(completionHistory).length === 0) return 1;
 
     const dates = Object.keys(completionHistory).sort();
-    if (dates.length === 0) return 0;
+    if (dates.length === 0) return 1;
 
     const firstDate = new Date(dates[0] + 'T00:00:00');
     const today = new Date();
@@ -253,7 +253,7 @@ function _replayCompletion(advancedSessionDates, fromDate) {
 *     session, so progression restarts from there.
  */
 function getProgramWeekState() {
-    const empty = { programWeek: 0, calendarWeek: 0, windowAnchor: null, sessionsInCurrentWeek: 0 };
+    const empty = { programWeek: 1, calendarWeek: 1, windowAnchor: null, sessionsInCurrentWeek: 0 };
 
     if (!completionHistory || Object.keys(completionHistory).length === 0) return empty;
 
@@ -272,7 +272,7 @@ function getProgramWeekState() {
     const diffDaysFromOriginal = Math.floor((today - originalFirstDate) / 86400000);
     const calendarWeek = Math.min(Math.floor(diffDaysFromOriginal / 7), 6);
     
-    // Weeks 0-3: purely calendar-based, no reset logic
+    // Weeks 1-3: purely calendar-based, no reset logic
     if (calendarWeek <= 3) {
         return { programWeek: calendarWeek, calendarWeek, windowAnchor: null, sessionsInCurrentWeek: 0 };
     }
@@ -368,7 +368,7 @@ function getProgramWeekState() {
 
 /**
  * Main week calculation function used throughout the app.
- * Weeks 0-3: calendar-based. Weeks 4-6: session-gated via getProgramWeekState().
+ * Weeks 1-3: calendar-based. Weeks 4-6: session-gated via getProgramWeekState().
  */
 function calculateUserWeek() {
     return getProgramWeekState().programWeek;
@@ -915,7 +915,7 @@ function loadPlaylists() {
             greetingP.innerHTML = `${userName}, you've completed the <strong>6-week program</strong>! Feel free to continue the exercises at your own pace.`;
         } else if (state.wasReset) {
             greetingP.innerHTML = `Welcome back, ${userName}! It's been a while — you're restarting at <strong>Week 4</strong>. Log a session to pick up where you left off.`;
-        } else if (userWeek === 0) {
+        } else if (userWeek === 1) {
             greetingP.innerHTML = `${userName}, welcome to the program. Let's get started!`;
         } else if (userWeek >= 4 && userWeek < 6) {
             const sessionsLeft = 2 - state.sessionsInCurrentWeek;

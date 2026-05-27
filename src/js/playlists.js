@@ -10,9 +10,9 @@ if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
 // Playlist structure
 const PLAYLISTS = [
     {
-        id: 'beginner-0-3',
-        title: 'Beginner Weeks 0-3',
-        description: 'Workout playlist for Week 0 to 3',
+        id: 'beginner-1-3',
+        title: 'Beginner Weeks 1-3',
+        description: 'Workout playlist for Week 1 to 3',
         type: 'video',
         videos: [
             {
@@ -262,6 +262,11 @@ const PLAYLISTS = [
         videos: [],
         others: [
             {
+                id: 'walking',
+                title: 'Walking',
+                description: '',
+                minutes: 30
+            }, {
                 id: 'running',
                 title: 'Running',
                 description: '',
@@ -288,12 +293,12 @@ const PLAYLISTS = [
                 minutes: 30
             },{
                 id:'high-intensity',
-                title: 'High Intensity Sport',
-                description: 'Including tennis, pickleball, golfing - walking the course',
+                title: 'High Intensity Sport or Recreation',
+                description: 'Including tennis, pickleball, dancing, golfing - walking the course',
                 minutes: 30
             }, {
                 id: 'low-intensity',
-                title: 'Low Intensity Sport',
+                title: 'Low Intensity Sport or Recreation',
                 description: 'Including lawn bowling, golfing - driving the course, shuffleboard',
                 minutes: 30
             }
