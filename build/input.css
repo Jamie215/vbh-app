@@ -57,6 +57,11 @@
         min-width: 220px;
     }
 
+    .nav-dropdown:hover .nav-dropdown-menu,
+    .nav-dropdown.open .nav-dropdown-menu {
+        display: flex;
+    }
+
     .nav-dropdown-item {
         display: flex;
         align-items: center;
@@ -80,10 +85,6 @@
 
     /* ── Desktop (≥1024px): hover-open absolute dropdown ── */
     @media (min-width: 1024px) {
-        .nav-dropdown:hover .nav-dropdown-menu,
-        .nav-dropdown.open .nav-dropdown-menu {
-            display: flex;
-        }
         .nav-dropdown:hover .nav-chevron {
             transform: rotate(180deg);
         }
@@ -143,9 +144,6 @@
         .nav-dropdown-toggle {
             width: 100%;
             justify-content: flex-start;
-        }
-        .nav-dropdown.open .nav-dropdown-menu {
-            display: flex;
         }
         .nav-dropdown-menu {
             padding-left: 1rem;
