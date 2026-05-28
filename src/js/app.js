@@ -240,7 +240,7 @@ function _replayCompletion(advancedSessionDates, fromDate) {
  * Core function that computes the program week state for weeks 4-6.
  * Returns detailed state used by calculateUserWeek(), alerts, and checkWeek6Activity().
  *
- * Weeks 0-3: purely calendar-based (days since first session / 7).
+ * Weeks 1-3: purely calendar-based (days since first session / 7).
  * Weeks 4-6: session-gated — requires 2 advanced sessions per program week to advance.
  *
  * 7-day window rules:
