@@ -104,12 +104,12 @@ async function onManualEntryDateChange() {
         const existingDay = completionHistory?.[dateInput.value];
         if (existingDay?.['advanced-4-6']) {
             playlistSelect.value = 'advanced-4-6';
-        } else if (existingDay?.['beginner-0-3']) {
-            playlistSelect.value = 'beginner-0-3';
+        } else if (existingDay?.['beginner-1-3']) {
+            playlistSelect.value = 'beginner-1-3';
         } else if (existingDay?.['external-activity']) {
             playlistSelect.value = 'external-activity';
         } else {
-            playlistSelect.value = calculateUserWeek() >= 4 ? 'advanced-4-6' : 'beginner-0-3';
+            playlistSelect.value = calculateUserWeek() >= 4 ? 'advanced-4-6' : 'beginner-1-3';
         }
     }
     

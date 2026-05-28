@@ -686,7 +686,7 @@ function getSuggestedWorkout() {
     const userWeek = calculateUserWeek();
 
     if (userWeek <= 3) {
-        return PLAYLISTS.find(p => p.id === 'beginner-0-3');
+        return PLAYLISTS.find(p => p.id === 'beginner-1-3');
     } else {
         return PLAYLISTS.find(p => p.id === 'advanced-4-6');
     }
@@ -1081,7 +1081,7 @@ function showPlaylist(playlistId) {
     
     // Create formatted title like "Beginner 3-6 Exercises"
     const isAdvanced = currentPlaylist.id.includes('advanced');
-    const formattedTitle = isAdvanced ? 'Advanced 4-6 Exercises' : 'Beginner 0-3 Exercises';
+    const formattedTitle = isAdvanced ? 'Advanced 4-6 Exercises' : 'Beginner 1-3 Exercises';
     
     if (titleEl) titleEl.textContent = formattedTitle;
     if (descEl) descEl.innerHTML = `<strong><u>Instructions</u></strong>: Go through the below exercises at your own pace. Click to watch the videos to see how each exercise is done. Your progress is saved when you click 'Save' in the exercise modal.`;

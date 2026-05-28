@@ -711,13 +711,13 @@ function _renderBreakdownBlocks(container, headerHTML, programByPlaylist, extern
 
     let blocksHTML = headerHTML;
 
-    const orderedPlaylistIds = ['beginner-0-3', 'advanced-4-6'];
+    const orderedPlaylistIds = ['beginner-1-3', 'advanced-4-6'];
     orderedPlaylistIds.forEach(pid => {
         const programEntries = programByPlaylist[pid];
         if (!programEntries || Object.keys(programEntries).length === 0) return;
 
         const isAdvanced = pid === 'advanced-4-6';
-        const label = isAdvanced ? 'Advanced 4-6' : 'Beginner 0-3';
+        const label = isAdvanced ? 'Advanced 4-6' : 'Beginner 1-3';
         const dotColor = isAdvanced ? CATEGORY_COLORS.advanced : CATEGORY_COLORS.beginner;
 
         // Count = every exercise in the playlist (the polar always shows all
