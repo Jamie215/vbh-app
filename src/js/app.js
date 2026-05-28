@@ -270,7 +270,6 @@ function getProgramWeekState() {
     const originalFirstDate = sessionDates[0];
 
     const diffDaysFromOriginal = Math.floor((today - originalFirstDate) / 86400000);
-    console.log("flooring", Math.floor(diffDaysFromOriginal / 7));
     const calendarWeek = Math.min(Math.floor(diffDaysFromOriginal / 7) + 1, 6);
     
     // Weeks 1-3: purely calendar-based, no reset logic
@@ -314,7 +313,7 @@ function getProgramWeekState() {
 
     let programWeek = 4;
     let windowAnchor = new Date(effectiveFirstDate);
-    windowAnchor.setDate(windowAnchor.getDate() + 28);
+    windowAnchor.setDate(windowAnchor.getDate() + 21);
 
     let sessionsInCurrentWeek = 0;
 
