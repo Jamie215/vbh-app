@@ -643,14 +643,14 @@ function setFooterVisibility(visible) {
 function showHelpModal() {
     // Placeholder — replace with actual view when ready
     await showAlert({
-        title: 'How do I use this application',
-        message: 'Coming soon!',
+        title: 'How to Use',
+        message: 'How to Use page coming soon!',
         buttonText: 'OK',
         variant: 'info'
     });
-
-    // const existing = document.getElementById('help-modal');
-    // if (existing) existing.remove();
+    
+    const existing = document.getElementById('help-modal');
+    if (existing) existing.remove();
 
     // const overlay = document.createElement('div');
     // overlay.id = 'help-modal';
