@@ -1,3 +1,4 @@
 .env
-schemaCreation.sql
+01_schema_Supabase.sql
+02_schema_REDCap.sql
 node_modules/
