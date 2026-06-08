@@ -81,6 +81,35 @@ async function initializeSession() {
     }
 }
 
+const TUTORIAL_VIDEOS = [
+    { id: 'dsg0hMkCIQw', title: 'How to Use the Application', description: 'A quick overview to HandsUP and how to navigate the app.' },
+    { id: 'mfQSv75ZUX4', title: 'Exercise Safety', description: 'Learn about safe exercise practices and how to avoid injuries.' },
+    { id: '9DTwfUD6CrA', title: 'How to Progress your Exercise', description: 'Learn how to progress your exercise in the program.' },
+    { id: 'GFyIX4xOC2s', title: 'What are Reps and Sets', description: 'Understand the basics of reps and sets in exercise training.' }
+]
+
+function loadHowToUseView() {
+    const grid = document.getElementById('how-to-use-grid');
+    if (!grid) return;
+
+    grid.innerHTML = TUTORIAL_VIDEOS.map((v, i) => `
+        <div class="bg-white rounded-card overflow-hidden shadow-card border border-border transition-all duration-200 cursor-pointer hover:-translate-y-1 hover:shadow-heavy" onclick="showTutorialModal(${i})">
+            <div class="relative aspect-video bg-black overflow-hidden group">
+                <img src="https://img.youtube.com/vi/${v.id}/hqdefault.jpg" alt="${v.title}" class="w-full h-full object-cover">
+                <div class="absolute inset-0 flex items-center justify-center bg-black/30 transition-colors hover:bg-black/50">
+                    <div class="w-16 h-16 rounded-full bg-white/90 flex items-center justify-center shadow-md">
+                        <i class="fa-solid fa-play text-brand text-xl ml-1"></i>
+                    </div>
+                </div>
+            </div>
+            <div class="p-5">
+                <h3 class="text-[1.1rem] font-semibold text-text-primary mb-1">${v.title}</h3>
+                <p class="text-text-secondary text-base">${v.description}</p>
+            </div>
+        </div>
+    `).join('');
+}
+
 // ==================== Education Lesson Map ====================
 // Maps Rise lesson IDs (used as bookmarks) to display titles.
 // IDs come from the Rise course payload baked into education/content/index.html.

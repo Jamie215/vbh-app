@@ -117,7 +117,7 @@ window.addEventListener('popstate', () => {
 
 /** Hide every top-level view in the app */
 function hideAllViews() {
-    const ids = ['auth-view', 'home-view', 'exercises-view', 'playlist-view', 'progress-view', 'education-view'];
+    const ids = ['auth-view', 'home-view', 'exercises-view', 'playlist-view', 'how-to-use-view', 'progress-view', 'education-view'];
     ids.forEach(id => {
         const el = document.getElementById(id);
         if (el) el.classList.add('hidden');
@@ -338,16 +338,21 @@ async function showHowToUse() {
         return;
     }
 
-    // pushRoute('/exercises/how-to-use');
-    // updateNavActiveState('how-to-use');
+    pushRoute('/exercises/how-to-use');
 
-    // Placeholder — replace with actual view when ready
-    await showAlert({
-        title: 'How to Use',
-        message: 'How to Use page coming soon!',
-        buttonText: 'OK',
-        variant: 'info'
-    });
+    hideAllViews();
+    const view = document.getElementById('how-to-use-view');
+    const navbar = document.getElementById('navbar');
+
+    if (view) view.classList.remove('hidden');
+    if (navbar) navbar.classList.remove('hidden');
+    setFooterVisibility(true);
+
+    updateNavActiveState('how-to-use');
+
+    if (typeof loadHowToUseView === 'function') {
+        loadHowToUseView();
+    }
 }
 
 
@@ -663,6 +668,36 @@ function showHelpModal() {
 
 function closeHelpModal() {
     const modal = document.getElementById('help-modal');
+    if (modal) modal.remove();
+}
+
+// Tutorial video modal
+function showTutorialModal(index) {
+    const v = TUTORIAL_VIDEOS?.[index];
+    if (!v) return;
+
+    const existing = document.getElementById('tutorial-modal');
+    if (existing) existing.remove();
+
+    const overlay = document.createElement('div');
+    overlay.id = 'tutorial-modal';
+    overlay.className = 'fixed inset-0 bg-black/70 flex items-center justify-center z-[1000] p-4';
+    overlay.onclick = (e) => { if (e.target === overlay) closeTutorialModal(); };
+    overlay.innerHTML = `
+        <div class="bg-white rounded-xl p-4 max-w-[900px] w-full relative">
+            <button onclick="closeTutorialModal()" class="absolute -top-3 -right-3 w-9 h-9 rounded-full bg-white shadow-md flex items-center justify-center text-text-primary border-none cursor-pointer hover:bg-gray-100 z-10" aria-label="Close">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+            <div class="aspect-video w-full rounded-lg overflow-hidden bg-black">
+                <iframe src="https://www.youtube.com/embed/${v.id}?rel=0&modestbranding=1" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen class="w-full h-full"></iframe>
+            </div>
+        </div>
+    `;
+    document.getElementById('app').appendChild(overlay);
+}
+
+function closeTutorialModal() {
+    const modal = document.getElementById('tutorial-modal');
     if (modal) modal.remove();
 }
 
