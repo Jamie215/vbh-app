@@ -97,8 +97,8 @@ function loadHowToUseView() {
             <div class="relative aspect-video bg-black overflow-hidden group">
                 <img src="https://img.youtube.com/vi/${v.id}/hqdefault.jpg" alt="${v.title}" class="w-full h-full object-cover">
                 <div class="absolute inset-0 flex items-center justify-center bg-black/30 transition-colors hover:bg-black/50">
-                    <div class="w-16 h-16 flex rounded-full bg-white flex items-center justify-center shadow-md">
-                        <i class="fa-solid fa-play text-brand text-2xl ml-1"></i>
+                    <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full flex items-center justify-center text-white transition-colors duration-200 bg-black/60 w-16 h-16 hover:text-brand">
+                        <i class="fa-solid fa-play text-2xl ml-1"></i>
                     </div>
                 </div>
             </div>
