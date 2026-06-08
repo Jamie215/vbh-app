@@ -13,6 +13,10 @@ function pushRoute(path, state = {}) {
     if (!_skipPush && window.location.pathname !== path) {
         history.pushState(state, '', path);
     }
+    // Scroll to top on route change (for mobile view)
+    document.activeElement?.blur()
+    window.scrollTo(0, 0);
+
 }
 
 /**
@@ -24,10 +28,6 @@ function pushRoute(path, state = {}) {
 function routeFromURL() {
     const path = window.location.pathname;
     
-    // Scroll to top on route change (for mobile view)
-    document.activeElement?.blur()
-    window.scrollTo(0, 0);
-
     // Dynamic route: /exercises/:playlistId
     const playlistMatch = path.match(/^\/exercises\/(.+)$/);
     if (playlistMatch) {
