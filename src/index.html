@@ -125,6 +125,16 @@
                             <button type="button" onclick="togglePasswordVisibility('signup-password', 'signup-toggle')" class="absolute right-3 bg-none border-none text-brand text-base font-medium cursor-pointer py-1 px-2 hover:text-brand-dark" id="signup-toggle">Show</button>
                         </div>
                     </div>
+                    <div class="mb-5 flex items-start gap-2.5">
+                        <label class="relative flex items-center cursor-pointer shrink-0 mt-0.5">
+                            <input type="checkbox" id="signup-agreement-checkbox" class="set-checkbox">
+                            <span class="checkmark-box"><i class="fa-solid fa-check"></i></span>
+                        </label>
+                        <label for="signup-agreement-checkbox" class="text-base text-text-secondary cursor-pointer leading-relaxed">
+                            I have read and agree to the
+                            <a href="#" onclick="showAgreementModal(); return false;" class="text-brand font-medium hover:underline">HandsUP User Agreement</a>
+                        </label>
+                    </div>
                     <div class="flex items-center justify-between mt-6 gap-4 max-[540px]:flex-col">
                         <p class="text-text-secondary text-base m-0 text-left max-[540px]:text-center max-[540px]:order-2">
                             Already have an account? <a href="/login" onclick="showSignInView(); return false;" class="text-brand no-underline font-medium hover:underline">Sign In</a>
