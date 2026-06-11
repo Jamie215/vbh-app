@@ -58,7 +58,7 @@ function showAgreementModal() {
     const acceptBtn = document.getElementById('agreement-accept-btn');
     const hint = document.getElementById('agreement-scroll-hint');
 
-    const checkScrolledToBotton = () => {
+    const checkScrolledToBottom = () => {
         const { scrollTop, scrollHeight, clientHeight } = scrollContent;
         const atBottom = scrollHeight - scrollTop - clientHeight < 10;
         if (atBottom) {
