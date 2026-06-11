@@ -86,21 +86,19 @@ function acceptAgreement() {
 // review is complete. Should be substantial enough to require scrolling.
 function getAgreementPlaceholderHTML() {
     return `
-        <p class="mb-4"><em>This is a placeholder for the HandsUP User Agreement. The full agreement is currently under review by the Principal Investigator and the Research Ethics Board.</em></p>
-        <p class="mb-4">Before launch, this section will contain the complete agreement covering the topics listed below.</p>
+        <p class="mt-4 mb-4"><em>This is a placeholder for the HandsUP User Agreement. The full agreement is currently under review by the Principal Investigator and the Research Ethics Board.</em></p>
         <h3 class="text-base font-semibold text-text-primary mt-6 mb-2">1. Eligibility and Study Participation</h3>
-        <p class="mb-4">Access to the application is limited to participants enrolled in the study who have signed the Informed Consent Form.</p>
+        <p class="mb-4">Access to the application is limited to participants enrolled in the study who have signed the Consent Form.</p>
         <h3 class="text-base font-semibold text-text-primary mt-6 mb-2">2. Intellectual Property and Content Use</h3>
         <p class="mb-4">All exercise videos, the education module, and other content within the application are protected by copyright. Participants are granted a limited, personal license to access the content for the purposes of the study only. Downloading, recording, redistribution, or sharing of any content is not permitted.</p>
         <h3 class="text-base font-semibold text-text-primary mt-6 mb-2">3. Health and Safety Disclaimer</h3>
         <p class="mb-4">The application is provided for research and educational purposes and is not a substitute for medical advice. Participants should consult their healthcare provider before beginning the exercise program and stop immediately if they experience pain, dizziness, or other unusual symptoms.</p>
         <h3 class="text-base font-semibold text-text-primary mt-6 mb-2">4. Personal Information and Privacy</h3>
-        <p class="mb-4">Your name, email, and study data are collected and stored securely as described in your Consent Form, and handled in accordance with applicable Canadian privacy law.</p>
+        <p class="mb-4">Your name, email, and study data are collected and stored securely as described in your Consent Form.</p>
         <h3 class="text-base font-semibold text-text-primary mt-6 mb-2">5. Account Responsibilities</h3>
         <p class="mb-4">You agree to keep your account credentials confidential and to use only your own account.</p>
-        <h3 class="text-base font-semibold text-text-primary mt-6 mb-2">6. Communications, Acceptable Use, Withdrawal, and Liability</h3>
-        <p class="mb-4">Additional terms covering reminder emails, acceptable use of the application, your right to withdraw from the study, and limitations of liability will appear in the final version.</p>
-        <p class="mb-4"><strong>Note:</strong> This in-app agreement supplements — and does not replace — the Informed Consent Form you signed at study enrollment. Where the two conflict, the Consent Form prevails.</p>
+        <h3 class="text-base font-semibold text-text-primary mt-6 mb-2">6. Acceptable Use, Withdrawal, and Liability</h3>
+        <p class="mb-4">Additional terms covering acceptable use of the application, your right to withdraw from the study, and limitations of liability will appear in the final version.</p>
         <p>For questions, contact the research team at <a href="mailto:research.hulc@gmail.com" class="text-brand hover:underline">research.hulc@gmail.com</a>.</p>
     `;
 }
