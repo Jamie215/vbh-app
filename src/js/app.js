@@ -236,7 +236,7 @@ function _replayCompletion(advancedSessionDates, fromDate) {
 
     let programWeek = 4;
     let windowAnchor = new Date(fromDate);
-    windowAnchor.setDate(windowAnchor.getDate() + 28);
+    windowAnchor.setDate(windowAnchor.getDate() + 21);
     let sessionsInWeek = 0;
 
     for (const sessionDateStr of advancedSessionDates) {
@@ -315,14 +315,11 @@ function getProgramWeekState() {
     }
     const effectiveFirstDate = sessionDates[effectiveFirstIdx];
 
-    // ── Completion check: did the user already finish the program in this run?
-    // Once true, completion is permanent for this effective period — survives
-    // inactivity, gaps, and stale windowAnchors.
-    const advancedSessionsInRun = getAdvancedSessionDates().filter(dateStr => {
-        return new Date(dateStr + 'T00:00:00') >= effectiveFirstDate;
-    });
-
-    if (_replayCompletion(advancedSessionsInRun, effectiveFirstDate) !== null) {
+    // Completion check uses the durable flag (or all-runs derivation as
+    // fallback). Once completed, this short-circuits past the inactivity
+    // reset and live progression — completion is permanent unless a history
+    // edit revokes it via syncCompletionState.
+    if (isProgramCompleted()) {
         return {
             programWeek: 6,
             calendarWeek,
@@ -331,6 +328,10 @@ function getProgramWeekState() {
             completed: true
         };
     }
+
+    const advancedSessionsInRun = getAdvancedSessionDates().filter(dateStr => {
+        return new Date(dateStr + 'T00:00:00') >= effectiveFirstDate;
+    });
 
     // Check 14-day inactivity reset (only for non-completed users)
     const mostRecentDate = new Date(allDates[allDates.length - 1] + 'T00:00:00');
@@ -404,20 +405,29 @@ function calculateUserWeek() {
 }
 
 /**
- * Returns true if the user has completed the full 6-week program.
- * Completed = program week 6 with 2+ sessions logged.
+ * Returns true if the user has ever completed the full 6-week program.
+ *
+ * Source of truth is the DB-backed durable flag (programCompletedAt),
+ * which survives gaps and inactivity. Falls back to deriving from history
+ * so completion is recognized in-session before syncCompletionState
+ * persists it (e.g., the user finishes their final session and the UI
+ * needs to react before the DB round-trip lands).
  */
 function isProgramCompleted() {
-    const state = getProgramWeekState();
-    return state.completed === true || (state.programWeek === 6 && state.sessionsInCurrentWeek >= 2);
+    if (programCompletedAt !== null) return true;
+    return _getCompletionEarnedDate() !== null;
 }
 
 /**
- * Replays session-gated progression and returns the date string of the
- * session that earned completion, or null if not completed.
+ * Returns the date string of the session that earned completion, or null
+ * if completion has never been achieved.
  *
- * Uses the same effectiveFirstDate logic as getProgramWeekState() — only
- * post-resume sessions count toward the run that achieved completion.
+ * Walks every gap-separated run (a sequence of sessions with no 14+ day
+ * internal gap) and checks each independently. Returns the earliest
+ * completion date found. This makes completion durable: once any run
+ * achieves it, the result is preserved across later gaps, inactivity, or
+ * additional runs. Only history edits that remove enough sessions to
+ * prevent ANY run from completing will cause this to return null.
  */
 function _getCompletionEarnedDate() {
     if (!completionHistory || Object.keys(completionHistory).length === 0) return null;
@@ -426,18 +436,32 @@ function _getCompletionEarnedDate() {
     if (allDates.length === 0) return null;
 
     const sessionDates = allDates.map(d => new Date(d + 'T00:00:00'));
-    let effectiveFirstIdx = 0;
+
+    // Identify runs: { start, end } per gap-separated segment.
+    const runs = [];
+    let runStartIdx = 0;
     for (let i = 1; i < sessionDates.length; i++) {
         const gapDays = Math.floor((sessionDates[i] - sessionDates[i - 1]) / 86400000);
-        if (gapDays >= 14) effectiveFirstIdx = i;
+        if (gapDays >= 14) {
+            runs.push({ start: sessionDates[runStartIdx], end: sessionDates[i - 1] });
+            runStartIdx = i;
+        }
     }
-    const effectiveFirstDate = sessionDates[effectiveFirstIdx];
+    runs.push({ start: sessionDates[runStartIdx], end: sessionDates[sessionDates.length - 1] });
 
-    const advancedSessionsInRun = getAdvancedSessionDates().filter(dateStr => {
-        return new Date(dateStr + 'T00:00:00') >= effectiveFirstDate;
-    });
+    // Replay completion per run, bounded to that run's sessions. Earliest
+    // completion wins — the canonical "earned" date for this user.
+    const allAdvancedSessions = getAdvancedSessionDates();
+    for (const run of runs) {
+        const advancedInRun = allAdvancedSessions.filter(dateStr => {
+            const d = new Date(dateStr + 'T00:00:00');
+            return d >= run.start && d <= run.end;
+        });
+        const earned = _replayCompletion(advancedInRun, run.start);
+        if (earned !== null) return earned;
+    }
 
-    return _replayCompletion(advancedSessionsInRun, effectiveFirstDate);
+    return null;
 }
 
 /**
@@ -678,6 +702,123 @@ function getExerciseWeekStartDate(state) {
 
     weekStartDate.setHours(0, 0, 0, 0);
     return weekStartDate;
+}
+
+/**
+ * Returns Date objects (midnight-aligned) for the start of every exercise
+ * week the user has reached. Used by the calendar strip to flag week
+ * boundaries.
+ *
+ * Weeks 1-3: calendar-based from originalFirstDate. These persist across
+ * resets — they're historical markers, not tied to current run.
+ *
+ * Weeks 4-6: session-gated, anchored to effectiveFirstDate. Week 4 starts
+ * when session-gating begins (effectiveFirstDate + 21 days); weeks 5-6
+ * start at each advance date from the replay.
+ *
+ * In reset state, no week 4+ flag is emitted until session-gating begins
+ * in the new run. Returns [] if there's no session history.
+ */
+function getExerciseWeekStartDates() {
+    if (!completionHistory || Object.keys(completionHistory).length === 0) return [];
+
+    const allDates = Object.keys(completionHistory).sort();
+    if (!allDates.length) return [];
+
+    const sessionDates = allDates.map(d => new Date(d + 'T00:00:00'));
+    const originalFirstDate = sessionDates[0];
+
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const starts = [];
+
+    // Weeks 1-3: calendar-based from originalFirstDate. Week N starts at
+    // day (N-1)*7.
+    const diffDaysFromOriginal = Math.floor((today - originalFirstDate) / 86400000);
+    const calendarWeek = Math.floor(diffDaysFromOriginal / 7) + 1;
+    const maxCalendarWeekReached = Math.min(calendarWeek, 3);
+
+    for (let w = 1; w <= maxCalendarWeekReached; w++) {
+        const d = new Date(originalFirstDate);
+        d.setDate(d.getDate() + (w - 1) * 7);
+        d.setHours(0, 0, 0, 0);
+        starts.push(d);
+    }
+
+    if (calendarWeek < 4) return starts;
+
+    // Weeks 4-6: session-gated. Compute gap-aware effectiveFirstDate
+    // (mirrors getProgramWeekState).
+    let effectiveFirstIdx = 0;
+    for (let i = 1; i < sessionDates.length; i++) {
+        const gapDays = Math.floor((sessionDates[i] - sessionDates[i - 1]) / 86400000);
+        if (gapDays >= 14) effectiveFirstIdx = i;
+    }
+    const effectiveFirstDate = sessionDates[effectiveFirstIdx];
+
+    // Completion takes precedence over the inactivity reset — once a user
+    // has earned completion, their historical week 4-6 flags are durable
+    // and survive later breaks. Only a manual history edit that revokes
+    // completion (via syncCompletionState clearing the row) will drop them.
+    //
+    // For non-completed users, mirror getProgramWeekState's reset behavior:
+    // if they've been inactive 14+ days, don't emit week 4+ flags from the
+    // old run — they're conceptually starting fresh.
+    if (!isProgramCompleted()) {
+        const mostRecentDate = new Date(allDates[allDates.length - 1] + 'T00:00:00');
+        const daysSinceLastActivity = Math.floor((today - mostRecentDate) / 86400000);
+        if (daysSinceLastActivity >= 14) return starts;
+    }
+
+    // Week 4 starts when session-gating begins
+    const week4Start = new Date(effectiveFirstDate);
+    week4Start.setDate(week4Start.getDate() + 21);
+    week4Start.setHours(0, 0, 0, 0);
+
+    if (week4Start > today) return starts;
+    starts.push(week4Start);
+
+    // Replay session-gated progression to capture week 5 and 6 starts
+    const advancedSessionsInRun = getAdvancedSessionDates().filter(dateStr => {
+        return new Date(dateStr + 'T00:00:00') >= effectiveFirstDate;
+    });
+
+    let programWeek = 4;
+    let windowAnchor = new Date(week4Start);
+    let sessionsInCurrentWeek = 0;
+
+    for (const sessionDateStr of advancedSessionsInRun) {
+        const sessionDate = new Date(sessionDateStr + 'T00:00:00');
+        if (sessionDate < windowAnchor) continue;
+        sessionsInCurrentWeek++;
+
+        if (sessionsInCurrentWeek >= 2) {
+            const windowEnd = new Date(windowAnchor);
+            windowEnd.setDate(windowEnd.getDate() + 7);
+
+            let advanceDate;
+            if (sessionDate < windowEnd) {
+                advanceDate = new Date(windowEnd);
+            } else {
+                advanceDate = new Date(sessionDate);
+                advanceDate.setDate(advanceDate.getDate() + 1);
+            }
+
+            if (today >= advanceDate) {
+                programWeek++;
+                if (programWeek > 6) break;
+                advanceDate.setHours(0, 0, 0, 0);
+                starts.push(new Date(advanceDate));
+                windowAnchor = advanceDate;
+                sessionsInCurrentWeek = (sessionDate >= advanceDate) ? 1 : 0;
+            } else {
+                break;
+            }
+        }
+    }
+
+    return starts;
 }
 
 /**
@@ -1468,9 +1609,9 @@ function renderCalendarStrip() {
     const canGoForward = start.getTime() < currentWeekStart.getTime();
     const canGoBack = _canNavigatePreviousWeek(start);
 
-    const exerciseStart = getExerciseWeekStartDate(getProgramWeekState());
-    const exerciseStartISO = exerciseStart ? _dateToISO(exerciseStart) : null;
-    const exerciseWeek = exerciseStart ? calculateUserWeek() : null;
+    const exerciseWeekStartISOs = new Set(
+        getExerciseWeekStartDates().map(d => _dateToISO(d))
+    );
 
     let daysHTML = '';
     for (let i = 0; i < 7; i++) {
@@ -1479,7 +1620,7 @@ function renderCalendarStrip() {
         const iso = _dateToISO(d);
         const isToday = iso === todayISO;
         const isSelected = iso === effectiveSelectedISO;
-        const isExerciseWeekStart = iso === exerciseStartISO;
+        const isExerciseWeekStart = exerciseWeekStartISOs.has(iso);
         const isFuture = d.getTime() > new Date(todayISO + 'T00:00:00').getTime();
         const isBeforeAccountCreation = currentUser.created_at? iso < currentUser.created_at.split('T')[0] : false;
         const isDisabled = isFuture || isBeforeAccountCreation;
@@ -1512,7 +1653,7 @@ function renderCalendarStrip() {
             <button type="button" class="flex-1 flex flex-col items-center gap-1 min-w-0 bg-transparent border-none p-0 ${cursorClass}"
                     onclick="selectCalendarDay('${iso}')" ${disabledAttr} aria-label="View ${iso}" ${tooltipText ? `data-tippy-content="${tooltipText}"` : ''}>
                 <div class="h-3 flex items-center justify-center">
-                    ${isExerciseWeekStart ? `<i class="fa-solid fa-flag text-violet-400 text-base leading-none" data-tippy-content="Start of Week ${exerciseWeek} of your exercise program"></i>` : ''}
+                    ${isExerciseWeekStart ? `<i class="fa-solid fa-flag text-violet-400 text-base leading-none" data-tippy-content="Start of the exercise week"></i>` : ''}
                 </div>
                 <span class="text-sm text-text-secondary font-medium max-md:text-xs">${labels[i]}</span>
                 <div class="w-10 h-10 rounded-full flex items-center justify-center text-base font-semibold transition-colors ${dayBoxClass} max-lg:w-8 max-lg:h-8 max-lg:text-sm max-md:w-8 max-md:h-8 max-md:text-sm">${d.getDate()}</div>
