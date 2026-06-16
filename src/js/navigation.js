@@ -390,13 +390,17 @@ async function loadEducationProgress() {
     }
 }
 
-// Called by the Rise iframe via postMessage when progress is updated
-window.saveEducationProgress = function (progress) {
-    window.eduProgress = progress;
-
+/**
+ * Schedules a debounced upsert of the current eduProgress + eduBookmark.
+ * Used by both saveEducationProgress (course-level progress changes from Rise)
+ * and saveEducationBookmark (lesson-navigation changes from Rise) so bookmark-
+ * only navigation still updates the row and bumps updated_at.
+ */
+function _scheduleEducationSave() {
     if (_eduSaveTimer) clearTimeout(_eduSaveTimer);
 
     _eduSaveTimer = setTimeout(async () => {
+        _eduSaveTimer = null;
         if (!currentUser) return;
         try {
             const { error } = await window.supabaseClient
@@ -408,15 +412,23 @@ window.saveEducationProgress = function (progress) {
                 }, {
                     onConflict: 'user_id'
                 });
+            if (error) logError(error, { operation: 'save_education_progress' });
         } catch (error) {
             logError(error, { operation: 'save_education_progress' });
         }
     }, 1000);
+}
+
+// Called by the Rise iframe via postMessage when progress is updated
+window.saveEducationProgress = function (progress) {
+    window.eduProgress = progress;
+    _scheduleEducationSave();
 };
 
 // Called by the Rise iframe via postMessage when bookmark is updated
 window.saveEducationBookmark = function (lessonId) {
     window.eduBookmark = lessonId || '';
+    _scheduleEducationSave();
 };
 
 async function showEducation() {
