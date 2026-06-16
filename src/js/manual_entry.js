@@ -886,11 +886,21 @@ async function saveManualEntry() {
                 loadHomeView();
             }
 
+            // Exercises view shows the greeting, alert, today's workout card,
+            // and playlist completion summaries — all derived from completionHistory.
+            const exercisesView = document.getElementById('exercises-view');
+            if (exercisesView && !exercisesView.classList.contains('hidden')) {
+                loadPlaylists();
+            }
+
             // Playlist view shows progress for the suggested workout.
             const playlistView = document.getElementById('playlist-view');
             if (playlistView && !playlistView.classList.contains('hidden')) {
                 if (typeof updatePlaylistProgressRing === 'function') {
                     updatePlaylistProgressRing();
+                }
+                if (typeof loadExerciseTable === 'function') {
+                    loadExerciseTable();
                 }
             }
 
