@@ -112,9 +112,36 @@ The app deploys to Cloudflare Pages:
 
 - **Build output / root**: `src/`
 - **Functions**: `functions/` (the env-injection middleware runs automatically)
-- **Environment variables**: `SUPABASE_URL`, `SUPABASE_ANON_KEY`
+- **Environment variables**: `SUPABASE_URL`, `SUPABASE_ANON_KEY` — set them
+  for both the **Production** and **Preview** environments, or branch previews
+  load with empty values ("Missing API keys" in the console)
 - Remember to run `npm run build:css` so `src/assets/css/tailwind.css` is up to
   date before deploying.
+
+## Migration notes
+
+The current app is a prototype. The production version will move off Supabase
+and YouTube to **REDCap** for data and an ethics-approved host for video
+storage and streaming. Things to carry into that work:
+
+- **Keep the REDCap API token server-side.** A REDCap API token grants access
+  to the whole project, so it must never reach the browser (unlike the Supabase
+  anon key, which relies on row-level security). Put a server in between — e.g.
+  a Cloudflare Pages Function like `functions/_middleware.js` — that holds the
+  token and checks what each signed-in user may read or write.
+- **Rewrite the Content Security Policy for the new stack.** `src/_headers`
+  currently sends the CSP in *report-only* mode and allows Supabase
+  (`connect-src`) and YouTube (`script-src`, `img-src`, `frame-src`). Replace
+  those with the new hosts — if the browser only talks to our own server,
+  `connect-src` can be `'self'` — test on a preview deployment, then switch
+  `Content-Security-Policy-Report-Only` to `Content-Security-Policy`.
+- **Video streaming needs `media-src`.** Streaming players (e.g. HLS) usually
+  play through `blob:` URLs, so the policy will need something like
+  `media-src 'self' blob: <video host>` or playback fails silently.
+- **Keep `data:` in `font-src`.** The eLearning module (Articulate Rise /
+  Storyline export) embeds its fonts as `data:` URLs, including the video
+  player's icon font. With the current policy enforced, the course was
+  otherwise clean when tested across all 13 lessons.
 
 ## Notes
 
