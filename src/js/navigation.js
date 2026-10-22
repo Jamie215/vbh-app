@@ -27,7 +27,18 @@ function pushRoute(path, state = {}) {
  */
 function routeFromURL() {
     const path = window.location.pathname;
-    
+
+    // Sub-pages under /exercises must be matched before the playlist route,
+    // or they're taken for playlist IDs
+    if (path === '/exercises/how-to-use') {
+        showHowToUse();
+        return;
+    }
+    if (path === '/exercises/progress') {
+        showMyProgress();
+        return;
+    }
+
     // Dynamic route: /exercises/:playlistId
     const playlistMatch = path.match(/^\/exercises\/(.+)$/);
     if (playlistMatch) {
