@@ -1,0 +1,27 @@
+{
+  "version": "3.97.34031.0",
+  "course_id": "69kUStJO8Yw",
+  "title": "Daily Protein Calculator",
+  "thumbnail": "story_content/thumbnail.jpg",
+  "scenes": [
+    {
+      "title": "Untitled Scene"
+    }
+  ],
+  "slides": [
+    {
+      "id": "5gzixuIaZh8",
+      "title": "Protein Calculator",
+      "scene_index": "1.1"
+    }
+  ],
+  "player": {
+    "name": "unified",
+    "width": 740,
+    "height": 611
+  },
+  "stage": {
+    "width": 720,
+    "height": 540
+  }
+}
