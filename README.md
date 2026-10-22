@@ -4,8 +4,14 @@
 people through a structured, video-based exercise program, tracks their
 progress, and delivers an interactive bone-health eLearning module.
 
-It's a static single-page app (no build step for the app itself) deployed on
-**Cloudflare Pages**, with **Supabase** for authentication and data.
+It's a static single-page app (no build step for the app itself), hosted on
+**Cloudflare Pages**.
+
+**This is a demo version.** It has no backend: one built-in test account with
+sample data, held in the browser. Everything can be tried, but changes are
+lost when the page is reloaded. Sign in with `demo@handsup.test` /
+`HandsUpDemo` (also shown on the Log In page). The study version will use
+REDCap; see [Migration notes](#migration-notes).
 
 ## Features
 
@@ -21,20 +27,21 @@ It's a static single-page app (no build step for the app itself) deployed on
   (progress resets after 14+ days of inactivity).
 - **eLearning module** — an embedded interactive course on bone health and
   osteoporosis, with its own progress tracking.
-- **Accounts** — email sign-up/sign-in and password recovery via Supabase auth.
-  Study agreements are handled by the coordinator at enrollment, outside the
-  app.
+- **Accounts** — in the demo, sign-in and sign-out with the demo account only;
+  sign-up and password reset show "not available in the demo". Enrollment and
+  study agreements are handled by the coordinator, outside the app.
 
 ## Tech stack
 
 - **Frontend** — vanilla JavaScript (no framework), client-side routing, and
-  **Tailwind CSS**. Third-party libraries load from CDN: Supabase JS, YouTube
-  IFrame API, Chart.js, Popper + Tippy.
-- **Backend / data** — [Supabase](https://supabase.com) (auth + Postgres).
-  Tables used by the app: `user_program_state`, `workout_sessions`,
-  and `education_progress`.
-- **Hosting** — [Cloudflare Pages](https://pages.cloudflare.com), including a
-  Pages Function middleware and `_headers` / `_redirects`.
+  **Tailwind CSS**. Third-party libraries load from CDN: YouTube IFrame API,
+  Chart.js, Popper + Tippy.
+- **Data** — a data layer (`src/js/data.js`) that every sign-in, read and write
+  goes through. Its demo version serves the sample data in
+  `src/js/demo-data.js` from memory. A real backend replaces the function
+  bodies in `data.js` and keeps their names and `{ data, error }` results.
+- **Hosting** — any static host. Today [Cloudflare Pages](https://pages.cloudflare.com),
+  using `_headers` / `_redirects`.
 
 ## Project structure
 
@@ -49,9 +56,11 @@ src/
   education/content/    embedded eLearning module (Articulate Rise export)
   js/
     app.js              app init, session routing, program-week logic
+    data.js             data layer (demo version: in-memory sample data)
+    demo-data.js        the demo account and its sample data
     auth.js             sign up / in / out, password recovery
     navigation.js       view switching + client-side routing
-    playlists.js        playlist definitions + Supabase client creation
+    playlists.js        playlist definitions
     videos.js           video playback and set/rep tracking
     progress.js         My Progress charts and detail panels
     manual_entry.js     logging past workouts
@@ -61,22 +70,19 @@ src/
 build/
   input.css             Tailwind entry
   tailwind.config.js    Tailwind config
-functions/
-  _middleware.js        Cloudflare Pages middleware — injects env vars
 ```
 
-## How configuration works
+## The demo account and sample data
 
-Supabase credentials are **not** hardcoded. The Cloudflare Pages middleware
-(`functions/_middleware.js`) injects them into each HTML response at request
-time as `window.ENV`, read from the environment:
+`src/js/demo-data.js` holds the demo account (email, password, name) and one
+participant part-way through week 5: workouts, external activities and
+eLearning progress. Dates are stored as "days ago", so the program-week logic
+shows the same picture whenever the demo is opened. Edit that file to change
+the starting point; the eLearning progress in it was recorded from the real
+course, so re-record it if the course's lessons change.
 
-- `SUPABASE_URL`
-- `SUPABASE_ANON_KEY`
-
-`playlists.js` reads `window.ENV` and creates the Supabase client. Set these as
-environment variables on the Cloudflare Pages project (and for local
-development — see below).
+The demo keeps the account signed in across reloads (in `sessionStorage`) but
+always reloads the sample data. Nothing is sent anywhere.
 
 ## Local development
 
@@ -92,30 +98,25 @@ npm run build:css
 npm run watch:css
 ```
 
-To run the app locally with the Supabase env injected exactly as in production,
-serve `src/` with the Cloudflare Pages dev server:
+Then start a local server and open the address it prints (normally
+http://localhost:3000):
 
 ```bash
-npx wrangler pages dev src
+npm start
 ```
 
-Provide `SUPABASE_URL` and `SUPABASE_ANON_KEY` to the dev server (e.g. via a
-`.dev.vars` file or your shell environment) so the middleware can inject them.
-
-> A plain static file server will serve the pages but **won't** run the
-> middleware, so `window.ENV` will be empty and Supabase calls will fail. Use
-> the Pages dev server (or set `window.ENV` yourself) for a working local
-> session.
+No keys or accounts are needed. `npm start` runs `serve` with `serve.json`,
+which sends unknown paths to `index.html` (so reloading a page such as
+`/progress` works) and turns off `serve`'s clean URLs, which would otherwise
+redirect the eLearning course's `index.html` and stop it loading. Another
+static server works too if it does the same two things.
 
 ## Deployment
 
 The app deploys to Cloudflare Pages:
 
 - **Build output / root**: `src/`
-- **Functions**: `functions/` (the env-injection middleware runs automatically)
-- **Environment variables**: `SUPABASE_URL`, `SUPABASE_ANON_KEY` — set them
-  for both the **Production** and **Preview** environments, or branch previews
-  load with empty values ("Missing API keys" in the console)
+- **Environment variables**: none
 - Remember to run `npm run build:css` so `src/assets/css/tailwind.css` is up to
   date before deploying.
 
@@ -123,8 +124,8 @@ The app deploys to Cloudflare Pages:
 
 The Rise export is used **unmodified**. Its loader (`lib/dist/*.js`) looks for
 `window.parent.RiseLMSInterface`, which `src/js/navigation.js` defines, and
-sends Rise's progress and bookmark calls through it to the
-`education_progress` table.
+sends Rise's progress and bookmark calls through it to the data layer
+(`Data.saveEducationProgress`).
 
 1. In Rise, export the course as **Web** (not SCORM/LMS) and unzip it.
 2. Replace everything in `src/education/content/` with the export. Asset
@@ -136,9 +137,11 @@ sends Rise's progress and bookmark calls through it to the
    `runtime-data.js`. Editing blocks inside a lesson keeps its ID, but
    partial progress on changed blocks resets. Completed lessons stay
    complete.
-5. On a preview deployment, go through part of a lesson and reload. The
-   sidebar percentage and lesson rings should be restored, and the
-   `education_progress` row should update.
+5. Sign in, go through part of a lesson, open Home and go back to the course.
+   The sidebar percentage and lesson rings should be kept, and Home should
+   name the lesson. (In the demo, a reload resets to the sample progress.)
+   If lessons changed, also re-record the sample progress in
+   `src/js/demo-data.js`.
 
 The previous export (used until Oct 2026) put a `Runtime` object inline in
 `index.html` instead, and that block had to be hand-edited to call the parent
@@ -146,14 +149,15 @@ window.
 
 ## Migration notes
 
-The current app is a prototype. The production version will move off Supabase
-and YouTube to **REDCap** for data and an ethics-approved, Canadian-hosted
+The current app is a demo. The study version will add a backend behind the
+data layer, with **REDCap** for data and an ethics-approved, Canadian-hosted
 option for video, with no participant data passing through Cloudflare. Options,
 recommendations, the proposed REDCap layout, open questions and the decision
 log are in [`docs/migration-plan.md`](docs/migration-plan.md).
 
 ## Notes
 
-- Database schema files (`01_schema_Supabase.sql`, `02_schema_REDCap.sql`), the
-  `.env`, and `node_modules/` are git-ignored.
+- The prototype used Supabase for accounts and data until Oct 2026; it was
+  replaced by the demo data layer. The schema files (`01_schema_Supabase.sql`,
+  `02_schema_REDCap.sql`), `.env` and `node_modules/` are git-ignored.
 - This program is part of the HULC / MSKIF bone-health work.

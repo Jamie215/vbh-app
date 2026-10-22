@@ -815,22 +815,10 @@ async function saveManualEntry() {
 
         let dbError;
         if (isEmpty) {
-            const { error } = await window.supabaseClient
-                .from('workout_sessions')
-                .delete()
-                .eq('user_id', currentUser.id)
-                .eq('session_date', selectedDate);
+            const { error } = await Data.deleteWorkoutSession(selectedDate);
             dbError = error;
         } else {
-            const { error } = await window.supabaseClient
-                .from('workout_sessions')
-                .upsert({
-                    user_id: currentUser.id,
-                    session_date: selectedDate,
-                    progress: progressData
-                }, {
-                    onConflict: 'user_id,session_date'
-                });
+            const { error } = await Data.saveWorkoutSession(selectedDate, progressData);
             dbError = error;
         }
 

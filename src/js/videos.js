@@ -327,22 +327,10 @@ async function saveVideoProgress() {
         if (isEmpty) {
             // Today's last logged exercise was just unchecked away — drop the row
             // rather than leaving an empty progress object behind.
-            const { error } = await window.supabaseClient
-                .from('workout_sessions')
-                .delete()
-                .eq('user_id', currentUser.id)
-                .eq('session_date', today);
+            const { error } = await Data.deleteWorkoutSession(today);
             dbError = error;
         } else {
-            const { error } = await window.supabaseClient
-                .from('workout_sessions')
-                .upsert({
-                    user_id: currentUser.id,
-                    session_date: today,
-                    progress: progressData
-                }, {
-                    onConflict: 'user_id,session_date'
-                });
+            const { error } = await Data.saveWorkoutSession(today, progressData);
             dbError = error;
         }
 

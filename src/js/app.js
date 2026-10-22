@@ -7,24 +7,6 @@ document.addEventListener('DOMContentLoaded', () => {
         initAuthFormListeners();
     }
 
-    // Check if Supabase client is available
-    if (!window.supabaseClient) {
-        console.error('Supabase client not initialized');
-        hideLoadingScreen();
-        showAuthPage();
-        return;
-    }
-
-    // Set up auth listener for sign-out events (synchronous only)
-    if (typeof initAuthListener === 'function') {
-        initAuthListener();
-    }
-
-    // Detect password recovery flow from URL hash BEFORE session routing
-    if (typeof detectPasswordRecovery === 'function') {
-        detectPasswordRecovery();
-    }
-    
     // Initialize session - this handles the initial page load
     initializeSession();
 });
@@ -34,14 +16,9 @@ document.addEventListener('DOMContentLoaded', () => {
 // wrap them in try/catch here. Anything that escapes shows up in the
 // console as an unhandled rejection.
 async function initializeSession() {
-    // If this is a password recovery redirect, the auth listener handles it — skip normal routing
-    if (isPasswordRecovery) {
-        return;
-    }
-    
     try {
-        const { data: { session }, error } = await window.supabaseClient.auth.getSession();
-        
+        const { data: user, error } = await Data.getSession();
+
         if (error) {
             logError(error, { operation: 'init_get_session' });
             hideLoadingScreen();
@@ -49,10 +26,10 @@ async function initializeSession() {
             return;
         }
         
-        if (session) {
-            currentUser = session.user;
+        if (user) {
+            currentUser = user;
             
-            await updateUIForAuthenticatedUser(session.user);
+            await updateUIForAuthenticatedUser(user);
             await loadTodaySession();
             await loadCompletionHistory();
             await loadProgramState();
@@ -484,15 +461,7 @@ async function syncCompletionState(method) {
             // If the locally-cached value already matches, skip the round-trip.
             if (programCompletedAt === earnedISO) return;
 
-            const { error } = await window.supabaseClient
-                .from('user_program_state')
-                .upsert({
-                    user_id: currentUser.id,
-                    completed_at: earnedISO,
-                    completion_method: method
-                }, {
-                    onConflict: 'user_id'
-                });
+            const { error } = await Data.saveProgramState(earnedISO, method);
 
             if (error) {
                 logError(error, {
@@ -506,10 +475,7 @@ async function syncCompletionState(method) {
             programCompletedAt = earnedISO;
         } else if (hadRowBefore) {
             // Derived state flipped to not-completed; clear the row.
-            const { error } = await window.supabaseClient
-                .from('user_program_state')
-                .delete()
-                .eq('user_id', currentUser.id);
+            const { error } = await Data.clearProgramState();
 
             if (error) {
                 logError(error, {
