@@ -544,7 +544,7 @@ function checkAndShowFinalSessionModal() {
     if (state.programWeek !== 6 || state.sessionsInCurrentWeek !== 1) return;
 
     // Check if today already has advanced activity (don't re-trigger)
-    const today = new Date().toISOString().split('T')[0];
+    const today = _dateToISO(new Date());
     const advancedDates = getAdvancedSessionDates();
     if (advancedDates.includes(today)) return;
 
@@ -800,7 +800,7 @@ function calculatePlaylistProgress(playlistId, todayOnly = false) {
     
     if (todayOnly) {
         // Only look at today's session
-        const today = new Date().toISOString().split('T')[0];
+        const today = _dateToISO(new Date());
         if (completionHistory && completionHistory[today] && completionHistory[today][playlistId]) {
             savedProgress = completionHistory[today][playlistId];
         }
@@ -1154,7 +1154,12 @@ function showPlaylist(playlistId) {
     }
 
     currentPlaylist = PLAYLISTS.find(p => p.id === playlistId);
-    if (!currentPlaylist) return;
+    // Unknown playlist (e.g. a stale URL): fall back to the playlist list
+    // rather than leaving no view on screen
+    if (!currentPlaylist) {
+        showExercises();
+        return;
+    }
 
     // External playlists aren't browsable
     if (currentPlaylist.type !== 'video') {
@@ -1244,7 +1249,7 @@ function loadExerciseTable() {
     
     tbody.innerHTML = '';
 
-    const today = new Date().toISOString().split('T')[0]; 
+    const today = _dateToISO(new Date()); 
     const todayCompletedExercises = completionHistory?.[today]?.[currentPlaylist.id] || {};
 
     currentPlaylist.videos.forEach((video, index) => {
@@ -1332,8 +1337,7 @@ function _isDateEligibleForManualEntry(isoDate) {
     const todayISO = _dateToISO(new Date());
     if (!currentUser?.created_at || isoDate > todayISO) return false; // future dates not allowed
 
-    const accountCreatedISO = currentUser.created_at.split('T')[0];
-    return isoDate >= accountCreatedISO; // only allow dates on or after account creation
+    return isoDate >= _getAccountCreatedISO(); // only allow dates on or after account creation
 }
 
 // Home View
@@ -1369,13 +1373,6 @@ function renderHomeGreeting() {
 }
 
 // ---------- Date helpers ----------
-function _dateToISO(d) {
-    const y = d.getFullYear();
-    const m = String(d.getMonth() + 1).padStart(2, '0');
-    const day = String(d.getDate()).padStart(2, '0');
-    return `${y}-${m}-${day}`;
-}
-
 function _getStartOfCurrentWeek() {
     const d = new Date();
     d.setHours(0, 0, 0, 0);
@@ -1547,7 +1544,7 @@ function renderCalendarStrip() {
         const isSelected = iso === effectiveSelectedISO;
         const isExerciseWeekStart = exerciseWeekStartISOs.has(iso);
         const isFuture = d.getTime() > new Date(todayISO + 'T00:00:00').getTime();
-        const isBeforeAccountCreation = currentUser.created_at? iso < currentUser.created_at.split('T')[0] : false;
+        const isBeforeAccountCreation = currentUser.created_at ? iso < _getAccountCreatedISO() : false;
         const isDisabled = isFuture || isBeforeAccountCreation;
 
         const hasActivity = completionHistory?.[iso] && _dayHasAnyCompletedExercise(completionHistory[iso]);
@@ -1564,7 +1561,7 @@ function renderCalendarStrip() {
         const disabledAttr = isDisabled ? 'disabled' : '';
         const cursorClass = isDisabled ? 'cursor-not-allowed opacity-40' : 'cursor-pointer';
 
-        const isAccountCreation = currentUser?.created_at && iso === currentUser.created_at.split('T')[0];
+        const isAccountCreation = currentUser?.created_at && iso === _getAccountCreatedISO();
         let tooltipText = '';
         if (isToday) {
             tooltipText = "This is today's session";
@@ -1616,7 +1613,7 @@ function renderCalendarStrip() {
 function _canNavigatePreviousWeek(currentViewedStart) {
     if (!currentUser?.created_at) return false;
 
-    const accountCreatedISO = new Date(currentUser.created_at.split('T')[0] + 'T00:00:00');
+    const accountCreatedISO = new Date(_getAccountCreatedISO() + 'T00:00:00');
 
     // Find the start of the week containing the account creating session
     const accountCreatedWeekStart = new Date(accountCreatedISO);
@@ -1646,7 +1643,7 @@ function selectCalendarDay(isoDate) {
     const todayISO = _dateToISO(new Date());
     if (isoDate > todayISO) return; // future dates not selectable
 
-    if (currentUser?.created_at && isoDate < currentUser.created_at.split('T')[0]) return;
+    if (currentUser?.created_at && isoDate < _getAccountCreatedISO()) return;
 
     selectedHomeDate = isoDate === todayISO ? null : isoDate; // toggle if clicking the already selected date
     renderCalendarStrip();
@@ -1660,7 +1657,7 @@ function renderTodayCard() {
     const todayISO = _dateToISO(new Date());
     const targetISO = selectedHomeDate || todayISO;
     const isToday = targetISO === todayISO;
-    const accountCreatedISO = currentUser?.created_at?.split('T')[0] ?? null;
+    const accountCreatedISO = _getAccountCreatedISO();
     const isAccountCreationDay = accountCreatedISO && targetISO === accountCreatedISO;
 
     const target = new Date(targetISO + 'T00:00:00');

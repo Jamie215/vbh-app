@@ -23,11 +23,11 @@ function openManualEntryModal(prefillDate = null) {
         const maxDate = new Date(today);
 
         dateInput.value = prefillDate ||'';
-        dateInput.max = maxDate.toISOString().split('T')[0];
+        dateInput.max = _dateToISO(maxDate);
 
         // Floor to the user's account creation date
         if (currentUser?.created_at) {
-            dateInput.min = currentUser.created_at.split('T')[0];
+            dateInput.min = _getAccountCreatedISO();
         }
     }
 
