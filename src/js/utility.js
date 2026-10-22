@@ -43,6 +43,21 @@ function logError(error, extraContext) {
     }
 }
 
+// ==================== Date Helpers ====================
+// Local-calendar YYYY-MM-DD. Don't use toISOString() for this: it returns the
+// UTC date, which is already tomorrow in the evening in Canada.
+function _dateToISO(d) {
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return `${y}-${m}-${day}`;
+}
+
+// Local date the account was created (created_at is a UTC timestamp)
+function _getAccountCreatedISO() {
+    return currentUser?.created_at ? _dateToISO(new Date(currentUser.created_at)) : null;
+}
+
 // ==================== Data Loading Functions ====================
 async function loadCompletionHistory() {
     if (!currentUser) return;
@@ -95,7 +110,7 @@ async function loadTodaySession() {
     if (!currentUser) return;
 
     try {
-        const today = new Date().toISOString().split('T')[0];
+        const today = _dateToISO(new Date());
         const { data, error } = await window.supabaseClient
             .from('workout_sessions')
             .select('*')

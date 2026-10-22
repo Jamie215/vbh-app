@@ -311,7 +311,7 @@ async function saveVideoProgress() {
     }
 
     // Save to database
-    const today = new Date().toISOString().split('T')[0];
+    const today = _dateToISO(new Date());
 
     const progressData = {};
     Object.keys(sessionProgress).forEach(pId => {
