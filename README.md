@@ -21,8 +21,9 @@ It's a static single-page app (no build step for the app itself) deployed on
   (progress resets after 14+ days of inactivity).
 - **eLearning module** — an embedded interactive course on bone health and
   osteoporosis, with its own progress tracking.
-- **Accounts** — email sign-up/sign-in, password recovery, and a signup safety
-  agreement, all via Supabase auth.
+- **Accounts** — email sign-up/sign-in and password recovery via Supabase auth.
+  Study agreements are handled by the coordinator at enrollment, outside the
+  app.
 
 ## Tech stack
 
