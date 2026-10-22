@@ -31,7 +31,7 @@ It's a static single-page app (no build step for the app itself) deployed on
   IFrame API, Chart.js, Popper + Tippy.
 - **Backend / data** — [Supabase](https://supabase.com) (auth + Postgres).
   Tables used by the app: `user_program_state`, `workout_sessions`,
-  `education_progress`, and `error_log`.
+  and `education_progress`.
 - **Hosting** — [Cloudflare Pages](https://pages.cloudflare.com), including a
   Pages Function middleware and `_headers` / `_redirects`.
 

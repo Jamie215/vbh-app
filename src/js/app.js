@@ -31,8 +31,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // Initialize session on page load.
 // Each loader handles its own errors via logError internally — we don't
-// wrap them in try/catch here. Anything that escapes falls through to
-// the window-level unhandledrejection listener.
+// wrap them in try/catch here. Anything that escapes shows up in the
+// console as an unhandled rejection.
 async function initializeSession() {
     // If this is a password recovery redirect, the auth listener handles it — skip normal routing
     if (isPasswordRecovery) {
