@@ -11,7 +11,7 @@ The current app is a working prototype:
 | Concern | Today | Problem for the study |
 |---|---|---|
 | Hosting | Cloudflare Pages (+ a Pages Function middleware) | Cloudflare (US-based) terminates HTTPS at its nearest data centre, which is not guaranteed to be in Canada, so participant data would be readable inside a non-Canadian third party |
-| Data & auth | Supabase (auth + Postgres) | PIs want **REDCap** as the study database; data must stay in Canada under the institution's control |
+| Data & auth | A demo data layer (`src/js/data.js`): one test account with sample data held in the browser. Supabase (auth + Postgres) was used until Oct 2026 | PIs want **REDCap** as the study database; data must stay in Canada under the institution's control |
 | Video | YouTube (unlisted embeds, IFrame API) | PIs want to leave YouTube over **IP concerns**: unlisted links work for anyone who has them, and YouTube's terms grant it a licence to uploaded content |
 
 The REB requirement: **data stays in Canada and under the institution's
@@ -28,8 +28,9 @@ through a global cloud service is ruled out.
 - **Long-lived access.** A participant's access lasts 6+ weeks and is used
   dozens of times, so access by a permanent personal link (sitting in an inbox
   the whole time) is weak. See [Authentication](#4-authentication).
-- **A small surface to migrate.** About a dozen Supabase calls across 3
-  tables, and 21 exercise videos plus 2 tutorial videos.
+- **A small surface to migrate.** Every sign-in, read and write goes through
+  the 16 functions of the data layer (`src/js/data.js`), and there are 21
+  exercise videos plus 4 tutorial videos.
 
 ### Hosting options considered
 
@@ -54,8 +55,7 @@ Browser ──HTTPS──▶ Western server ──API──▶ Western REDCap
 - No Cloudflare in the data path. The site, API and videos share one origin,
   so session cookies work normally and the CSP can use `connect-src 'self'`.
 - The REDCap API token lives only on the server. **It must never reach the
-  browser:** unlike the Supabase anon key (protected by row-level security), a
-  REDCap token grants access to the whole project. The server decides what
+  browser:** a REDCap token grants access to the whole project. The server decides what
   each signed-in participant may read or write.
 - A commercial cloud in a Canadian region is the fallback if WTS can't host
   it, with weaker REB standing (see the table above).
@@ -69,7 +69,7 @@ manage passwords.
 |---|---|---|---|---|
 | A. Permanent personal link | The link is the account | Weak: a forwarded or leaked email gives full access for weeks | Easiest | Small |
 | B. Activation link + password | Emailed link works once; participant sets a password and logs in with email + password after that | Good | Passwords get forgotten, so frequent resets | Moderate |
-| **C. Activation link + emailed code** | Each login: enter email, receive a 6-digit code. "Remember this device" keeps them signed in for about 30 days | Good: the link alone gives nothing; every login needs inbox access | Nothing to remember; about 2–3 code logins over the program | Moderate |
+| **C. Activation link + emailed code** | Each sign-in: enter email, receive a 6-digit code. No "remember this device": the session ends when the browser closes | Good: the link alone gives nothing; every sign-in needs inbox access | Nothing to remember, but a code at every visit (at least 12 over the program) | Moderate |
 | D. Self-hosted login server (e.g. Keycloak) | Full identity system | Strongest | Same as B | Large, plus ongoing maintenance |
 
 **Recommendation: C.** Choose B instead if the PIs worry that participants
@@ -85,11 +85,14 @@ Additions for B or C:
   Western's systems. _Confirm with the REDCap admin that Alerts fire on API
   imports_; otherwise use Western's mail relay.
 - Login codes are stored hashed and expire after a few minutes. Sessions use
-  an HttpOnly cookie, which works because everything is same-origin.
+  an HttpOnly cookie, which works because everything is same-origin. The
+  cookie ends when the browser closes; there is no "remember this device",
+  since a long-lived session on a shared computer is likely to be questioned by
+  the REB.
 
 ## 5. Data model in REDCap
 
-### What the app stores today (Supabase)
+### What the prototype stored (Supabase, until Oct 2026)
 
 | Table | Shape | Written when |
 |---|---|---|
@@ -156,8 +159,10 @@ Notes:
   questionnaires, those become normal events, and these logs sit as repeating
   instruments within a "program" event.
 - **Client logic is unchanged.** The program week, completion and the 14-day
-  reset are computed from session dates in the browser. The server returns
-  the same shape of data the app gets from Supabase today.
+  reset are computed from session dates in the browser. The browser reaches
+  data only through the data layer (`src/js/data.js`), whose functions already
+  return the shapes the app uses; the REDCap version re-implements those
+  functions to call the server.
 
 ## 6. Video storage and streaming
 
@@ -188,8 +193,8 @@ people without Western accounts, it means less to build.
 `src/_headers` sends the CSP in **report-only** mode, deliberately left that
 way during the prototype phase. For the new stack:
 
-- Remove the Supabase (`connect-src`) and YouTube (`script-src`, `img-src`,
-  `frame-src`) entries. With a same-origin API, `connect-src 'self'` is enough.
+- Remove the YouTube (`script-src`, `img-src`, `frame-src`) entries. (The
+  Supabase entries were removed with the demo data layer in Oct 2026.) With a same-origin API, `connect-src 'self'` is enough.
 - Add `media-src 'self' blob:` (plus the video host if it's separate). HLS
   players play through `blob:` URLs, so without it playback fails silently.
 - **Keep `data:` in `font-src`.** The eLearning module (Rise/Storyline export)
@@ -207,7 +212,7 @@ way during the prototype phase. For the new stack:
 | 1 | Can the server reach REDCap's API and send email? What bandwidth and storage come with it? | WTS |
 | 2 | Do REDCap Alerts fire on API data imports? Can the API delete individual repeating instances? | REDCap admin |
 | 3 | Which video platform does Western license, where is it hosted, and can it serve non-Western viewers? | Western IT |
-| 4 | Is email acceptable as the login identity? How long may a "remembered device" session last? | PIs / REB |
+| 4 | Is email acceptable as the login identity? Is a code at every sign-in, with sessions ending when the browser closes, acceptable to participants? | PIs / REB |
 | 5 | Is login option C acceptable, or does the study need B? | PIs |
 | 6 | Will baseline/follow-up outcome measures also live in REDCap (events alongside the logs)? | PIs |
 
@@ -218,6 +223,8 @@ way during the prototype phase. For the new stack:
 | Oct 2026 | Move off Supabase to REDCap; move off YouTube | PIs |
 | Oct 2026 | No participant data through Cloudflare or other global cloud services | REB requirement |
 | Oct 2026 | Keep the CSP in report-only mode during the prototype; enforce it as part of the migration | Project team |
+| Oct 2026 | Replace Supabase in the prototype with a demo data layer: one test account, sample data held in the browser | Project team |
+| Oct 2026 | If sign-in option C is chosen: a code at every sign-in, no "remember this device" | Project team |
 | — | Hosting option | _pending_ |
 | — | Authentication option | _pending_ |
 | — | REDCap data layout | _pending_ |
