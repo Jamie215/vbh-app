@@ -9,9 +9,8 @@ let currentVideoProgress = {};
 // button until something actually changes.
 let originalVideoProgressSnapshot = null;
 
-function onYouTubeIframeAPIReady() {
-    console.log('YouTube API Ready');
-}
+// Called by the YouTube IFrame API once it has loaded
+function onYouTubeIframeAPIReady() {}
 
 // Play video from table
 function playExerciseVideo(videoId) {
@@ -418,5 +417,3 @@ function closeVideo() {
         doneBtn.innerHTML = 'Save';
     }
 }
-
-console.log('Videos module loaded');

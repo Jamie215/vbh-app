@@ -10,7 +10,6 @@ let isPasswordRecovery = false;
 function detectPasswordRecovery() {
     const hash = window.location.hash;
     if (hash && hash.includes('type=recovery')) {
-        console.log('Password recovery flow detected from URL');
         isPasswordRecovery = true;
         return true;
     }
@@ -207,7 +206,6 @@ async function signIn() {
 // Handle post sign-in setup (called directly from signIn, not from onAuthStateChange).
 // Each loader handles its own errors via logError internally — we don't wrap them.
 async function handlePostSignIn(user) {
-    console.log('handlePostSignIn: Setting up user session...');
     currentUser = user;
 
     await updateUIForAuthenticatedUser(user);
@@ -218,7 +216,6 @@ async function handlePostSignIn(user) {
 
     hideLoadingScreen();
     routeAfterAuth();
-    console.log('handlePostSignIn: Complete');
 }
 
 // Sign out
@@ -400,37 +397,30 @@ function initAuthListener() {
 
     // Callback must be synchronous
     window.supabaseClient.auth.onAuthStateChange((event, session) => {
-        console.log('Auth event:', event, 'Session:', !!session);
-        
         switch (event) {
             case 'INITIAL_SESSION':
                 if (isPasswordRecovery) {
-                    console.log('INITIAL_SESSION during recovery - showing reset form');
                     if (session?.user) {
                         currentUser = session.user;
                     }
                     hideLoadingScreen();
                     showResetPasswordView();
-                } else {
-                    console.log('INITIAL_SESSION - handled by app.js');
                 }
+                // Otherwise initializeSession() in app.js handles it
                 break;
                 
             case 'SIGNED_IN':
                 if (isPasswordRecovery) {
-                    console.log('SIGNED_IN during recovery - deferring to PASSWORD_RECOVERY handler');
                     if (session?.user) {
                         currentUser = session.user;
                     }
                     hideLoadingScreen();
                     showResetPasswordView();
-                } else {
-                    console.log('SIGNED_IN - handled by signIn()');
                 }
+                // Otherwise signIn() handles it
                 break;
                 
             case 'SIGNED_OUT':
-                console.log('SIGNED_OUT - resetting app state');
                 resetAppState();
                 updateUIForGuestUser();
                 hideLoadingScreen();
@@ -452,7 +442,6 @@ function initAuthListener() {
                 break;
 
             case 'PASSWORD_RECOVERY':
-                console.log('PASSWORD_RECOVERY - showing reset password form');
                 // User clicked the reset link in their email
                 // Supabase has already verified the token and created a session
                 if (session?.user) {
@@ -461,13 +450,8 @@ function initAuthListener() {
                 hideLoadingScreen();
                 showResetPasswordView();
                 break;
-                
-            default:
-                console.log('Unhandled auth event:', event);
         }
     });
-    
-    console.log('Auth listener initialized (synchronous)');
 }
 
 // Handle Enter key press in auth forms
@@ -533,5 +517,3 @@ function initAuthFormListeners() {
         });
     }
 }
-
-console.log('Auth module loaded');

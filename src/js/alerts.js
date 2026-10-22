@@ -231,5 +231,3 @@ function dismissAlert(type, title) {
         }
     }
 }
-
-console.log('Alerts module loaded');

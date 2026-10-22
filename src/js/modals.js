@@ -152,5 +152,3 @@ function showConfirm({ title, message, variant = 'info', confirmText = 'Confirm'
         allowBackdropDismiss: false
     });
 }
-
-console.log('Modals module loaded');

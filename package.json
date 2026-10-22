@@ -1,8 +1,8 @@
 {
   "name": "vbh-app",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "private": true,
+  "description": "Hands Up: Bone Health Program for Osteoporosis — exercise program and eLearning web app",
   "scripts": {
     "build:css": "tailwindcss -c ./build/tailwind.config.js -i ./build/input.css -o ./src/assets/css/tailwind.css --minify",
     "watch:css": "tailwindcss -c ./build/tailwind.config.js -i ./build/input.css -o ./src/assets/css/tailwind.css --watch"
@@ -12,7 +12,7 @@
     "url": "git+https://github.com/Jamie215/vbh-app.git"
   },
   "keywords": [],
-  "author": "",
+  "author": "Jamie Kim",
   "license": "ISC",
   "bugs": {
     "url": "https://github.com/Jamie215/vbh-app/issues"
