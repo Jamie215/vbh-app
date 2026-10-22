@@ -9,9 +9,6 @@ let currentVideoProgress = {};
 // button until something actually changes.
 let originalVideoProgressSnapshot = null;
 
-// Called by the YouTube IFrame API once it has loaded
-function onYouTubeIframeAPIReady() {}
-
 // Play video from table
 function playExerciseVideo(videoId) {
     const video = currentPlaylist.videos.find(v => v.id === videoId);

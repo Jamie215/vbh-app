@@ -592,68 +592,6 @@ function showFinalSessionModal() {
     });
 }
 
-/**
- * Checks if the user just completed the program by finishing all exercises
- * in their 2nd session of week 6. Call this after saving progress.
- * Returns true if the modal was shown.
- */
-function checkAndShowProgramCompletionModal() {
-    // Must be on program week 6
-    const state = getProgramWeekState();
-    if (state.programWeek !== 6) return false;
-
-    // Today must be an advanced session (the 2nd one in week 6)
-    const today = new Date().toISOString().split('T')[0];
-    const advancedDates = getAdvancedSessionDates();
-    if (!advancedDates.includes(today)) return false;
-
-    // Check if today's advanced playlist progress is 100%
-    const progress = calculatePlaylistProgress('advanced-4-6', true);
-    if (progress.percentage < 100) return false;
-
-    // Check if already shown this session
-    const dismissed = sessionStorage.getItem('dismissedCompletionModal');
-    if (dismissed) return false;
-
-    showProgramCompletionModal();
-    return true;
-}
-
-/**
- * Renders and displays the program completion celebration modal.
- */
-function showProgramCompletionModal() {
-    // Remove existing if present
-    const existing = document.getElementById('program-completion-modal');
-    if (existing) existing.remove();
-
-    const overlay = document.createElement('div');
-    overlay.id = 'program-completion-modal';
-    overlay.className = 'fixed inset-0 bg-black/60 flex items-center justify-center z-[1000] opacity-0 transition-opacity duration-300';
-    overlay.innerHTML = `
-        <div class="bg-white rounded-2xl py-10 px-8 max-w-[440px] w-[90%] text-center scale-90 transition-transform duration-300" style="box-shadow: 0 20px 60px rgba(0,0,0,0.15);">
-            <div class="w-[72px] h-[72px] rounded-full flex items-center justify-center mx-auto mb-5" style="background: radial-gradient(ellipse farthest-corner at right bottom, #FEDB37 0%, #FDB931 8%, #9f7928 30%, #8A6E2F 40%, transparent 80%), radial-gradient(ellipse farthest-corner at left top, #FFFFFF 0%, #FFFFAC 8%, #D1B464 25%, #5d4a1f 62.5%, #5d4a1f 100%);">
-                <i class="fa-solid fa-trophy text-[2rem] text-white"></i>
-            </div>
-            <h2 class="text-2xl font-bold text-text-primary mb-3">Congratulations! 🎉</h2>
-            <p class="text-base text-[#4a5568] leading-relaxed mb-2">
-                You've officially completed the <strong>6-week HandsUP program</strong>! 
-            </p>
-            <p class="text-base text-[#718096] mb-6">
-                You're welcome to keep going with the Advanced exercises at your own pace. Keep up the great work!
-            </p>
-            <button class="text-white border-none py-3 px-10 rounded-lg text-base font-semibold cursor-pointer transition-all hover:-translate-y-px" style="background: linear-gradient(135deg, #7c3aed, #6d28d9); box-shadow: none;" onmouseenter="this.style.boxShadow='0 4px 12px rgba(124,58,237,0.3)'" onmouseleave="this.style.boxShadow='none'" onclick="closeProgramCompletionModal()">Okay</button>
-        </div>
-    `;
-
-    document.getElementById('app').appendChild(overlay);
-
-    requestAnimationFrame(() => {
-        overlay.style.opacity = '1';
-        overlay.querySelector('div').style.transform = 'scale(1)';
-    });
-}
-
 function _closeFadeModal(modalId, dismissalKey) {
     const modal = document.getElementById(modalId);
     if (modal) {
@@ -667,10 +605,6 @@ function _closeFadeModal(modalId, dismissalKey) {
 
 function closeFinalSessionModal() {
     _closeFadeModal('final-session-modal', 'dismissedFinalSessionModal');
-}
-
-function closeProgramCompletionModal() {
-    _closeFadeModal('program-completion-modal', 'dismissedCompletionModal');
 }
 
 /**
@@ -1673,9 +1607,7 @@ function renderCalendarStrip() {
             if (el._tippy) el._tippy.destroy();
         });
         tippy('[data-tippy-content]', {
-            theme: 'material',
             placement: 'top',
-            animation: 'shift-away',
         });
     }
 }
