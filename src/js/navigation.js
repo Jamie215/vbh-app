@@ -479,7 +479,6 @@ async function showEducation() {
             const finish = (reason) => {
                 if (settled) return;
                 settled = true;
-                console.log('Education iframe ready via:', reason);
                 clearInterval(pollTimer);
                 clearTimeout(fallbackTimer);
                 iframe.removeEventListener('load', onLoad);
@@ -712,5 +711,3 @@ function closeTutorialModal() {
     const modal = document.getElementById('tutorial-modal');
     if (modal) modal.remove();
 }
-
-console.log('Navigation module loaded');

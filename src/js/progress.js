@@ -882,5 +882,3 @@ function renderAllTimeView(container) {
 
     _renderBreakdownBlocks(container, headerHTML, programByPlaylist, externalData, true);
 }
-
-console.log('Progress module loaded');

@@ -937,5 +937,3 @@ async function saveManualEntry() {
         }
     }
 }
-
-console.log('Manual entry module loaded');

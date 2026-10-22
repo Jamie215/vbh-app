@@ -2,8 +2,6 @@
 
 // ==================== App Initialization ====================
 document.addEventListener('DOMContentLoaded', () => {
-    console.log('DOM loaded, initializing app...');
-    
     // Initialize auth form listeners
     if (typeof initAuthFormListeners === 'function') {
         initAuthFormListeners();
@@ -36,17 +34,13 @@ document.addEventListener('DOMContentLoaded', () => {
 // wrap them in try/catch here. Anything that escapes falls through to
 // the window-level unhandledrejection listener.
 async function initializeSession() {
-    console.log('initializeSession: Starting...');
-
     // If this is a password recovery redirect, the auth listener handles it — skip normal routing
     if (isPasswordRecovery) {
-        console.log('initializeSession: Password recovery flow detected, skipping normal routing');
         return;
     }
     
     try {
         const { data: { session }, error } = await window.supabaseClient.auth.getSession();
-        console.log('initializeSession: getSession completed', { hasSession: !!session, error });
         
         if (error) {
             logError(error, { operation: 'init_get_session' });
@@ -56,7 +50,6 @@ async function initializeSession() {
         }
         
         if (session) {
-            console.log('initializeSession: User is authenticated, loading data...');
             currentUser = session.user;
             
             await updateUIForAuthenticatedUser(session.user);
@@ -67,9 +60,7 @@ async function initializeSession() {
             
             hideLoadingScreen();
             routeAfterAuth();
-            console.log('initializeSession: Done!');
         } else {
-            console.log('initializeSession: No session, showing auth page');
             updateUIForGuestUser();
             hideLoadingScreen();
             showAuthPage();
@@ -1881,5 +1872,3 @@ function renderEducationHomeCard() {
         </div>
     `;
 }
-
-console.log('App module loaded');

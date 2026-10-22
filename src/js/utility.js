@@ -366,5 +366,3 @@ function resetAppState() {
     currentPlaylist = null;
     programCompletedAt = null;
 }
-
-console.log('Shared utilities loaded');

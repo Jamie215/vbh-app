@@ -6,6 +6,11 @@ module.exports = {
     './src/**/*.html',
     './src/**/*.js',
   ],
+  // Built at runtime as `badge-${difficulty}` / `dot-${difficulty}` in app.js,
+  // so the scanner can't see them (see getEquipmentDifficulty).
+  safelist: [
+    { pattern: /^(badge|dot)-(support|baseline|challenging|neutral)$/ },
+  ],
   theme: {
     extend: {
       colors: {
