@@ -1,8 +1,5 @@
 // Handles sign up, sign in, sign out, and auth state changes
 
-// Flag to track if initial session has been handled by app.js
-let initialSessionHandled = false;
-
 // Detect password recovery flow from URL hash BEFORE session routing
 // Supabase appends #access_token=...&type=recovery&... to the redirect URL
 let isPasswordRecovery = false;

@@ -153,13 +153,6 @@ function hideLoadingScreen() {
     }
 }
 
-function showLoadingScreen() {
-    const loadingScreen = document.getElementById('loading-screen');
-    if (loadingScreen) {
-        loadingScreen.classList.remove('hidden');
-    }
-}
-
 
 // ==================== Auth Views ====================
 
@@ -524,12 +517,6 @@ async function showEducation() {
 
     updateNavActiveState('education');
     setFooterVisibility(false);
-}
-
-function hideEducation() {
-    const educationView = document.getElementById('education-view');
-    if (educationView) educationView.classList.add('hidden');
-    showHome();
 }
 
 // Only used on sign-out to fully tear down the iframe

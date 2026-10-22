@@ -2,10 +2,6 @@
 // Handles contextual alerts for progress milestones, resets, and pacing
 // Depends on: utility.js (completionHistory), app.js (calculateUserWeek, getProgramWeekState, calculateCalendarWeek)
 
-// Track if progress was reset (detected via inactivity)
-let wasProgressReset = false;
-let previousWeekBeforeReset = null;
-
 /**
  * Detects if user's progress was reset due to inactivity (14+ days).
  * Uses getProgramWeekState() which already computes the reset internally.
