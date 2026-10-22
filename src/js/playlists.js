@@ -1,12 +1,3 @@
-// Supabase configuration
-const SUPABASE_URL = window.ENV?.SUPABASE_URL || '';
-const SUPABASE_ANON_KEY = window.ENV?.SUPABASE_ANON_KEY || '';
-
-// Check if keys are configured
-if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
-    console.error('Missing API keys. Please configure environment variables.');
-}
-
 // Playlist structure
 const PLAYLISTS = [
     {
@@ -305,6 +296,3 @@ const PLAYLISTS = [
         ]
     }
 ];
-
-// Initialize Supabase
-window.supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);

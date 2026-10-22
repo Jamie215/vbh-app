@@ -63,11 +63,7 @@ async function loadCompletionHistory() {
     if (!currentUser) return;
     
     try {
-        const { data, error } = await window.supabaseClient
-            .from('workout_sessions')
-            .select('session_date, progress')
-            .eq('user_id', currentUser.id)
-            .order('session_date', { ascending: true });
+        const { data, error } = await Data.loadWorkoutSessions();
 
         if (error) {
             logError(error, { operation: 'load_completion_history' });
@@ -89,11 +85,7 @@ async function loadProgramState() {
     if (!currentUser) return;
 
     try {
-        const { data, error } = await window.supabaseClient
-            .from('user_program_state')
-            .select('completed_at')
-            .eq('user_id', currentUser.id)
-            .maybeSingle();
+        const { data, error } = await Data.loadProgramState();
 
         if (error) {
             logError(error, { operation: 'load_program_state' });
@@ -111,13 +103,7 @@ async function loadTodaySession() {
 
     try {
         const today = _dateToISO(new Date());
-        const { data, error } = await window.supabaseClient
-            .from('workout_sessions')
-            .select('*')
-            .eq('user_id', currentUser.id)
-            .eq('session_date', today)
-            .order('updated_at', { ascending: false })
-            .maybeSingle();
+        const { data, error } = await Data.loadWorkoutSession(today);
 
         if (error) {
             logError(error, { operation: 'load_today_session' });
@@ -188,13 +174,12 @@ async function updateUIForAuthenticatedUser(user) {
     let profile = null;
     
     try {
-        const { data, error } = await window.supabaseClient
-            .rpc('get_my_profile');
+        const { data, error } = await Data.getProfile();
         
         if (error) {
             logError(error, { operation: 'fetch_profile' });
         } else {
-            profile = data?.[0] || null;
+            profile = data;
         }
     } catch (error) {
         logError(error, { operation: 'fetch_profile' });

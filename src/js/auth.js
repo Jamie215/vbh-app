@@ -1,17 +1,6 @@
-// Handles sign up, sign in, sign out, and auth state changes
-
-// Detect password recovery flow from URL hash BEFORE session routing
-// Supabase appends #access_token=...&type=recovery&... to the redirect URL
-let isPasswordRecovery = false;
-
-function detectPasswordRecovery() {
-    const hash = window.location.hash;
-    if (hash && hash.includes('type=recovery')) {
-        isPasswordRecovery = true;
-        return true;
-    }
-    return false;
-}
+// Handles sign up, sign in, sign out and password reset. Accounts are
+// handled by the data layer (data.js); in the demo only sign-in and
+// sign-out work.
 
 // Sign up new user
 async function signUp() {
@@ -37,15 +26,7 @@ async function signUp() {
     }
 
     try {
-        const { data, error } = await window.supabaseClient.auth.signUp({
-            email: email,
-            password: password,
-            options: {
-                data: {
-                    full_name: name
-                }
-            }
-        });
+        const { error } = await Data.signUp({ name, email, password });
 
         if (error) {
             showMessage('signup-message', error.message, true);
@@ -78,26 +59,17 @@ async function signIn() {
     }
 
     try {
-        const { data, error } = await window.supabaseClient.auth.signInWithPassword({
-            email: email,
-            password: password
-        });
+        const { data: user, error } = await Data.signIn(email, password);
 
         if (error) {
-            if (error.message.includes('Invalid login credentials')) {
-                showMessage('signin-message', 'Invalid email or password', true);
-            } else if (error.message.includes('Email not confirmed')) {
-                showMessage('signin-message', 'Please verify your email before signing in', true);
-            } else {
-                showMessage('signin-message', error.message, true);
-            }
+            showMessage('signin-message', error.message, true);
         } else {
             showMessage('signin-message', 'Signing in...', false);
             // Clear form
             document.getElementById('login-email').value = '';
             document.getElementById('login-password').value = '';
             
-            handlePostSignIn(data.user);
+            handlePostSignIn(user);
         }
     } catch (error) {
         logError(error, { operation: 'auth_signin' });
@@ -105,7 +77,7 @@ async function signIn() {
     }
 }
 
-// Handle post sign-in setup (called directly from signIn, not from onAuthStateChange).
+// Handle post sign-in setup.
 // Each loader handles its own errors via logError internally — we don't wrap them.
 async function handlePostSignIn(user) {
     currentUser = user;
@@ -132,7 +104,7 @@ async function signOut() {
     if (!confirmed) return;
 
     try {
-        const { error } = await window.supabaseClient.auth.signOut();
+        const { error } = await Data.signOut();
 
         if (error) {
             await showAlert({
@@ -140,8 +112,12 @@ async function signOut() {
                 message: 'There was a problem signing you out: ' + error.message + '. Please try again.',
                 variant: 'danger'
             });
+            return;
         }
-        // onAuthStateChange will fire SIGNED_OUT synchronously
+
+        resetAppState();
+        updateUIForGuestUser();
+        showAuthPage();
     } catch (error) {
         logError(error, { operation: 'auth_signout' });
         await showAlert({
@@ -195,12 +171,7 @@ async function sendPasswordReset() {
     }
 
     try {
-        // redirectTo should point to your deployed app URL
-        // Supabase will append the recovery token to this URL
-        const currentOrigin = window.location.origin;
-        const { error } = await window.supabaseClient.auth.resetPasswordForEmail(email, {
-            redirectTo: currentOrigin
-        });
+        const { error } = await Data.requestPasswordReset(email);
 
         if (error) {
             showMessage('forgot-message', error.message, true);
@@ -247,22 +218,12 @@ async function updatePassword() {
     }
 
     try {
-        const { error } = await window.supabaseClient.auth.updateUser({
-            password: password
-        });
+        const { error } = await Data.updatePassword(password);
 
         if (error) {
             showMessage('reset-message', error.message, true);
         } else {
             showMessage('reset-message', 'Password updated successfully! Redirecting...', false);
-
-            // Clear recovery state
-            isPasswordRecovery = false;
-
-            // Clean the hash from the URL
-            if (window.history.replaceState) {
-                window.history.replaceState(null, '', window.location.pathname);
-            }
 
             // Clear form
             document.getElementById('reset-password').value = '';
@@ -288,76 +249,23 @@ async function updatePassword() {
     }
 }
 
-// Listen to auth state changes
-function initAuthListener() {
-    if (!window.supabaseClient) {
-        console.error('Supabase client not available');
-        hideLoadingScreen();
-        showAuthPage();
-        return;
-    }
+// Demo: show the demo account's details on the Log In page
+function renderDemoSignInNotice() {
+    const notice = document.getElementById('demo-signin-notice');
+    if (!notice || !Data.isDemo) return;
 
-    // Callback must be synchronous
-    window.supabaseClient.auth.onAuthStateChange((event, session) => {
-        switch (event) {
-            case 'INITIAL_SESSION':
-                if (isPasswordRecovery) {
-                    if (session?.user) {
-                        currentUser = session.user;
-                    }
-                    hideLoadingScreen();
-                    showResetPasswordView();
-                }
-                // Otherwise initializeSession() in app.js handles it
-                break;
-                
-            case 'SIGNED_IN':
-                if (isPasswordRecovery) {
-                    if (session?.user) {
-                        currentUser = session.user;
-                    }
-                    hideLoadingScreen();
-                    showResetPasswordView();
-                }
-                // Otherwise signIn() handles it
-                break;
-                
-            case 'SIGNED_OUT':
-                resetAppState();
-                updateUIForGuestUser();
-                hideLoadingScreen();
-                showAuthPage();
-                break;
-                
-            case 'TOKEN_REFRESHED':
-                // Just update the user reference (synchronous)
-                if (session) {
-                    currentUser = session.user;
-                }
-                break;
-                
-            case 'USER_UPDATED':
-                // Update user reference (synchronous)
-                if (session?.user) {
-                    currentUser = session.user;
-                }
-                break;
-
-            case 'PASSWORD_RECOVERY':
-                // User clicked the reset link in their email
-                // Supabase has already verified the token and created a session
-                if (session?.user) {
-                    currentUser = session.user;
-                }
-                hideLoadingScreen();
-                showResetPasswordView();
-                break;
-        }
-    });
+    notice.innerHTML = `
+        <p class="font-semibold text-text-primary mb-1">Demo version</p>
+        <p class="mb-1">Sign in with <strong>${Data.demoAccount.email}</strong> and password <strong>${Data.demoAccount.password}</strong>.</p>
+        <p>You can try everything, but changes aren't saved: reloading the page goes back to the sample data.</p>
+    `;
+    notice.classList.remove('hidden');
 }
 
 // Handle Enter key press in auth forms
 function initAuthFormListeners() {
+    renderDemoSignInNotice();
+
     const loginEmail = document.getElementById('login-email');
     const loginPassword = document.getElementById('login-password');
     

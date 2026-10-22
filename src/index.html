@@ -87,6 +87,7 @@
                 <div id="signin-view">
                     <h1 class="text-[1.75rem] font-bold text-text-primary mb-2">Log In</h1>
                     <p class="text-text-secondary text-base mb-8">Enter your email & password to log in</p>
+                    <div id="demo-signin-notice" class="hidden mb-6 p-4 bg-subtle border-l-4 border-brand rounded-lg text-base text-text-secondary leading-relaxed"></div>
                     <div class="mb-5">
                         <label for="login-email" class="block text-base font-medium text-text-primary mb-2">Email</label>
                         <input type="email" id="login-email" class="auth-input" placeholder="test@email.com" required>
@@ -549,18 +550,21 @@
     </div>
 
     <!-- 1. External dependencies -->
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.117.3"></script>
     <script src="https://www.youtube.com/iframe_api"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
     <script src="https://unpkg.com/@popperjs/core@2.11.8"></script>
     <script src="https://unpkg.com/tippy.js@6.3.7"></script>
     <link rel="stylesheet" href="https://unpkg.com/tippy.js@6.3.7/dist/tippy.css">
     
-    <!-- 2. Supabase client & data -->
+    <!-- 2. Playlists -->
     <script src="/js/playlists.js"></script>
 
     <!-- 3. Shared utilities & state -->
     <script src="/js/utility.js"></script>
+
+    <!-- 3a. Data layer (demo: sample data held in the browser) -->
+    <script src="/js/demo-data.js"></script>
+    <script src="/js/data.js"></script>
 
     <!-- 4. Alerts module -->
     <script src="/js/alerts.js"></script>

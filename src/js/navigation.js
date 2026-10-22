@@ -369,16 +369,12 @@ window.eduBookmark = '';
 // Save queue to debounce rapid writes from Rise
 let _eduSaveTimer = null;
 
-// Load education progress from Supabase and cache it for the iframe to read
+// Load education progress and cache it for the iframe to read
 async function loadEducationProgress() {
     if (!currentUser) return;
 
     try {
-        const { data, error } = await window.supabaseClient
-            .from('education_progress')
-            .select('*')
-            .eq('user_id', currentUser.id)
-            .maybeSingle();
+        const { data, error } = await Data.loadEducationProgress();
 
         if (error) {
             logError(error, { operation: 'load_education_progress' });
@@ -407,15 +403,7 @@ function _scheduleEducationSave() {
         _eduSaveTimer = null;
         if (!currentUser) return;
         try {
-            const { error } = await window.supabaseClient
-                .from('education_progress')
-                .upsert({
-                    user_id: currentUser.id,
-                    progress: window.eduProgress,
-                    bookmark: window.eduBookmark
-                }, {
-                    onConflict: 'user_id'
-                });
+            const { error } = await Data.saveEducationProgress(window.eduProgress, window.eduBookmark);
             if (error) logError(error, { operation: 'save_education_progress' });
         } catch (error) {
             logError(error, { operation: 'save_education_progress' });
