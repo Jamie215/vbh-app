@@ -14,33 +14,35 @@ The current app is a working prototype:
 | Data & auth | Supabase (auth + Postgres) | PIs want **REDCap** as the study database; data must stay in Canada under the institution's control |
 | Video | YouTube (unlisted embeds, IFrame API) | PIs want to leave YouTube over **IP concerns**: unlisted links work for anyone who has them, and YouTube's terms grant it a licence to uploaded content |
 
-The REB requirement, carried over from the CTS project (see _CTS — Design &
-Workflow Overview_, Section 7): **data stays in Canada and under the
-institution's control the whole way through**. Any design that routes
-participant data through a global cloud service has been set aside.
+The REB requirement: **data stays in Canada and under the institution's
+control the whole way through**. Any design that routes participant data
+through a global cloud service is ruled out.
 
-## 2. How HandsUP differs from the CTS survey
+## 2. What the design has to support
 
-The CTS survey's options (in-person export, mobile app, Western-managed server,
-commercial Canadian cloud) are the starting point, but HandsUP differs in ways
-that narrow them:
-
-- **It's a home program people return to many times.** 6 weeks, about 2
-  sessions a week, plus the eLearning module. CTS's in-person options (1a
-  encrypted device, 1b study tablet) don't fit, which leaves **a server in
-  Canada**.
+- **A home program people return to many times.** 6 weeks, about 2 sessions a
+  week, plus the eLearning module, done remotely.
 - **The app reads its own data back.** Progress charts, the current program
   week, calendar tracking and the 14-day inactivity reset all need the
   participant's history, so the server must read from REDCap as well as write.
-- **A permanent personal link is riskier here.** In CTS a link is used once
-  per timepoint. In HandsUP it would grant access for 6+ weeks, be used dozens
-  of times, and sit in an inbox the whole time.
-- **The surface to migrate is small.** About a dozen Supabase calls across 3
+- **Long-lived access.** A participant's access lasts 6+ weeks and is used
+  dozens of times, so access by a permanent personal link (sitting in an inbox
+  the whole time) is weak. See [Authentication](#4-authentication).
+- **A small surface to migrate.** About a dozen Supabase calls across 3
   tables, and 21 exercise videos plus 2 tutorial videos.
+
+### Hosting options considered
+
+| Option | Fits HandsUP? | Data residency |
+|---|---|---|
+| In-person collection to an encrypted, study-owned device | No: the program is done at home | Canada, institution-controlled |
+| App on study-provided tablets, collected in person | Only if every participant gets a tablet for 6+ weeks | Canada, institution-controlled |
+| **Western-managed (WTS) server in Canada** | Yes | Canada, institution-controlled |
+| Commercial cloud, Canadian region (Azure Canada Central, AWS Canada) | Yes | In Canada, but the provider is subject to US law, so weaker for the REB |
 
 ## 3. Recommended architecture
 
-**Everything on a Western-managed (WTS) server in Canada** (CTS option 2a):
+**Everything on a Western-managed (WTS) server in Canada:**
 
 ```
 Browser ──HTTPS──▶ Western server ──API──▶ Western REDCap
@@ -55,9 +57,8 @@ Browser ──HTTPS──▶ Western server ──API──▶ Western REDCap
   browser:** unlike the Supabase anon key (protected by row-level security), a
   REDCap token grants access to the whole project. The server decides what
   each signed-in participant may read or write.
-- CTS option 2b (commercial cloud, Canadian region) is the fallback if WTS
-  can't host it, but it passes through a provider subject to US law and has
-  lower REB likelihood.
+- A commercial cloud in a Canadian region is the fallback if WTS can't host
+  it, with weaker REB standing (see the table above).
 
 ## 4. Authentication
 
@@ -66,7 +67,7 @@ manage passwords.
 
 | Option | How it works | Security | Ease for older adults | Work |
 |---|---|---|---|---|
-| A. Permanent link (CTS approach) | The link is the account | Weak: a forwarded or leaked email gives full access for weeks | Easiest | Built (CTS) |
+| A. Permanent personal link | The link is the account | Weak: a forwarded or leaked email gives full access for weeks | Easiest | Small |
 | B. Activation link + password | Emailed link works once; participant sets a password and logs in with email + password after that | Good | Passwords get forgotten, so frequent resets | Moderate |
 | **C. Activation link + emailed code** | Each login: enter email, receive a 6-digit code. "Remember this device" keeps them signed in for about 30 days | Good: the link alone gives nothing; every login needs inbox access | Nothing to remember; about 2–3 code logins over the program | Moderate |
 | D. Self-hosted login server (e.g. Keycloak) | Full identity system | Strongest | Same as B | Large, plus ongoing maintenance |
@@ -215,7 +216,7 @@ way during the prototype phase. For the new stack:
 | Date | Decision | By |
 |---|---|---|
 | Oct 2026 | Move off Supabase to REDCap; move off YouTube | PIs |
-| Oct 2026 | No participant data through Cloudflare or other global cloud services | REB requirement (from CTS) |
+| Oct 2026 | No participant data through Cloudflare or other global cloud services | REB requirement |
 | Oct 2026 | Keep the CSP in report-only mode during the prototype; enforce it as part of the migration | Project team |
 | — | Hosting option | _pending_ |
 | — | Authentication option | _pending_ |
