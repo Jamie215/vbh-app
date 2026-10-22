@@ -435,6 +435,61 @@ window.saveEducationBookmark = function (lessonId) {
     _scheduleEducationSave();
 };
 
+/**
+ * LMS interface for the Rise export. The export's loader (lib/dist/*.js) looks
+ * for window.parent.RiseLMSInterface and routes Rise's progress calls here, so
+ * the exported index.html can be dropped in unmodified.
+ *
+ * Rise reports progress in two ways:
+ *   - setLessonProgress(lesson) on every change within a lesson
+ *   - setCourseProgress(course) only when a lesson's completion flips
+ * Both are merged into eduProgress, which keeps the shape app.js reads
+ * ({ lessons: { [id]: { percentComplete, ... } }, percentComplete }).
+ */
+window.RiseLMSInterface = {
+    getProgress(defaults) {
+        const saved = window.eduProgress;
+        if (saved && typeof saved === 'object' && saved.lessons) {
+            const copy = JSON.parse(JSON.stringify(saved));
+            delete copy.currentLesson;
+            return copy;
+        }
+        return defaults;
+    },
+
+    setLessonProgress(lesson) {
+        if (!lesson || !lesson.id) return;
+        const current = window.eduProgress || { lessons: {} };
+        window.saveEducationProgress({
+            ...current,
+            lessons: { ...current.lessons, [lesson.id]: lesson }
+        });
+    },
+
+    setCourseProgress(course) {
+        if (course && course.lessons) window.saveEducationProgress(course);
+    },
+
+    setBookmark(lessonId) {
+        window.saveEducationBookmark(lessonId);
+    },
+
+    getMasteryScore(quiz) {
+        return quiz?.passingScore;
+    },
+
+    // Unused by this course (no quizzes, single locale, no telemetry)
+    getLocale() { return undefined; },
+    setLocale() {},
+    getStudentId() { return ''; },
+    finish() {},
+    finishQuiz() {},
+    finishStoryline() {},
+    reportAnswer() {},
+    reportUngradedAnswers() {},
+    exit() {}
+};
+
 async function showEducation() {
     if (!currentUser) {
         showAuthPage();

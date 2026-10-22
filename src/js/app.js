@@ -103,7 +103,7 @@ function loadHowToUseView() {
 
 // ==================== Education Lesson Map ====================
 // Maps Rise lesson IDs (used as bookmarks) to display titles.
-// IDs come from the Rise course payload baked into education/content/index.html.
+// IDs come from the Rise course payload in education/content/runtime-data.js.
 // Sections (module headers) are excluded — bookmarks only land on `blocks`-type lessons.
 const EDUCATION_LESSONS = {
     'HS-DDqUH8jqNhXAgn7LRSrXgcYkQIg_N': { title: 'Introduction to the Program',             module: 'Welcome' },

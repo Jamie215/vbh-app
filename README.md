@@ -118,6 +118,31 @@ The app deploys to Cloudflare Pages:
 - Remember to run `npm run build:css` so `src/assets/css/tailwind.css` is up to
   date before deploying.
 
+## Updating the eLearning module
+
+The Rise export is used **unmodified**. Its loader (`lib/dist/*.js`) looks for
+`window.parent.RiseLMSInterface`, which `src/js/navigation.js` defines, and
+sends Rise's progress and bookmark calls through it to the
+`education_progress` table.
+
+1. In Rise, export the course as **Web** (not SCORM/LMS) and unzip it.
+2. Replace everything in `src/education/content/` with the export. Asset
+   folder names change between exports, so don't merge folders.
+3. Check that `index.html` has `"loadOnlyInLms":false` in its `__CONFIG__`
+   block. Nothing else in the export needs editing.
+4. If lessons were added, removed or renamed, update `EDUCATION_LESSONS` in
+   `src/js/app.js`. The lesson IDs are in the base64 payload in
+   `runtime-data.js`. Editing blocks inside a lesson keeps its ID, but
+   partial progress on changed blocks resets. Completed lessons stay
+   complete.
+5. On a preview deployment, go through part of a lesson and reload. The
+   sidebar percentage and lesson rings should be restored, and the
+   `education_progress` row should update.
+
+The previous export (used until Oct 2026) put a `Runtime` object inline in
+`index.html` instead, and that block had to be hand-edited to call the parent
+window.
+
 ## Migration notes
 
 The current app is a prototype. The production version will move off Supabase
