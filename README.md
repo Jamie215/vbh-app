@@ -10,8 +10,7 @@ It's a static single-page app (no build step for the app itself), hosted on
 **This is a demo version.** It has no backend: one built-in test account with
 sample data, held in the browser. Everything can be tried, but changes are
 lost when the page is reloaded. Sign in with `demo@handsup.test` /
-`HandsUpDemo` (also shown on the Log In page). The study version will use
-REDCap; see [Migration notes](#migration-notes).
+`HandsUpDemo` (also shown on the Log In page).
 
 ## Features
 
@@ -28,8 +27,7 @@ REDCap; see [Migration notes](#migration-notes).
 - **eLearning module** — an embedded interactive course on bone health and
   osteoporosis, with its own progress tracking.
 - **Accounts** — in the demo, sign-in and sign-out with the demo account only;
-  sign-up and password reset show "not available in the demo". Enrollment and
-  study agreements are handled by the coordinator, outside the app.
+  sign-up and password reset show "not available in the demo".
 
 ## Tech stack
 
@@ -38,8 +36,8 @@ REDCap; see [Migration notes](#migration-notes).
   Chart.js, Popper + Tippy.
 - **Data** — a data layer (`src/js/data.js`) that every sign-in, read and write
   goes through. Its demo version serves the sample data in
-  `src/js/demo-data.js` from memory. A real backend replaces the function
-  bodies in `data.js` and keeps their names and `{ data, error }` results.
+  `src/js/demo-data.js` from memory. To connect a backend, replace the function
+  bodies in `data.js` and keep their names and `{ data, error }` results.
 - **Hosting** — any static host. Today [Cloudflare Pages](https://pages.cloudflare.com),
   using `_headers` / `_redirects`.
 
@@ -143,21 +141,7 @@ sends Rise's progress and bookmark calls through it to the data layer
    If lessons changed, also re-record the sample progress in
    `src/js/demo-data.js`.
 
-The previous export (used until Oct 2026) put a `Runtime` object inline in
-`index.html` instead, and that block had to be hand-edited to call the parent
-window.
-
-## Migration notes
-
-The current app is a demo. The study version will add a backend behind the
-data layer, with **REDCap** for data and an ethics-approved, Canadian-hosted
-option for video, with no participant data passing through Cloudflare. Options,
-recommendations, the proposed REDCap layout, open questions and the decision
-log are in [`docs/migration-plan.md`](docs/migration-plan.md).
-
 ## Notes
 
-- The prototype used Supabase for accounts and data until Oct 2026; it was
-  replaced by the demo data layer. The schema files (`01_schema_Supabase.sql`,
-  `02_schema_REDCap.sql`), `.env` and `node_modules/` are git-ignored.
+- `.env`, `node_modules/` and local database schema files are git-ignored.
 - This program is part of the HULC / MSKIF bone-health work.
